@@ -145,7 +145,6 @@
                     </div>
                 </div>
             </div>
-
             <el-image-viewer
                     v-if="showViewer"
                     :on-close="closeViewer"
@@ -227,7 +226,7 @@
             }).then(res => {
                 // console.log(res.data.data)
                 _this.caseData = res.data.data;
-                //          患者基本信息
+                //      患者基本信息
                 _this.$axios.get("/patient/patientIndex/" + res.data.data.patientId, {
                     headers: {
                         "Authorization": _this.$store.getters.getToken

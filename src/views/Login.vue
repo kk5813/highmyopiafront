@@ -72,12 +72,13 @@
                         if(this.code.validate(this.ruleForm.code)) {
                             const _this = this;
                             //this.ruleForm.userPassword=this.$md5(this.ruleForm.userPassword)
+                            console.log("用户输入的密码是：" , this.ruleForm.userPassword)
                             this.$axios.post('/login', this.ruleForm).then(res => {
                                 console.log(res)
                                 const jwt = res.headers['authorization'];
                                 const userInfo = res.data.data;
 
-                                //          数据共享至整个前端项目
+                                // 数据共享至整个前端项目
                                 _this.$store.commit("SET_TOKEN", jwt);
                                 _this.$store.commit("SET_USERINFO", userInfo);
 

@@ -81,6 +81,9 @@
                         <el-form-item label="用户登录名" :label-width="formLabelWidth">
                             <el-input v-model="form.userLoginName" autocomplete="off"></el-input>
                         </el-form-item>
+                        <el-form-item label="用户密码" :label-width="formLabelWidth">
+                            <el-input v-model="form.userPassword" autocomplete="off"></el-input>
+                        </el-form-item>
                         <el-form-item label="用户姓名" :label-width="formLabelWidth">
                             <el-input v-model="form.userName" autocomplete="off"></el-input>
                         </el-form-item>
@@ -97,11 +100,14 @@
                         <el-button type="primary" @click="submitAddUser('form')">确 定</el-button>
                     </div>
                 </el-dialog>
-<!--                编辑用户的弹出对话框-->
+                <!--编辑用户的弹出对话框-->
                 <el-dialog title="编辑用户" :visible.sync="dialogEditFormVisible" width="30%">
                     <el-form :model="editForm">
                         <el-form-item label="用户登录名" :label-width="formLabelWidth">
                             <el-input v-model="editForm.userLoginName" autocomplete="off"></el-input>
+                        </el-form-item>
+                        <el-form-item label="用户密码" :label-width="formLabelWidth">
+                            <el-input v-model="editForm.userPassword" autocomplete="off"></el-input>
                         </el-form-item>
                         <el-form-item label="用户姓名" :label-width="formLabelWidth">
                             <el-input v-model="editForm.userName" autocomplete="off"></el-input>
@@ -156,6 +162,7 @@
                     userId: '',
                     userName: '',
                     userLoginName: '',
+                    userPassword: '',
                     userStatus: '',
                 },
                 formLabelWidth: '100px',
@@ -177,17 +184,27 @@
             handleSelect(key, keyPath) {
                 console.log(key, keyPath);
             },
-            //      编辑功能
+            //编辑功能
             handleEdit(index, row) {
                 console.log(index, row)
+                const _this = this
+                _this.$axios.get('/user/find/' + row.userId, {
+                    headers: {
+                        "Authorization": _this.$store.getters.getToken
+                    }
+                }).then(res => {
+                    this.editForm.userPassword = res.data.data.userPassword
+                })
+
                 this.editForm.userLoginName = row.userLoginName
                 this.editForm.userName = row.userName
+                this.editForm.userPassword = row.userPassword
                 if(row.userStatus === '医生') this.editForm.userStatus = '1'
                 else if (row.userStatus === '护士') this.editForm.userStatus = '2'
                 else if (row.userStatus === '系统管理员') this.editForm.userStatus = '0'
                 this.dialogEditFormVisible = true
             },
-            //      失效某用户
+            //失效某用户
             handleDelete(index, row) {
                 const _this = this
                 console.log(row.userId);
@@ -238,7 +255,7 @@
                 );
                 console.log(this.dataSelect)
             },
-            //          当前登录用户标绿
+            //当前登录用户标绿
             tableRowClassName({row, rowIndex}) {
                 if(row.userLoginName === this.$store.getters.getUser.userLoginName) {
                     return 'success-row';

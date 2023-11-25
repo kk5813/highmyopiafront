@@ -139,7 +139,7 @@
             </div>
             <div class="opt-img">
                 <div v-show="activeName=='fourth'" v-for="item in opt">
-                    <div @click="onPreview(item)" @dblclick="sendToPredict(item)" @ v-if="item.type ==='JPG'">
+                    <div @click="onPreview(item)" @dblclick="sendToPredict(item)" @v-if="item.type ==='JPG'">
                         <img
                                 class="case-img"
                                 :src="item.localpath" alt="">
@@ -243,7 +243,7 @@
             }).then(res => {
                 // console.log(res.data.data)
                 _this.caseData = res.data.data;
-                //          患者基本信息
+                // 患者基本信息
                 _this.$axios.get("/patient/patientIndex/" + res.data.data.patientId, {
                     headers: {
                         "Authorization": _this.$store.getters.getToken
@@ -335,6 +335,7 @@
                 });
             },
             onPreview(item) {
+                console.log("onPreview")
                 clearTimeout(timer)
                 timer = setTimeout(() => {
                   this.optimg = item.localpath
@@ -379,9 +380,7 @@
                         dangerouslyUseHTMLString: true,
                         type: 'warning'
                       }).then(() => {
-
                       }).catch(() => {
-
                       });
                     }
                 )
@@ -395,6 +394,9 @@
             // 关闭查看器
             closeViewer() {
                 this.showViewer = false
+            },
+            clicked(){
+                console.log("点击确定")
             }
         }
     }
