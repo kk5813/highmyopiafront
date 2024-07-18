@@ -34,8 +34,8 @@
         data() {
             return {
                 ruleForm: {
-                    userLoginName: 'ly',
-                    userPassword: 'ab0947f28b35fceef8fef1092114c805',
+                    userLoginName: 'zcc',
+                    userPassword: '2287996531',
                     code: ''
                 },
                 rules: {
