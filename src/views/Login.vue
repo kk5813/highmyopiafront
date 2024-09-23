@@ -71,7 +71,7 @@
                     if (valid) {
                         if(this.code.validate(this.ruleForm.code)) {
                             const _this = this;
-                            //this.ruleForm.userPassword=this.$md5(this.ruleForm.userPassword)
+                            this.ruleForm.userPassword=this.$md5(this.ruleForm.userPassword)
                             console.log("用户输入的密码是：" , this.ruleForm.userPassword)
                             this.$axios.post('/login', this.ruleForm).then(res => {
                                 console.log(res)
