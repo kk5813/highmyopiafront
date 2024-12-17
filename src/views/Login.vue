@@ -65,25 +65,27 @@
                 this.bannerH = document.documentElement.clientHeight
             },
             submitForm(formName) {
-                console.log(this.ruleForm.code)
-                console.log(this.code.options.code)
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
                         if(this.code.validate(this.ruleForm.code)) {
                             const _this = this;
                             this.ruleForm.userPassword=this.$md5(this.ruleForm.userPassword)
-                            console.log("用户输入的密码是：" , this.ruleForm.userPassword)
                             this.$axios.post('/login', this.ruleForm).then(res => {
                                 console.log(res)
-                                const jwt = res.headers['authorization'];
-                                const userInfo = res.data.data;
+                                if(res.data.code === 400){
+                                  _this.$message.error('用户名或密码错误');
+                                  this.ruleForm.userPassword = "";
+                                  this.ruleForm.code = "";
+                                }else {
+                                  const jwt = res.headers['authorization'];
+                                  const userInfo = res.data.data;
 
-                                // 数据共享至整个前端项目
-                                _this.$store.commit("SET_TOKEN", jwt);
-                                _this.$store.commit("SET_USERINFO", userInfo);
+                                  // 数据共享至整个前端项目
+                                  _this.$store.commit("SET_TOKEN", jwt);
+                                  _this.$store.commit("SET_USERINFO", userInfo);
 
-
-                                _this.$router.push("main");
+                                  _this.$router.push("main");
+                                }
                             })
                         } else {
                             const _this = this;
