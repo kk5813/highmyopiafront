@@ -9,6 +9,9 @@ import NotCompletedCase from "../views/NotCompletedCase";
 import CompletedCase from "../views/CompletedCase";
 import PostCaseDetail from "../views/PostCaseDetail";
 import CaseDetail from "../views/CaseDetail";
+import AIdiagnosis from "../views/AIdiagnosis";
+import illStatistic from "../views/illStatistic";
+// import test from "../views/test";
 
 Vue.use(VueRouter)
 
@@ -62,7 +65,23 @@ const routes = [
     path: '/casedetail/:id',
     name: 'CaseDetail',
     component: CaseDetail
-  }
+  },
+  // {
+  //   path: '/test/:id',
+  //   name: 'test',
+  //   component: test
+  // },
+  {
+    path: '/AIdiagnosis',
+    name: 'AIdiagnosis',
+    component: AIdiagnosis
+  },
+  {
+    path: '/illStatistic',
+    name: 'illStatistic',
+    component: illStatistic
+  },
+  
 ]
 
 const router = new VueRouter({

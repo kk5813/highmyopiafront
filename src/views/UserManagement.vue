@@ -11,7 +11,7 @@
                         background-color="#0099cc"
                         text-color="#fff"
                         active-text-color="#ffd04b">
-                    <span>高度近视智能诊断系统</span>
+                    <span>慢病管理系统</span>
                     <el-menu-item index="/usermanagement"><i class="el-icon-user"></i>用户管理</el-menu-item>
                     <el-menu-item index="/patientmanagement"><i class="el-icon-folder"></i>患者档案</el-menu-item>
                     <el-menu-item index="/followupvisit"><i class="el-icon-phone-outline"></i>随访管理</el-menu-item>

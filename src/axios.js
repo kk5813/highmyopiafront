@@ -2,18 +2,34 @@ import axios from "axios"
 import ElementUI from 'element-ui'
 import store from './store'
 import router from "./router";
+import {getSession} from '@/auth'
 
-// axios.defaults.baseURL = 'http://10.12.5.29:8081'
-// axios.defaults.baseURL = 'http://192.168.31.53:8081'
-axios.defaults.baseURL = 'http://localhost:8081'
-// axios.defaults.baseURL = '/api'
+
+const service = axios.create({
+    // baseURL: 'http://8.140.145.137',
+    baseURL: 'http://localhost:8081/api/v1', 
+    timeout: 6 * 1000 // request timeout
+  })
+  
 
 //      前置拦截
-axios.interceptors.request.use(config => {
-    return config
-})
+// axios.interceptors.request.use(config => {
+//     return config
+// })
 
-//      后置拦截
+service.interceptors.request.use(
+  config => {
+    if (getSession()) {
+      config.headers['authorization'] = getSession()
+    }
+    return config
+  },
+  error => {
+    // do something with request error
+    console.log(error) // for debug
+    return Promise.reject(error)
+  }
+)
 
 // axios.interceptors.response.use(response => {
 //         if(response.data.code === 200) {
@@ -41,3 +57,4 @@ axios.interceptors.request.use(config => {
 //         return Promise.reject(error)
 //     }
 // )
+export default service

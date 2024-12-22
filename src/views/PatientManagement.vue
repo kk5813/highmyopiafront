@@ -11,24 +11,32 @@
                         :data="dataSelect.slice((currentPage-1)*pageSize,currentPage*pageSize)"
                         style="width: 100%">
                     <el-table-column
-                            label="患者卡号"
-                            prop="patientId">
+                            label="就诊号"
+                            prop="visitNumber">
                     </el-table-column>
                     <el-table-column
                             label="患者姓名"
                             prop="patientName">
                     </el-table-column>
                     <el-table-column
-                            label="性别"
-                            prop="gender">
+                            label="年龄"
+                            prop="age">
                     </el-table-column>
                     <el-table-column
-                            label="手机号"
-                            prop="telephone">
+                            label="诊断"
+                            prop="diagName">
                     </el-table-column>
                     <el-table-column
-                            label="生日"
-                            prop="birthday">
+                            label="诊断时间"
+                            prop="diagTime">
+                    </el-table-column>
+                    <el-table-column
+                            label="眼别"
+                            prop="siteName">
+                    </el-table-column>
+                    <el-table-column
+                            label="科室"
+                            prop="deptName">
                     </el-table-column>
                     <el-table-column
                             width="400 px"
@@ -48,12 +56,8 @@
                                     基本信息</el-button>
                             <el-button
                                     size="mini"
-                                    @click="patientShortInfo(scope.$index, scope.row)">
-                                    病情</el-button>
-                            <el-button
-                                    size="mini"
                                     type="success"
-                                    @click="handleEdit(scope.$index, scope.row)">过往病历</el-button>
+                                    @click="toCaseDetail">详细病历</el-button>
                         </template>
                     </el-table-column>
                 </el-table>
@@ -82,17 +86,11 @@
                                 <el-radio-button label="女性"></el-radio-button>
                             </el-radio-group>
                         </el-form-item>
-                        <el-form-item label="患者地址" :label-width="formLabelWidth">
-                            <el-input v-model="infoForm.address" autocomplete="off"></el-input>
-                        </el-form-item>
                         <el-form-item label="出生日期" :label-width="formLabelWidth">
                             <el-input v-model="infoForm.birthday" autocomplete="off"></el-input>
                         </el-form-item>
                         <el-form-item label="患者电话" :label-width="formLabelWidth">
                             <el-input v-model="infoForm.telephone" autocomplete="off"></el-input>
-                        </el-form-item>
-                        <el-form-item label="患者单位" :label-width="formLabelWidth">
-                            <el-input v-model="infoForm.unit" autocomplete="off" placeholder="请输入患者单位"></el-input>
                         </el-form-item>
                         <el-form-item label="身份证号" :label-width="formLabelWidth">
                             <el-input v-model="infoForm.idcard" autocomplete="off"></el-input>
@@ -103,70 +101,8 @@
                         <el-button type="primary" @click="submitEditPatient('form')">确 定</el-button>
                     </div>
                 </el-dialog>
-                <!--                            患者简要病情          -->
-                <el-dialog :title="currentPatientName +'简要病情'" :visible.sync="dialogFormVisibleShortInfo" width="30%">
-                    <el-form :model="shortInfoForm">
-                        <el-form-item label="患者卡号" :label-width="formLabelWidth">
-                            <el-input v-model="shortInfoForm.patientId" autocomplete="off" disabled></el-input>
-                        </el-form-item>
-                        <el-form-item label="患者姓名" :label-width="formLabelWidth">
-                            <el-input v-model="shortInfoForm.patientName" autocomplete="off" disabled></el-input>
-                        </el-form-item>
-                        <el-form-item label="患者视力" :label-width="formLabelWidth">
-                            <el-col :span="2">左眼</el-col>
-                            <el-col :span="9">
-                                <el-input v-model="shortInfoForm.eyesightOS" autocomplete="off"></el-input>
-                            </el-col>
-                            <el-col :span="2">右眼</el-col>
-                            <el-col :span="9">
-                                <el-input v-model="shortInfoForm.eyesightOD" autocomplete="off"></el-input>
-                            </el-col>
-                        </el-form-item>
-                        <el-form-item label="诊断病名" :label-width="formLabelWidth">
-                            <el-radio-group v-model="shortInfoForm.diagnosis">
-                                <el-radio-button label="视力正常"></el-radio-button>
-                                <el-radio-button label="普通近视"></el-radio-button>
-                                <el-radio-button label="高度近视"></el-radio-button>
-                                <el-radio-button label="病理性近视"></el-radio-button>
-                            </el-radio-group>
-                        </el-form-item>
-                        <el-form-item label="家族史" :label-width="formLabelWidth">
-                            <el-radio v-model="shortInfoForm.hereditary" :label="false">无</el-radio>
-                            <el-radio v-model="shortInfoForm.hereditary" :label="true">有</el-radio>
-                        </el-form-item>
-                    </el-form>
-                    <div slot="footer" class="dialog-footer">
-                        <el-button @click="dialogFormVisibleShortInfo = false">取 消</el-button>
-                        <el-button type="primary" @click="submitEditShortInfo('shortInfoForm')">确 定</el-button>
-                    </div>
-                </el-dialog>
-<!--                                            患者过往病历-->
-                <el-dialog :title="currentPatientName + '的过往病历'" :visible.sync="dialogFormVisiblePastCase" width="30%">
-                    <el-table
-                            :data="caseData"
-                            style="width: 100%">
-                        <el-table-column
-                                label="病历号"
-                                width="180"
-                                prop="id">
-                        </el-table-column>
-                        <el-table-column
-                                label="诊断结论"
-                                width="180"
-                                prop="diagnosis">
-                        </el-table-column>
-                        <el-table-column label="操作">
-                            <template slot-scope="scope">
-                                <el-button
-                                        size="mini"
-                                        type="success"
-                                        @click="pastCase(scope.$index, scope.row)">详细病历</el-button>
-                            </template>
-                        </el-table-column>
-                    </el-table>
-                </el-dialog>
             </el-main>
-            <el-footer>爱尔眼科高度近视智能诊断系统(  推荐使用IE9+,Firefox、Chrome 浏览器访问   )</el-footer>
+            <el-footer>爱尔眼科慢病管理系统(  推荐使用IE9+,Firefox、Chrome 浏览器访问   )</el-footer>
         </el-container>
     </div>
 </template>
@@ -186,30 +122,57 @@
                 search: '',
                 currentPage: 1,
                 pageSize: 10,
-                // 当前页用户数据
-                dataSelect: [],
+                
+                dataSelect: [{
+                        visitNumber: 'MZ202405210003',
+                        patientName: '周印',
+                        age: '53',
+                        diagName: '干眼综合征',
+                        diagTime: '2024-05-21 14:25:29',
+                        siteName: '双眼',
+                        deptName: '白内障科',
+                    },
+                    {
+                        visitNumber: 'MZ202405210003',
+                        patientName: '周印2',
+                        age: '53',
+                        diagName: '干眼综合征',
+                        diagTime: '2024-05-21 14:25:29',
+                        siteName: '双眼',
+                        deptName: '白内障科',
+                    },
+                    {
+                        visitNumber: 'MZ202405210003',
+                        patientName: '周印3',
+                        age: '53',
+                        diagName: '干眼综合征',
+                        diagTime: '2024-05-21 14:25:29',
+                        siteName: '双眼',
+                        deptName: '白内障科',
+                    },
+                    ],
                 //   患者基本信息
                 infoForm: {
-                    id: '',
-                    patientName: '',
-                    patientId: '',
-                    gender: '',
-                    birthday: '',
-                    telephone: '',
-                    address: '',
-                    unit: '',
-                    idcard: '',
+                    id: '123',
+                    patientName: '123',
+                    patientId: '123',
+                    gender: '123',
+                    birthday: '123',
+                    telephone: '123',
+                    address: '123',
+                    unit: '123',
+                    idcard: '123',
                 },
                 //      患者简要病情
                 shortInfoForm: {
-                    id: '',
-                    patientName: '',
-                    patientId: '',
-                    diagnosis: '',
-                    eyesightOD: '',
-                    eyesightOS: '',
+                    id: '123',
+                    patientName: '123',
+                    patientId: '123',
+                    diagnosis: '123',
+                    eyesightOD: '123',
+                    eyesightOS: '123',
                     hereditary: 'false',
-                    doctorId: '',
+                    doctorId: '123',
                 },
                 //      患者过往病历
                 caseData: [{
@@ -221,35 +184,21 @@
             }
         },
         created() {
-            this.getPatientData()
+            // this.getPatientData()
         },
         methods: {
             handleSelect(key, keyPath) {
                 console.log(key, keyPath);
             },
-            //          患者过往病历
-            handleEdit(index, row) {
-                // console.log(index, row)
-                this.currentPatientName = row.patientName
-                this.dialogFormVisiblePastCase = true;
-                console.log(row.patientId)
-                const _this = this
-                _this.$axios.get("/caselist/pastCaselist/" + row.patientId, {
-                    headers: {
-                        "Authorization": _this.$store.getters.getToken
-                    }
-                }).then(res => {
-                    console.log(res)
-                    _this.caseData = res.data.data;
-
-                })
+            toCaseDetail(){
+                this.$router.push({name: "PostCaseDetail", params: {id: 123}})
             },
             //          患者基本信息
             patientInfo(index, row) {
                 this.currentPatientName = row.patientName
                 this.infoForm.id = row.id;
                 this.infoForm.patientName = row.patientName.substring(0,1) + row.patientName.substring(2,3)
-              this.infoForm.patientId = row.patientId
+                this.infoForm.patientId = row.patientId
                 this.infoForm.gender = row.gender
                 this.infoForm.birthday = row.birthday
                 this.infoForm.telephone = row.telephone
@@ -257,28 +206,6 @@
                 this.infoForm.unit = row.unit
                 this.infoForm.idcard = row.idcard
                 this.dialogFormVisible = true
-            },
-            //          患者简要病情
-            patientShortInfo(index, row) {
-                this.currentPatientName = row.patientName
-                this.shortInfoForm.id = row.id
-                this.shortInfoForm.patientName = row.patientName
-                this.shortInfoForm.patientId = row.patientId
-                const _this = this
-                _this.$axios.get("/patient/shortinfo/" + row.id, {
-                    headers: {
-                        "Authorization": _this.$store.getters.getToken
-                    }
-                }).then(res => {
-                    if(res.status === 200) {
-                        this.dialogFormVisibleShortInfo = true
-                        _this.shortInfoForm.diagnosis = res.data.data.diagnosis
-                        _this.shortInfoForm.doctorId = res.data.data.doctorId
-                        _this.shortInfoForm.eyesightOD = res.data.data.eyesightOD
-                        _this.shortInfoForm.eyesightOS = res.data.data.eyesightOS
-                        _this.shortInfoForm.hereditary = res.data.data.hereditary
-                    }
-                })
             },
             handleSizeChange(val) {
                 console.log(`每页 ${val} 条`);
@@ -289,11 +216,6 @@
             handleCurrentChange(val) {
                 console.log(`当前页: ${val}`);
                 this.currentPage = val;
-            },
-            //          去过往病历详情页
-            pastCase(index, row) {
-                const _this = this
-                _this.$router.push({name: "PostCaseDetail", params: {id: row.id}})
             },
             //          页面加载，获取数据
             getPatientData() {
@@ -336,28 +258,6 @@
                     }
                 })
             },
-            //          编辑患者简要病情
-            submitEditShortInfo() {
-                this.dialogFormVisibleShortInfo = false
-                const _this = this
-                console.log(this.infoForm)
-                _this.$axios.post('/patient/editshortinfo', _this.shortInfoForm, {
-                    headers: {
-                        "Authorization": _this.$store.getters.getToken
-                    }
-                }).then(res => {
-                    console.log(res)
-                    if(res.data.code === 200) {
-                        this.$message({
-                            message: '编辑成功',
-                            type: 'success'
-                        });
-                        this.reload()
-                    } else {
-                        this.$message.error('编辑失败');
-                    }
-                })
-            }
         }
     }
 </script>

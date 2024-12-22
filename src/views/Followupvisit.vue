@@ -265,7 +265,7 @@
                 </div>
             </el-dialog>
         </el-main>
-        <el-footer>爱尔眼科高度近视智能诊断系统(  推荐使用IE9+,Firefox、Chrome 浏览器访问   )</el-footer>
+        <el-footer>爱尔眼科慢病管理系统(  推荐使用IE9+,Firefox、Chrome 浏览器访问   )</el-footer>
     </div>
 </template>
 
