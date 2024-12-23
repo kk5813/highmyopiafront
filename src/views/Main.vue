@@ -13,7 +13,7 @@
           :row-class-name="tableRowClassName"
           style="width: 100%"
         >
-          <el-table-column label="登录名" prop="userLoginName">
+          <el-table-column label="登录账号" prop="userLoginName">
           </el-table-column>
           <el-table-column label="用户名" prop="userName"> </el-table-column>
           <el-table-column label="用户状态" prop="userStatus">
@@ -26,21 +26,23 @@
           </el-table-column>
           <el-table-column width="400 px" align="right">
             <template slot="header" slot-scope="scope">
+              <el-button
+                size="medium"
+                @click="dialogFormVisible = true"
+                type="primary"
+                plain
+                style="margin-right: 10px"
+                >添加用户</el-button
+              >
               <el-input
                 v-on:input="dataSizeChange()"
                 v-model="search"
                 size="medium"
-                placeholder="输入关键字搜索"
+                style="width: 200px"
+                placeholder="输入登录账号或用户名搜索"
               />
             </template>
             <template slot-scope="scope">
-              <el-button
-                size="mini"
-                @click="dialogFormVisible = true"
-                type="primary"
-                plain
-                >添加</el-button
-              >
               <el-button
                 size="mini"
                 @click="handleEdit(scope.$index, scope.row)"
@@ -73,35 +75,29 @@
           :visible.sync="dialogFormVisible"
           width="30%"
         >
-          <el-form :model="form">
-            <el-form-item label="用户登录名" :label-width="formLabelWidth">
+          <el-form :model="addForm">
+            <el-form-item label="登录账号" :label-width="formLabelWidth">
               <el-input
-                v-model="form.userLoginName"
+                v-model="addForm.userLoginName"
                 autocomplete="off"
               ></el-input>
             </el-form-item>
             <el-form-item label="用户密码" :label-width="formLabelWidth">
               <el-input
-                v-model="form.userPassword"
+                v-model="addForm.userPassword"
                 autocomplete="off"
               ></el-input>
             </el-form-item>
-            <el-form-item label="用户姓名" :label-width="formLabelWidth">
-              <el-input v-model="form.userName" autocomplete="off"></el-input>
-            </el-form-item>
-            <el-form-item label="用户角色">
-              <el-radio-group v-model="form.userStatus">
-                <el-radio label="0">系统管理员</el-radio>
-                <el-radio label="1">医生</el-radio>
-                <el-radio label="2">护士</el-radio>
-              </el-radio-group>
+            <el-form-item label="用户名" :label-width="formLabelWidth">
+              <el-input
+                v-model="addForm.userName"
+                autocomplete="off"
+              ></el-input>
             </el-form-item>
           </el-form>
           <div slot="footer" class="dialog-footer">
             <el-button @click="dialogFormVisible = false">取 消</el-button>
-            <el-button type="primary" @click="submitAddUser('form')"
-              >确 定</el-button
-            >
+            <el-button type="primary" @click="submitAddUser()">确 定</el-button>
           </div>
         </el-dialog>
         <!--编辑用户的弹出对话框-->
@@ -121,6 +117,7 @@
               <el-input
                 v-model="editForm.userPassword"
                 autocomplete="off"
+                placeholder="未输入则默认为原密码"
               ></el-input>
             </el-form-item>
             <el-form-item label="用户姓名" :label-width="formLabelWidth">
@@ -132,14 +129,13 @@
             <el-form-item label="用户角色">
               <el-radio-group v-model="editForm.userStatus">
                 <el-radio label="0">系统管理员</el-radio>
-                <el-radio label="1">医生</el-radio>
-                <el-radio label="2">护士</el-radio>
+                <el-radio label="1">普通用户</el-radio>
+                <el-radio label="-1">无效用户</el-radio>
               </el-radio-group>
             </el-form-item>
           </el-form>
           <div slot="footer" class="dialog-footer">
-            <el-button @click="dialogEditFormVisible = false">取 消</el-button>
-            <el-button type="primary" @click="submitEditUser('editForm')"
+            <el-button type="primary" @click="submitEditUser()"
               >确 定</el-button
             >
           </div>
@@ -172,6 +168,10 @@ export default {
       // 编辑和添加用户对话框
       dialogFormVisible: false,
       dialogEditFormVisible: false,
+      addForm: {
+        userName: "",
+        userLoginName: "",
+      },
       //添加用户表格
       form: {
         userName: "",
@@ -208,7 +208,7 @@ export default {
     };
   },
   created() {
-    // this.getUserTableData();
+    this.getUserTableData();
   },
   methods: {
     handleSelect(key, keyPath) {
@@ -216,24 +216,17 @@ export default {
     },
     //编辑功能
     handleEdit(index, row) {
-      console.log(index, row);
-      const _this = this;
-      _this.$axios
-        .get("/user/find/" + row.userId, {
-          headers: {
-            Authorization: _this.$store.getters.getToken,
-          },
-        })
-        .then((res) => {
-          this.editForm.userPassword = res.data.data.userPassword;
-        });
+      // console.log(row.userId);
+      // api.findUserById(row.userId).then((res) => {
+      //   console.log(res)
+      // });
 
       this.editForm.userLoginName = row.userLoginName;
       this.editForm.userName = row.userName;
-      this.editForm.userPassword = row.userPassword;
-      if (row.userStatus === "医生") this.editForm.userStatus = "1";
-      else if (row.userStatus === "护士") this.editForm.userStatus = "2";
-      else if (row.userStatus === "系统管理员") this.editForm.userStatus = "0";
+      this.editForm.userPassword = ''
+      if (row.userStatus === "系统管理员") this.editForm.userStatus = "0";
+      else if (row.userStatus === "普通用户") this.editForm.userStatus = "1";
+      else if (row.userStatus === "无效用户") this.editForm.userStatus = "-1";
       this.dialogEditFormVisible = true;
     },
     //失效某用户
@@ -247,12 +240,7 @@ export default {
           type: "warning",
         })
         .then(() => {
-          _this.$axios
-            .get("/user/invalid/" + row.userId, {
-              headers: {
-                Authorization: _this.$store.getters.getToken,
-              },
-            })
+          api.deleteUser(row.userId)
             .then((res) => {
               console.log(res);
               if (res.data.code === 200) {
@@ -293,12 +281,7 @@ export default {
       );
       console.log(this.dataSelect);
     },
-    // 当前登录用户标绿
-    tableRowClassName({ row, rowIndex }) {
-      if (row.userLoginName === this.$store.getters.getUser.userLoginName) {
-        return "success-row";
-      } else return "";
-    },
+
     //      获得数据
     getUserTableData() {
       const _this = this;
@@ -319,45 +302,33 @@ export default {
       });
     },
     //      添加用户
-    submitAddUser(form) {
+    submitAddUser() {
       const _this = this;
-      this.$axios
-        .post("/user/add", this.form, {
-          headers: {
-            Authorization: _this.$store.getters.getToken,
-          },
-        })
-        .then((res) => {
-          console.log(res);
-          if (res.data.code === 200) {
-            this.$message({
-              message: "成功创建用户" + _this.form.userName,
-              type: "success",
-            });
-          } else {
-            this.$message.error("创建失败");
-          }
-          _this.dialogFormVisible = false;
-        });
+      api.addUser(this.addForm).then((res) => {
+        if (res.data.code == 200) {
+          this.$message({
+            message: "成功创建用户" + _this.addForm.userName,
+            type: "success",
+          });
+        } else {
+          this.$message.error("创建失败");
+        }
+        _this.dialogFormVisible = false;
+      });
     },
     //      编辑用户
-    submitEditUser(editForm) {
+    submitEditUser() {
       const _this = this;
-      console.log(_this.editForm);
-      _this.tableData.forEach(function (element) {
-        console.log(element.userLoginName + "/" + _this.editForm.userLoginName);
-        if (element.userLoginName === _this.editForm.userLoginName) {
-          _this.editForm.userId = element.userId;
-        }
-      });
+      // console.log(_this.editForm);
+      // _this.tableData.forEach(function (element) {
+      //   console.log(element.userLoginName + "/" + _this.editForm.userLoginName);
+      //   if (element.userLoginName === _this.editForm.userLoginName) {
+      //     _this.editForm.userId = element.userId;
+      //   }
+      // });
+      
       _this.dialogEditFormVisible = false;
-      this.$axios
-        .post("/user/edit", _this.editForm, {
-          headers: {
-            Authorization: _this.$store.getters.getToken,
-          },
-        })
-        .then((res) => {
+      api.editUser(_this.editForm).then((res) => {
           console.log(res);
           if (res.data.code === 200) {
             this.$message({
@@ -370,6 +341,13 @@ export default {
           _this.dialogFormVisible = false;
         });
     },
+
+    // 当前登录用户标绿
+    tableRowClassName({ row, rowIndex }) {
+      if (row.userLoginName === this.$store.getters.getUser.userLoginName) {
+        return "success-row";
+      } else return "";
+    },
   },
   mounted() {
     this.getUserTableData();
@@ -380,7 +358,8 @@ export default {
 <style scoped>
 .el-header {
   width: 100%;
-  position: absolute;
+  position: fixed;
+  z-index: 1000;
   left: 0;
   padding: 0;
   background-color: #b3c0d1;
@@ -389,6 +368,7 @@ export default {
   line-height: 65px;
   top: 0;
 }
+
 .el-footer {
   bottom: 0;
   width: 100%;
@@ -402,12 +382,17 @@ export default {
   font-size: 10px;
 }
 .el-main {
+  /* display: flex(center, center, row); */
+  height: calc(100vh - 60px - 65px);
   width: 100%;
-  margin-top: 60px;
+  margin-top: 50px;
   background-color: #e9eef3;
   color: #333;
+
   text-align: center;
-  height: 850px;
+  /* height: 1000px; */
+  /* overflow: hidden; */
+  overflow: auto;
 }
 .el-table /deep/ .success-row {
   background: #f0f9eb;

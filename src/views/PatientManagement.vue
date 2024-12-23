@@ -263,30 +263,43 @@
 </script>
 
 <style scoped>
-    .el-header, .el-footer {
-        width: 100%;
-        position:fixed;
-        left: 0;
-        padding: 0;
-        background-color: #B3C0D1;
-        color: #333;
-        text-align: center;
-        line-height: 65px;
-    }
-    .el-footer {
-        bottom: 0;
-        font-size: 10px;
-    }
     .el-header {
-        top: 0;
-    }
-    .el-main {
-        width: 100%;
-        margin-top: 60px;
-        background-color: #E9EEF3;
-        color: #333;
-        text-align: center;
-        height: 850px;
-    }
+  width: 100%;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  padding: 0;
+  background-color: #b3c0d1;
+  color: #333;
+  text-align: center;
+  line-height: 65px;
+  top: 0;
+}
+
+.el-footer {
+  bottom: 0;
+  width: 100%;
+  position: fixed;
+  left: 0;
+  padding: 0;
+  background-color: #b3c0d1;
+  color: #333;
+  text-align: center;
+  line-height: 65px;
+  font-size: 10px;
+}
+.el-main {
+  /* display: flex(center, center, row); */
+  height: calc(100vh - 60px - 65px);
+  width: 100%;
+  margin-top: 50px;
+  background-color: #e9eef3;
+  color: #333;
+
+  text-align: center;
+  /* height: 1000px; */
+  /* overflow: hidden; */
+  overflow: auto;
+}
 
 </style>

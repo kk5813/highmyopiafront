@@ -32,21 +32,37 @@
         <i class="el-icon-data-analysis"></i>病种统计
       </el-menu-item>
       <div class="menu-right">
-        <el-button type="primary" icon="el-icon-edit">我的</el-button>
-        <el-button type="primary" icon="el-icon-lock">锁屏</el-button>
-        <el-button type="primary" icon="el-icon-close">退出</el-button>
+        <el-button @click="userLogout()" type="primary" icon="el-icon-close">退出</el-button>
       </div>
     </el-menu>
   </div>
 </template>
 
 <script>
+import api from "@/api/apiManage";
+import {removeSession} from '@/auth'
 export default {
   name: "Header",
   props: {
     activeIndex: "",
   },
-  methods: {},
+  methods: {
+    userLogout() {
+      api.logout().then((res) => {
+        console.log(res)
+        if (res.data.code == 200) {
+          removeSession()
+          this.$message({
+            message: "您已成功退出！",
+            type: "success",
+          });
+          this.$router.push({ path: "login" });
+        } else {
+          this.$message.error("退出失败！");
+        }
+      });
+    },
+  },
 };
 </script>
 

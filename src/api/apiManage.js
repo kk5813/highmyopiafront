@@ -28,6 +28,13 @@ export default {
     })
   },
 
+  findUserById(userId) {
+    return request({
+      url: "/user/find/" + userId,
+      method: 'get',
+    })
+  },
+
   editUser(data) {
     return request({
       url: '/user/edit',
@@ -43,11 +50,11 @@ export default {
     })
   },
 
-  getUserList(pageSize,pageNumber) {
+  getUserList(pageSize, pageNumber) {
     return request({
       url: '/user/page',
       method: 'get',
-      params:{
+      params: {
         pageSize,
         pageNumber
       }
@@ -127,7 +134,7 @@ export default {
       data
     })
   },
-  
+
   getIllCount(data) {
     return request({
       url: '/diagnosis',
@@ -136,4 +143,3 @@ export default {
     })
   }
 }
-

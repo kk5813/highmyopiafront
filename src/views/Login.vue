@@ -1,38 +1,4 @@
 <template>
-  <!-- <div class="login_container">
-    <div class="log-content">
-      <h1>欢迎登录慢病管理系统</h1>
-      <el-form
-        :model="ruleForm"
-        :rules="rules"
-        ref="ruleForm"
-        label-width="100px"
-        class="demo-ruleForm"
-        label-position="left"
-      >
-        <el-form-item label="用户名" prop="userLoginName">
-          <el-input v-model="ruleForm.userLoginName"></el-input>
-        </el-form-item>
-        <el-form-item label="密码" prop="userPassword">
-          <el-input type="password" v-model="ruleForm.userPassword"></el-input>
-        </el-form-item>
-        <el-form-item label="验证码" prop="code" class="form-item-code">
-          <el-input v-model="ruleForm.code"></el-input>
-          <div id="v_container"></div>
-        </el-form-item>
-        <el-form-item class="form-item-button">
-          <el-button type="primary" @click="submitForm('ruleForm')"
-            >登录</el-button
-          >
-        </el-form-item>
-      </el-form>
-    </div>
-    <el-carousel indicator-position="none" trigger="click" arrow="always" :height="bannerH + 'px'">
-            <el-carousel-item v-for="img in BannerImg" :key="img.url">
-                <img :src="img.url" alt="">
-            </el-carousel-item>
-        </el-carousel>
-  </div> -->
   <div class="login_container">
     <div class="login_box">
       <div class="avatar_box">
