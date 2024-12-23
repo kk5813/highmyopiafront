@@ -6,13 +6,9 @@
         <Header active-index="/Main"></Header>
       </el-header>
       <el-main>
-        <!--                            用户管理表格-->
-        <!-- "dataSelect.slice((currentPage-1)*pageSize,currentPage*pageSize)" -->
-        <el-table
-          :data="dataSelect"
-          :row-class-name="tableRowClassName"
-          style="width: 100%"
-        >
+        <el-table :data="tableData" style="width: 100%" v-loading="loading">
+          <el-table-column width="90" label="用户ID" prop="userId">
+          </el-table-column>
           <el-table-column label="登录账号" prop="userLoginName">
           </el-table-column>
           <el-table-column label="用户名" prop="userName"> </el-table-column>
@@ -34,12 +30,13 @@
                 style="margin-right: 10px"
                 >添加用户</el-button
               >
+              <!-- v-on:input="dataSizeChange()" -->
               <el-input
-                v-on:input="dataSizeChange()"
+                @keyup.enter.native="dataSizeChange()"
                 v-model="search"
                 size="medium"
                 style="width: 200px"
-                placeholder="输入登录账号或用户名搜索"
+                placeholder="输入用户ID并按下回车搜索"
               />
             </template>
             <template slot-scope="scope">
@@ -66,7 +63,7 @@
           :page-sizes="[1, 5, 10, 20]"
           :page-size="pageSize"
           layout="total, sizes, prev, pager, next, jumper"
-          :total="dataSelect.length"
+          :total="totalSize"
         >
         </el-pagination>
         <!--                添加用户的弹出对话框-->
@@ -180,7 +177,6 @@ export default {
       },
       //编辑用户表格
       editForm: {
-        userId: "",
         userName: "",
         userLoginName: "",
         userPassword: "",
@@ -194,36 +190,20 @@ export default {
       currentPage: 1,
       pageSize: 10,
       // 当前页用户数据
-      dataSelect: [
-        {
-          userLoginName: "123",
-          userName: "123",
-          userStatus: "123",
-          creator: "123",
-          createTime: "123",
-          modifier: "123",
-          updateTime: "123",
-        },
-      ],
+      dataSelect: [{}],
+      loading: true,
+      totalSize: 0,
     };
   },
   created() {
-    this.getUserTableData();
+    // this.getUserTableData();
   },
   methods: {
-    handleSelect(key, keyPath) {
-      console.log(key, keyPath);
-    },
     //编辑功能
     handleEdit(index, row) {
-      // console.log(row.userId);
-      // api.findUserById(row.userId).then((res) => {
-      //   console.log(res)
-      // });
-
       this.editForm.userLoginName = row.userLoginName;
       this.editForm.userName = row.userName;
-      this.editForm.userPassword = ''
+      this.editForm.userPassword = "";
       if (row.userStatus === "系统管理员") this.editForm.userStatus = "0";
       else if (row.userStatus === "普通用户") this.editForm.userStatus = "1";
       else if (row.userStatus === "无效用户") this.editForm.userStatus = "-1";
@@ -233,25 +213,24 @@ export default {
     handleDelete(index, row) {
       const _this = this;
       console.log(row.userId);
-      _this
-        .$confirm("您是否要失效用户" + row.userLoginName, "提示", {
+      _this.$confirm("您是否要失效用户" + row.userLoginName, "提示", {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
           type: "warning",
         })
         .then(() => {
-          api.deleteUser(row.userId)
-            .then((res) => {
-              console.log(res);
-              if (res.data.code === 200) {
-                _this.$message({
-                  type: "success",
-                  message: "成功失效用户!",
-                });
-              } else {
-                _this.$message.error("操作失败");
-              }
-            });
+          api.deleteUser(row.userId).then((res) => {
+            console.log(res);
+            if (res.data.code === 200) {
+              _this.$message({
+                type: "success",
+                message: "成功失效用户!",
+              });
+              this.getUserTableData();
+            } else {
+              _this.$message.error("操作失败");
+            }
+          });
         })
         .catch(() => {
           _this.$message({
@@ -261,31 +240,46 @@ export default {
         });
     },
     //每页条数改变时触发 选择一页显示多少行
-    handleSizeChange(val) {
-      console.log(`每页 ${val} 条`);
-      this.currentPage = 1;
-      this.pageSize = val;
+    handleSizeChange(size) {
+      this.pageSize = size;
+      this.getUserTableData();
     },
     //当前页改变时触发 跳转其他页
-    handleCurrentChange(val) {
-      console.log(`当前页: ${val}`);
-      this.currentPage = val;
+    handleCurrentChange(page) {
+      this.currentPage = page;
+      this.getUserTableData();
     },
     //          搜索功能
     dataSizeChange() {
-      this.dataSelect = this.tableData.filter(
-        (data) =>
-          !this.search ||
-          data.userName.toLowerCase().includes(this.search.toLowerCase()) ||
-          data.userLoginName.toLowerCase().includes(this.search.toLowerCase())
-      );
-      console.log(this.dataSelect);
+      api.findUserById(this.search).then((res) => {
+        console.log(res);
+        let role = "";
+        if (res.data.code == 200 && res.data.data) {
+          if (res.data.data.userStatus === 0) {
+            role = "系统管理员";
+          } else if (res.data.data.userStatus === 1) {
+            role = "普通用户";
+          } else {
+            role = "无效用户";
+          }
+          this.tableData = []
+          this.tableData.push(res.data.data);
+          this.tableData[0].userStatus = role;
+          this.loading = false;
+          this.totalSize = res.data.data.total;
+        } else {
+          this.$message({
+            message: "用户不存在",
+            type: "danger",
+          });
+        }
+      });
     },
 
     //      获得数据
     getUserTableData() {
-      const _this = this;
-      api.getUserList().then((res) => {
+      this.loading = true;
+      api.getUserList(this.pageSize, this.currentPage).then((res) => {
         if (res.data.code == 200) {
           this.tableData = res.data.data.records;
           this.tableData.forEach(function (element) {
@@ -297,7 +291,8 @@ export default {
               element.userStatus = "无效用户";
             }
           });
-          _this.dataSelect = this.tableData;
+          this.loading = false;
+          this.totalSize = res.data.data.total;
         }
       });
     },
@@ -319,34 +314,21 @@ export default {
     //      编辑用户
     submitEditUser() {
       const _this = this;
-      // console.log(_this.editForm);
-      // _this.tableData.forEach(function (element) {
-      //   console.log(element.userLoginName + "/" + _this.editForm.userLoginName);
-      //   if (element.userLoginName === _this.editForm.userLoginName) {
-      //     _this.editForm.userId = element.userId;
-      //   }
-      // });
-      
       _this.dialogEditFormVisible = false;
+      console.log(_this.editForm);
       api.editUser(_this.editForm).then((res) => {
-          console.log(res);
-          if (res.data.code === 200) {
-            this.$message({
-              message: "编辑成功",
-              type: "success",
-            });
-          } else {
-            this.$message.error("编辑失败");
-          }
-          _this.dialogFormVisible = false;
-        });
-    },
-
-    // 当前登录用户标绿
-    tableRowClassName({ row, rowIndex }) {
-      if (row.userLoginName === this.$store.getters.getUser.userLoginName) {
-        return "success-row";
-      } else return "";
+        console.log(res);
+        if (res.data.code === 200) {
+          this.$message({
+            message: "编辑成功",
+            type: "success",
+          });
+          this.getUserTableData();
+        } else {
+          this.$message.error("编辑失败");
+        }
+        _this.dialogFormVisible = false;
+      });
     },
   },
   mounted() {

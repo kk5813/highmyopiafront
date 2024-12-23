@@ -28,6 +28,12 @@ export default {
     })
   },
 
+  searchByName(userLoginName) {
+    return request({
+      
+    })
+  },
+
   findUserById(userId) {
     return request({
       url: "/user/find/" + userId,
