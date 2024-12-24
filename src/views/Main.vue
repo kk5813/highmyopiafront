@@ -24,7 +24,7 @@
             <template slot="header" slot-scope="scope">
               <el-button
                 size="medium"
-                @click="dialogFormVisible = true"
+                @click="handleAdd()"
                 type="primary"
                 plain
                 style="margin-right: 10px"
@@ -72,7 +72,7 @@
           :visible.sync="dialogFormVisible"
           width="30%"
         >
-          <el-form :model="addForm">
+          <el-form :model="addForm" ref="addForm">
             <el-form-item label="登录账号" :label-width="formLabelWidth">
               <el-input
                 v-model="addForm.userLoginName"
@@ -104,6 +104,13 @@
           width="30%"
         >
           <el-form :model="editForm">
+            <el-form-item label="用户ID" :label-width="formLabelWidth">
+              <el-input
+                v-model="editForm.userId"
+                autocomplete="off"
+                disabled
+              ></el-input>
+            </el-form-item>
             <el-form-item label="用户登录名" :label-width="formLabelWidth">
               <el-input
                 v-model="editForm.userLoginName"
@@ -165,18 +172,15 @@ export default {
       // 编辑和添加用户对话框
       dialogFormVisible: false,
       dialogEditFormVisible: false,
+      // 添加用户表格
       addForm: {
         userName: "",
+        userPassword: "",
         userLoginName: "",
       },
-      //添加用户表格
-      form: {
-        userName: "",
-        userLoginName: "",
-        userStatus: "",
-      },
-      //编辑用户表格
+      // 编辑用户表格
       editForm: {
+        userId: "",
         userName: "",
         userLoginName: "",
         userPassword: "",
@@ -201,6 +205,7 @@ export default {
   methods: {
     //编辑功能
     handleEdit(index, row) {
+      this.editForm.userId = row.userId;
       this.editForm.userLoginName = row.userLoginName;
       this.editForm.userName = row.userName;
       this.editForm.userPassword = "";
@@ -209,6 +214,12 @@ export default {
       else if (row.userStatus === "无效用户") this.editForm.userStatus = "-1";
       this.dialogEditFormVisible = true;
     },
+
+    handleAdd() {
+      this.dialogFormVisible = true
+      Object.assign(this.$data.addForm, this.$options.data().addForm)
+    },
+    
     //失效某用户
     handleDelete(index, row) {
       const _this = this;
@@ -302,9 +313,11 @@ export default {
       api.addUser(this.addForm).then((res) => {
         if (res.data.code == 200) {
           this.$message({
-            message: "成功创建用户" + _this.addForm.userName,
+            message: "成功创建用户",
             type: "success",
           });
+        } else if(res.data.code == 400 && res.data.msg == "该用户名已注册！") {
+          this.$message.error("该登录账号已存在");
         } else {
           this.$message.error("创建失败");
         }

@@ -22,5 +22,6 @@ new Vue({
   render: h => h(App)
 }).$mount('#app')
 
+
 // Object.defineProperty(Vue.prototype, '$moment', { value: canvas })
 
