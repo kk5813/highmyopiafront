@@ -17,6 +17,7 @@
 
 <script>
 import Header from "../components/Header";
+import api from "@/api/apiManage";
 export default {
   name: "illStatistic",
   components: { Header },
@@ -67,7 +68,19 @@ export default {
     };
   },
   created() {
-    // this.setCharts();
+    let obj = {
+      "beginTime": "",
+      "endTime": ""
+    }
+    let jsonString = JSON.stringify(obj);
+    api.getIllCount(jsonString).then((res) => {
+        console.log(res);
+        // if (res.data.code == 200) {
+        //   this.infoForm = res.data.data.records;
+        //   this.loading = false;
+        //   this.totalSize = res.data.data.total;
+        // }
+      });
   },
   methods: {
     setCharts() {

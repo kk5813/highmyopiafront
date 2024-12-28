@@ -11,6 +11,7 @@ import canvas from './canvas'
 import * as echarts from 'echarts'
 Vue.config.productionTip = false
 
+
 Vue.use(ElementUI)
 Vue.prototype.$axios = axios
 Vue.prototype.$md5 = md5
@@ -21,6 +22,10 @@ new Vue({
   store,
   render: h => h(App)
 }).$mount('#app')
+
+
+
+
 
 
 // Object.defineProperty(Vue.prototype, '$moment', { value: canvas })

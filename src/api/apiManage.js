@@ -28,12 +28,6 @@ export default {
     })
   },
 
-  searchByName(userLoginName) {
-    return request({
-      
-    })
-  },
-
   findUserById(userId) {
     return request({
       url: "/user/find/" + userId,
@@ -71,7 +65,7 @@ export default {
   // 患者信息管理  ==>  /patient
   getPatientById(patientId) {
     return request({
-      url: '/patient/find/' + patientId,
+      url: '/patients/find/' + patientId,
       method: 'get'
     })
   },
@@ -143,9 +137,36 @@ export default {
 
   getIllCount(data) {
     return request({
-      url: '/diagnosis',
+      url: '/today/CategoryCount',
       method: 'get',
       data
     })
-  }
+  },
+
+  getVisitList(pageSize,pageNumber,diagName) {
+    return request({
+      url: '/visits/page',
+      method: 'get',
+      params: {
+        pageSize,
+        pageNumber,
+        diagName
+      },
+    })
+  },
+
+  getCaseById(elementId) {
+    return request({
+      url: '/element/find/' + elementId,
+      method: 'get'
+    })
+  },
+
+  getCaseByCondition(data) {
+    return request({
+      url: '/element/search',
+      method: 'get',
+      data
+    })
+  },
 }
