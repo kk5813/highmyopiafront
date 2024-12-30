@@ -2,15 +2,16 @@ import axios from "axios"
 import ElementUI from 'element-ui'
 import store from './store'
 import router from "./router";
-import {getSession} from '@/auth'
-
+import {
+  getSession
+} from '@/auth'
 
 const service = axios.create({
-    // baseURL: 'http://8.140.145.137',
-    baseURL: 'http://localhost:8081/api/v1', 
-    timeout: 6 * 1000 // request timeout
-  })
-  
+  // baseURL: 'http://8.140.145.137',
+  baseURL: 'http://localhost:8081/api/v1',
+  timeout: 6 * 1000 // request timeout
+})
+
 
 //      前置拦截
 // axios.interceptors.request.use(config => {
@@ -18,10 +19,10 @@ const service = axios.create({
 // })
 
 service.interceptors.request.use(
-  
+
   config => {
-    if (getSession()) {
-      config.headers['authorization'] = getSession()
+    if (sessionStorage.getItem("token")) {
+      config.headers['authorization'] = sessionStorage.getItem("token")
     }
     return config
   },

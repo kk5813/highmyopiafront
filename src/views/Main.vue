@@ -32,11 +32,11 @@
               >
               <!-- v-on:input="dataSizeChange()" -->
               <el-input
-                @keyup.enter.native="dataSizeChange()"
+                @keyup.enter.native="searchById()"
                 v-model="search"
                 size="medium"
-                style="width: 200px"
-                placeholder="输入用户ID并按下回车搜索"
+                style="width: 250px"
+                placeholder="输入用户登录账号并按下回车搜索"
               />
             </template>
             <template slot-scope="scope">
@@ -195,7 +195,7 @@ export default {
       pageSize: 10,
       // 当前页用户数据
       dataSelect: [{}],
-      loading: true,
+      loading: false,
       totalSize: 0,
     };
   },
@@ -216,15 +216,16 @@ export default {
     },
 
     handleAdd() {
-      this.dialogFormVisible = true
-      Object.assign(this.$data.addForm, this.$options.data().addForm)
+      this.dialogFormVisible = true;
+      Object.assign(this.$data.addForm, this.$options.data().addForm);
     },
-    
+
     //失效某用户
     handleDelete(index, row) {
       const _this = this;
       console.log(row.userId);
-      _this.$confirm("您是否要失效用户" + row.userLoginName, "提示", {
+      _this
+        .$confirm("您是否要失效用户" + row.userLoginName, "提示", {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
           type: "warning",
@@ -261,51 +262,66 @@ export default {
       this.getUserTableData();
     },
     //          搜索功能
-    dataSizeChange() {
-      api.findUserById(this.search).then((res) => {
-        console.log(res);
-        let role = "";
-        if (res.data.code == 200 && res.data.data) {
-          if (res.data.data.userStatus === 0) {
-            role = "系统管理员";
-          } else if (res.data.data.userStatus === 1) {
-            role = "普通用户";
+    searchById() {
+      let obj = {
+        userLoginName: this.search,
+      };
+      this.loading = true;
+      this.currentPage = 1;
+      this.pageSize = 10;
+      api
+        .searchUser(obj)
+        .then((res) => {
+          if (res.data.code == 200 && res.data.data) {
+            let users = res.data.data.users;
+            users.forEach((item, index) => {
+              if (item.userStatus === 0) {
+                users[index].userStatus = "系统管理员";
+              } else if (item.userStatus === 1) {
+                users[index].userStatus = "普通用户";
+              } else {
+                users[index].userStatus = "无效用户";
+              }
+            });
+            this.tableData = users;
+            this.totalSize = res.data.data.total;
           } else {
-            role = "无效用户";
+            this.$message({
+              message: "用户不存在",
+              type: "danger",
+            });
           }
-          this.tableData = []
-          this.tableData.push(res.data.data);
-          this.tableData[0].userStatus = role;
+        })
+        .catch((error) => {})
+        .finally(() => {
           this.loading = false;
-          this.totalSize = res.data.data.total;
-        } else {
-          this.$message({
-            message: "用户不存在",
-            type: "danger",
-          });
-        }
-      });
+        });
     },
 
     //      获得数据
     getUserTableData() {
       this.loading = true;
-      api.getUserList(this.pageSize, this.currentPage).then((res) => {
-        if (res.data.code == 200) {
-          this.tableData = res.data.data.records;
-          this.tableData.forEach(function (element) {
-            if (element.userStatus === 0) {
-              element.userStatus = "系统管理员";
-            } else if (element.userStatus === 1) {
-              element.userStatus = "普通用户";
-            } else {
-              element.userStatus = "无效用户";
-            }
-          });
+      api
+        .getUserList(this.pageSize, this.currentPage)
+        .then((res) => {
+          if (res.data.code == 200) {
+            this.tableData = res.data.data.records;
+            this.tableData.forEach(function (element) {
+              if (element.userStatus === 0) {
+                element.userStatus = "系统管理员";
+              } else if (element.userStatus === 1) {
+                element.userStatus = "普通用户";
+              } else {
+                element.userStatus = "无效用户";
+              }
+            });
+            this.totalSize = res.data.data.total;
+          }
+        })
+        .catch((error) => {})
+        .finally(() => {
           this.loading = false;
-          this.totalSize = res.data.data.total;
-        }
-      });
+        });
     },
     //      添加用户
     submitAddUser() {
@@ -316,7 +332,7 @@ export default {
             message: "成功创建用户",
             type: "success",
           });
-        } else if(res.data.code == 400 && res.data.msg == "该用户名已注册！") {
+        } else if (res.data.code == 400 && res.data.msg == "该用户名已注册！") {
           this.$message.error("该登录账号已存在");
         } else {
           this.$message.error("创建失败");
@@ -378,7 +394,7 @@ export default {
 }
 .el-main {
   /* display: flex(center, center, row); */
-  height: calc(100vh - 60px - 65px);
+  height: calc(100vh - 60px - 50px);
   width: 100%;
   margin-top: 50px;
   background-color: #e9eef3;

@@ -62,9 +62,9 @@
           width="30%"
         >
           <el-form :model="infoForm">
-            <el-form-item label="就诊号" :label-width="formLabelWidth">
+            <el-form-item label="患者ID" :label-width="formLabelWidth">
               <el-input
-                v-model="infoForm.patientId"
+                v-model="infoForm.id"
                 autocomplete="off"
                 disabled
               ></el-input>
@@ -125,20 +125,17 @@ export default {
       formLabelWidth: "100px",
       //用户数据
       tableData: [{}],
-      currentPage: 1,
-      pageSize: 10,
       //搜索词
       search: "",
       currentPage: 1,
       pageSize: 10,
       totalSize: 0,
-      loading: true,
+      loading: false,
       dataSelect: [{}],
       //   患者基本信息
       infoForm: {
         id: "123",
         name: "123",
-        patientId: "123",
         sexName: "123",
         birthday: "123",
         phone: "123",
@@ -154,6 +151,7 @@ export default {
   },
   created() {
     // this.getPatientData()
+    
   },
   methods: {
     handleSelect(key, keyPath) {
@@ -167,10 +165,9 @@ export default {
     },
     //          患者基本信息
     patientInfo(index, row) {
-      api.getPatientById("1796786711460069377").then((res) => {
+      api.getPatientById(row.patientId).then((res) => {
         if (res.data.code == 200) {
           this.infoForm = res.data.data;
-          this.infoForm.patientId = row.visitNumber;
         }
       });
       this.dialogFormVisible = true;
@@ -192,13 +189,15 @@ export default {
       api
         .getVisitList(this.pageSize, this.currentPage, this.search)
         .then((res) => {
+          console.log(res)
           if (res.data.code == 200) {
             this.tableData = res.data.data.records;
-
-            this.loading = false;
             this.totalSize = res.data.data.total;
-            this.loading = false;
           }
+        })
+        .catch((error) => {})
+        .finally(() => {
+          this.loading = false;
         });
     },
     dataSizeChange() {
@@ -219,21 +218,13 @@ export default {
     submitEditPatient() {
       this.dialogFormVisible = false;
       const _this = this;
-      console.log(this.infoForm);
-      _this.$axios
-        .post("/patient/edit", _this.infoForm, {
-          headers: {
-            Authorization: _this.$store.getters.getToken,
-          },
-        })
+      api.editPatient(_this.infoForm)
         .then((res) => {
-          console.log(res);
           if (res.data.code === 200) {
             this.$message({
               message: "编辑成功",
               type: "success",
             });
-            this.reload();
           } else {
             this.$message.error("编辑失败");
           }
@@ -274,7 +265,7 @@ export default {
 }
 .el-main {
   /* display: flex(center, center, row); */
-  height: calc(100vh - 60px - 65px);
+  height: calc(100vh - 60px - 50px);
   width: 100%;
   margin-top: 50px;
   background-color: #e9eef3;

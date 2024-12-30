@@ -108,13 +108,13 @@ export default {
         if (valid) {
           if (this.code.validate(this.ruleForm.code)) {
             // this.ruleForm.userPassword=this.$md5(this.ruleForm.userPassword)
-            // console.log("用户输入的密码是：" , this.ruleForm.userPassword)
             api.login(this.ruleForm).then((res) => {
               if (res.data.code == 200) {
                 const userInfo = res.data.data;
-                setSession(res.headers.authorization)
-                _this.$store.commit("SET_USERINFO", userInfo);
-                console.log(userInfo)
+                // setSession(res.headers.authorization)
+                sessionStorage.setItem('token',res.headers.authorization)
+                sessionStorage.setItem('userName',userInfo.userName)
+                // _this.$store.commit("SET_USERINFO", userInfo);
                 this.$router.push({ path: "main" });
               } else _this.$message.error("用户不存在或密码错误！");
             });
@@ -123,7 +123,6 @@ export default {
             _this.$message.error("验证码错误");
           }
         } else {
-          console.log("error submit!!");
           return false;
         }
       });

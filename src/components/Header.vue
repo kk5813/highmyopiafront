@@ -32,7 +32,21 @@
         <i class="el-icon-data-analysis"></i>病种统计
       </el-menu-item>
       <div class="menu-right">
-        <el-button @click="userLogout()" type="primary" icon="el-icon-close">退出</el-button>
+        <div
+          style="
+            float: left;
+            margin-right: 20px;
+            width: 200px;
+            color: white;
+            font-size: 16px;
+            text-align:right;
+          "
+        >
+          <i class="el-icon-user-solid"></i>{{ userName }}
+        </div>
+        <el-button @click="userLogout()" type="primary" icon="el-icon-close"
+          >退出</el-button
+        >
       </div>
     </el-menu>
   </div>
@@ -40,18 +54,30 @@
 
 <script>
 import api from "@/api/apiManage";
-import {removeSession} from '@/auth'
+import { removeSession } from "@/auth";
 export default {
   name: "Header",
   props: {
     activeIndex: "",
   },
+  data() {
+    return {
+      first: true,
+      userName: "admin",
+    };
+  },
+  created(){
+    if(sessionStorage.getItem('userName')){
+      this.userName = sessionStorage.getItem('userName')
+    }
+  },
   methods: {
     userLogout() {
       api.logout().then((res) => {
-        console.log(res)
         if (res.data.code == 200) {
-          removeSession()
+          // removeSession();
+          sessionStorage.removeItem('token')
+          sessionStorage.removeItem('userName')
           this.$message({
             message: "您已成功退出！",
             type: "success",
@@ -62,6 +88,9 @@ export default {
         }
       });
     },
+  },
+  mounted(){
+
   },
 };
 </script>

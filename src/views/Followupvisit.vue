@@ -4,330 +4,244 @@
       <Header active-index="/Followupvisit"></Header>
     </el-header>
     <el-main>
-      <!--                三个表格 今日待随访/超期未随访/全部未随访        -->
-      <el-tabs v-model="activeName" @tab-click="handleClick" stretch>
-        <el-tab-pane label="今日待随访" name="first">
-          <el-table
-            :data="
-              todayUndoSelect.slice(
-                (todayUndoCurrentPage - 1) * todayUndoPageSize,
-                todayUndoCurrentPage * todayUndoPageSize
-              )
-            "
-            style="width: 100%"
-          >
-            <el-table-column label="病历号" prop="caseId"> </el-table-column>
-            <el-table-column label="患者卡号" prop="patientId">
-            </el-table-column>
-            <el-table-column label="患者姓名" prop="patientName">
-            </el-table-column>
-            <el-table-column label="手机号" prop="telephone"> </el-table-column>
-            <el-table-column label="计划随访时间" prop="planVisitDate">
-            </el-table-column>
-            <el-table-column width="400 px" align="right">
-              <template slot="header" slot-scope="scope">
-                <el-input
-                  v-on:input="todayUndoDataSizeChange"
-                  v-model="search"
-                  size="medium"
-                  placeholder="输入关键字搜索"
-                />
-              </template>
-              <template slot-scope="scope" class="table-operate">
-                <el-button
-                  size="mini"
-                  @click="patientInfo(scope.$index, scope.row)"
-                  type="primary"
-                  plain
+      <el-table :data="tableData" style="width: 100%" v-loading="loading">
+        <!-- .slice((currentPage - 1) * pageSize, currentPage * pageSize) -->
+        <el-table-column label="患者卡号" prop="patientId"> </el-table-column>
+        <el-table-column label="患者姓名" prop="patientName"> </el-table-column>
+        <el-table-column label="手机号" prop="telephone"> </el-table-column>
+        <el-table-column label="计划随访时间" prop="planVisitDate">
+          <template slot="header" slot-scope="scope">
+            <el-popover
+              ref="popover"
+              placement="bottom"
+              trigger="click"
+              popper-class="popoverStyle"
+            >
+              <div slot="reference" class="div-popover">
+                计划随访时间<i class="el-icon-arrow-down" />
+              </div>
+              <el-checkbox-group
+                :max="1"
+                v-model="checkList"
+                style="width: 80px"
+              >
+                <el-checkbox label="全部未随访" class="el-checkbox__statusFirst"
+                  >全部未随访</el-checkbox
                 >
-                  基本信息</el-button
+                <el-checkbox
+                  label="今日未随访"
+                  class="el-checkbox__statusOthers"
+                  >今日未随访</el-checkbox
                 >
-                <el-button
-                  size="mini"
-                  @click="patientPastCase(scope.$index, scope.row)"
+                <el-checkbox
+                  label="超期未随访"
+                  class="el-checkbox__statusOthers"
+                  >超期未随访</el-checkbox
                 >
-                  患者病历</el-button
-                >
-                <el-button
-                  size="mini"
-                  type="success"
-                  @click="addFollowup(scope.$index, scope.row)"
-                  >新增随访</el-button
-                >
-              </template>
-            </el-table-column>
-          </el-table>
-          <!--                                            表格分页-->
-          <el-pagination
-            align="center"
-            @size-change="handleTodayUndoSizeChange"
-            @current-change="handleTodayUndoCurrentChange"
-            :current-page="todayUndoCurrentPage"
-            :page-sizes="[1, 5, 10, 20]"
-            :page-size="todayUndoPageSize"
-            layout="total, sizes, prev, pager, next, jumper"
-            :total="todayUndoSelect.length"
-          >
-          </el-pagination>
-        </el-tab-pane>
-        <el-tab-pane label="超期未随访" name="second">
-          <el-table
-            :data="
-              overdueSelect.slice(
-                (overdueCurrentPage - 1) * overduePageSize,
-                overdueCurrentPage * overduePageSize
-              )
-            "
-            style="width: 100%"
-          >
-            <el-table-column label="病历号" prop="caseId"> </el-table-column>
-            <el-table-column label="患者卡号" prop="patientId">
-            </el-table-column>
-            <el-table-column label="患者姓名" prop="patientName">
-            </el-table-column>
-            <el-table-column label="手机号" prop="telephone"> </el-table-column>
-            <el-table-column label="计划随访时间" prop="planVisitDate">
-            </el-table-column>
-            <el-table-column width="400 px" align="right">
-              <template slot="header" slot-scope="scope">
-                <el-input
-                  v-on:input="overdueDataSizeChange"
-                  v-model="search"
-                  size="medium"
-                  placeholder="输入关键字搜索"
-                />
-              </template>
-              <template slot-scope="scope" class="table-operate">
-                <el-button
-                  size="mini"
-                  @click="patientInfo(scope.$index, scope.row)"
-                  type="primary"
-                  plain
-                >
-                  基本信息</el-button
-                >
-                <el-button
-                  size="mini"
-                  @click="patientPastCase(scope.$index, scope.row)"
-                >
-                  过往病历</el-button
-                >
-                <el-button
-                  size="mini"
-                  type="success"
-                  @click="addFollowup(scope.$index, scope.row)"
-                  >新增随访</el-button
-                >
-              </template>
-            </el-table-column>
-          </el-table>
-          <!--                                            表格分页-->
-          <el-pagination
-            align="center"
-            @size-change="handleOverdueSizeChange"
-            @current-change="handleOverdueCurrentChange"
-            :current-page="overdueCurrentPage"
-            :page-sizes="[1, 5, 10, 20]"
-            :page-size="overduePageSize"
-            layout="total, sizes, prev, pager, next, jumper"
-            :total="overdueSelect.length"
-          >
-          </el-pagination>
-        </el-tab-pane>
-        <el-tab-pane label="全部未随访" name="third">
-          <el-table
-            :data="
-              undoSelect.slice(
-                (undoCurrentPage - 1) * undoPageSize,
-                undoCurrentPage * undoPageSize
-              )
-            "
-            style="width: 100%"
-          >
-            <el-table-column label="病历号" prop="caseId"> </el-table-column>
-            <el-table-column label="患者卡号" prop="patientId">
-            </el-table-column>
-            <el-table-column label="患者姓名" prop="patientName">
-            </el-table-column>
-            <el-table-column label="手机号" prop="telephone"> </el-table-column>
-            <el-table-column label="计划随访时间" prop="planVisitDate">
-            </el-table-column>
-            <el-table-column width="400 px" align="right">
-              <template slot="header" slot-scope="scope">
-                <el-input
-                  v-on:input="undoDataSizeChange"
-                  v-model="search"
-                  size="medium"
-                  placeholder="输入关键字搜索"
-                />
-              </template>
-              <template slot-scope="scope" class="table-operate">
-                <el-button
-                  size="mini"
-                  @click="patientInfo(scope.$index, scope.row)"
-                  type="primary"
-                  plain
-                >
-                  基本信息</el-button
-                >
-                <el-button
-                  size="mini"
-                  @click="patientPastCase(scope.$index, scope.row)"
-                >
-                  过往病历</el-button
-                >
-                <el-button
-                  size="mini"
-                  type="success"
-                  @click="addFollowup(scope.$index, scope.row)"
-                  >新增随访</el-button
-                >
-              </template>
-            </el-table-column>
-          </el-table>
-          <!--                                            表格分页-->
-          <el-pagination
-            align="center"
-            @size-change="handleUndoSizeChange"
-            @current-change="handleUndoCurrentChange"
-            :current-page="undoCurrentPage"
-            :page-sizes="[1, 5, 10, 20]"
-            :page-size="undoPageSize"
-            layout="total, sizes, prev, pager, next, jumper"
-            :total="undoSelect.length"
-          >
-          </el-pagination>
-        </el-tab-pane>
-      </el-tabs>
-      <!--                                            患者信息编辑-->
+              </el-checkbox-group>
+              <el-row :gutter="1">
+                <el-col :span="12">
+                  <el-link
+                    :underline="false"
+                    type="primary"
+                    :disabled="checkList.length == 0"
+                    @click="filterChange"
+                    >筛选</el-link
+                  >
+                </el-col>
+              </el-row>
+            </el-popover>
+          </template>
+        </el-table-column>
+        <el-table-column width="400 px" align="right">
+          <template slot="header" slot-scope="scope">
+            <el-button
+              size="medium"
+              type="success"
+              style="margin-right: 10px"
+              @click="addFollowup(scope.$index, scope.row)"
+              >新增随访</el-button
+            >
+            <el-input
+              @keyup.enter.native="searchByIdInput()"
+              v-model="search"
+              size="medium"
+              placeholder="输入患者ID回车搜索"
+              style="width: 200px"
+            />
+          </template>
+          <template slot-scope="scope" class="table-operate">
+            <el-button
+              size="mini"
+              @click="editFollowupInfo(scope.row)"
+              type="primary"
+              plain
+            >
+              随访信息</el-button
+            >
+            <el-button size="mini" @click="handlePatientInfo(scope.row)">
+              病人资料</el-button
+            >
+          </template>
+        </el-table-column>
+      </el-table>
+      <!--                                            表格分页-->
+      <el-pagination
+        align="center"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :current-page="currentPage"
+        :page-sizes="[1, 5, 10, 20]"
+        :page-size="pageSize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="totalSize"
+      >
+      </el-pagination>
+      <!-- 随访信息 -->
       <el-dialog
-        :title="currentPatientName + '基本信息'"
-        :visible.sync="dialogFormVisible"
+        title="随访信息"
+        :visible.sync="dialogEditFormVisible"
         width="30%"
       >
-        <el-form :model="infoForm">
-          <el-form-item label="患者卡号" :label-width="formLabelWidth">
+        <el-form :model="followupForm">
+          <el-form-item label="患者ID" :label-width="formLabelWidth">
             <el-input
-              v-model="infoForm.patientId"
+              v-model="followupForm.patientId"
               autocomplete="off"
               disabled
             ></el-input>
           </el-form-item>
           <el-form-item label="患者姓名" :label-width="formLabelWidth">
             <el-input
-              v-model="infoForm.patientName"
+              v-model="followupForm.patientName"
               autocomplete="off"
-              disabled
             ></el-input>
           </el-form-item>
-          <el-form-item label="患者性别" :label-width="formLabelWidth">
-            <el-radio-group v-model="infoForm.gender" disabled>
-              <el-radio-button label="男性"></el-radio-button>
-              <el-radio-button label="女性"></el-radio-button>
+          <el-form-item label="计划随访日期" :label-width="formLabelWidth">
+            <el-input
+              v-model="followupForm.planVisitDate"
+              autocomplete="off"
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="随访计划" :label-width="formLabelWidth">
+            <el-input
+              v-model="followupForm.visitPlan"
+              autocomplete="off"
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="实际随访日期" :label-width="formLabelWidth">
+            <el-input
+              v-model="followupForm.visitDate"
+              autocomplete="off"
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="随访结果记录" :label-width="formLabelWidth">
+            <el-input
+              v-model="followupForm.visitContent"
+              autocomplete="off"
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="随访情况补充" :label-width="formLabelWidth">
+            <el-input
+              v-model="followupForm.visitRemark"
+              autocomplete="off"
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="是否完成随访" :label-width="formLabelWidth">
+            <el-radio-group
+              style="margin-left: 10px"
+              v-model="followupForm.visitResult"
+            >
+              <el-radio :label="0">未随访</el-radio>
+              <el-radio :label="1">已随访</el-radio>
+              <el-radio :label="-1">不再随访</el-radio>
             </el-radio-group>
           </el-form-item>
-          <el-form-item label="患者地址" :label-width="formLabelWidth">
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="dialogEditFormVisible = false">取 消</el-button>
+          <el-button type="primary" @click="submitEditFollowup()"
+            >确 定</el-button
+          >
+        </div>
+      </el-dialog>
+      <!-- 病人信息 -->
+      <el-dialog
+        title="病人基本信息"
+        :visible.sync="dialogFormVisible"
+        width="30%"
+      >
+        <el-form :model="infoForm">
+          <el-form-item label="患者ID" :label-width="formLabelWidth">
             <el-input
-              v-model="infoForm.address"
+              v-model="infoForm.id"
               autocomplete="off"
               disabled
             ></el-input>
+          </el-form-item>
+          <el-form-item label="患者姓名" :label-width="formLabelWidth">
+            <el-input v-model="infoForm.name" autocomplete="off"></el-input>
+          </el-form-item>
+          <el-form-item label="患者性别" :label-width="formLabelWidth">
+            <el-radio-group
+              style="margin-left: -200px"
+              v-model="infoForm.sexName"
+            >
+              <el-radio label="男">男</el-radio>
+              <el-radio label="女">女</el-radio>
+            </el-radio-group>
           </el-form-item>
           <el-form-item label="出生日期" :label-width="formLabelWidth">
-            <el-input
-              v-model="infoForm.birthday"
-              autocomplete="off"
-              disabled
-            ></el-input>
+            <el-input v-model="infoForm.birthday" autocomplete="off"></el-input>
           </el-form-item>
           <el-form-item label="患者电话" :label-width="formLabelWidth">
-            <el-input
-              v-model="infoForm.telephone"
-              autocomplete="off"
-              disabled
-            ></el-input>
-          </el-form-item>
-          <el-form-item label="患者单位" :label-width="formLabelWidth">
-            <el-input
-              v-model="infoForm.unit"
-              autocomplete="off"
-              placeholder="请输入患者单位"
-              disabled
-            ></el-input>
+            <el-input v-model="infoForm.phone" autocomplete="off"></el-input>
           </el-form-item>
           <el-form-item label="身份证号" :label-width="formLabelWidth">
-            <el-input
-              v-model="infoForm.idcard"
-              autocomplete="off"
-              disabled
-            ></el-input>
+            <el-input v-model="infoForm.idNumber" autocomplete="off"></el-input>
           </el-form-item>
         </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="dialogFormVisible = false">取 消</el-button>
+          <el-button type="primary" @click="submitEditPatient('form')"
+            >确 定</el-button
+          >
+        </div>
       </el-dialog>
       <!--                            新增随访          -->
       <el-dialog
-        :title="currentPatientName + '添加随访'"
-        :visible.sync="dialogFormVisibleFollowup"
+        title="添加随访"
+        :visible.sync="dialogAddFormVisible"
         width="30%"
       >
-        <el-form :model="addFollow">
-          <el-form-item label="预防计划" :label-width="formLabelWidth">
-            <el-select
-              v-model="addFollow.visitPlan"
-              placeholder="请选择随访类型"
-            >
-              <el-option label="计划随访" value="planned"></el-option>
-              <el-option label="非计划随访" value="Unplanned"></el-option>
-              <el-option label="定期随访" value="regular"></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="是否随访成功" :label-width="formLabelWidth">
-            <el-radio
-              v-model="addFollow.visitResult"
-              label="true"
-              @change="followupResultChange(addFollow)"
-              >是</el-radio
-            >
-            <el-radio
-              v-model="addFollow.visitResult"
-              label="false"
-              @change="followupResultChange(addFollow)"
-              >否</el-radio
-            >
-          </el-form-item>
-          <el-form-item
-            label="随访内容"
-            :label-width="formLabelWidth"
-            v-if="visitresult"
-          >
+        <el-form :model="addFollowForm">
+          <el-form-item label="患者ID" :label-width="formLabelWidth">
             <el-input
-              v-model="addFollow.visitContent"
+              v-model="addFollowForm.patientId"
               autocomplete="off"
             ></el-input>
           </el-form-item>
-          <div v-else>
-            <el-form-item label="随访未成功原因" :label-width="formLabelWidth">
-              <el-input
-                v-model="addFollow.visitRemark"
-                autocomplete="off"
-              ></el-input>
-            </el-form-item>
-            <el-form-item label="下次随访时间" :label-width="formLabelWidth">
-              <el-date-picker
-                v-model="addFollow.nextVisitDate"
-                type="date"
-                placeholder="选择日期"
-                :picker-options="pickerOptions"
-              >
-              </el-date-picker>
-            </el-form-item>
-          </div>
+          <el-form-item label="计划随访日期" :label-width="formLabelWidth">
+            <el-date-picker
+              style="float: left"
+              v-model="addFollowForm.planVisitDate"
+              align="left"
+              type="date"
+              placeholder="选择日期"
+              :picker-options="pickerOptions"
+            >
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item label="随访计划" :label-width="formLabelWidth">
+            <el-input
+              v-model="addFollowForm.visitPlan"
+              autocomplete="off"
+            ></el-input>
+          </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
-          <el-button @click="dialogFormVisibleFollowup = false"
-            >取 消</el-button
-          >
-          <el-button type="primary" @click="submitEditShortInfo('addFollow')"
+          <el-button @click="dialogAddFormVisible = false">取 消</el-button>
+          <el-button type="primary" @click="submitAddShortInfoForm()"
             >确 定</el-button
           >
         </div>
@@ -342,53 +256,59 @@
 
 <script>
 import Header from "../components/Header";
+import api from "@/api/apiManage";
 export default {
   name: "Followupvisit",
   components: { Header },
   inject: ["reload"],
   data() {
     return {
-      activeName: "first",
-      todayUndo: [{}],
-      todayUndoSelect: [],
-      todayUndoCurrentPage: 1,
-      todayUndoPageSize: 10,
-      overdue: [{}],
-      overdueSelect: [],
-      overdueCurrentPage: 1,
-      overduePageSize: 10,
-      undo: [{}],
-      undoSelect: [],
-      undoCurrentPage: 1,
-      undoPageSize: 10,
+      loading: false,
+      currentPage: 1,
+      pageSize: 10,
       search: "",
+      totalSize: 0,
+      checkList: ["全部未随访"],
       currentPatientName: "",
+      dialogFormVisible: false,
+      dialogEditFormVisible: false,
       infoForm: {
-        id: "",
-        patientName: "",
-        patientId: "",
+        id: "123",
+        name: "123",
+        sexName: "123",
+        birthday: "123",
+        phone: "123",
+        idNumber: "123",
+      },
+      followupForm: {
         gender: "",
-        birthday: "",
+        id: 0,
+        nextVisitDate: "",
+        patientId: "",
+        patientName: "",
+        planVisitDate: "",
         telephone: "",
-        address: "",
-        unit: "",
-        idcard: "",
+        visitContent: "",
+        visitDate: "",
+        visitPlan: "",
+        visitRemark: "",
+        visitResult: 0,
       },
       formLabelWidth: "120px",
       dialogFormVisible: false,
-      dialogFormVisibleFollowup: false,
-      addFollow: {
+      dialogAddFormVisible: false,
+      addFollowForm: {
         id: "",
-        caseId: "",
         patientId: "",
         planVisitDate: "",
         visitPlan: "",
         visitRemark: "",
-        visitResult: "true",
+        visitResult: "",
         visitDate: "",
         visitContent: "",
         nextVisitDate: "",
       },
+      tableData: [],
       visitresult: true,
       pickerOptions: {
         //          日期限制，只能选择今日以后的时间
@@ -399,167 +319,254 @@ export default {
     };
   },
   created() {
-    const _this = this;
-    //          超期的随访
-    _this.$axios
-      .get("/followup/Overdue", {
-        headers: {
-          Authorization: _this.$store.getters.getToken,
-        },
-      })
-      .then((res) => {
-        // console.log(res)
-        _this.overdue = res.data.data;
-        _this.overdueSelect = res.data.data;
-      });
-
-    //          今日的随访
-    _this.$axios
-      .get("/followup/todayUndo", {
-        headers: {
-          Authorization: _this.$store.getters.getToken,
-        },
-      })
-      .then((res) => {
-        // console.log(res)
-        _this.todayUndo = res.data.data;
-        _this.todayUndoSelect = res.data.data;
-      });
-
-    //          全部未完成的随访
-    _this.$axios
-      .get("/followup/Undo", {
-        headers: {
-          Authorization: _this.$store.getters.getToken,
-        },
-      })
-      .then((res) => {
-        // console.log(res)
-        _this.undo = res.data.data;
-        _this.undoSelect = res.data.data;
-      });
+    this.getData();
   },
   methods: {
+    searchByIdInput() {
+      let idObj = {
+        patientId: this.search,
+      };
+      this.loading = true;
+      api
+        .searchFollowup(idObj)
+        .then((res) => {
+          if (res.data.code == 200) {
+            this.tableData = res.data.data.records;
+            this.totalSize = this.tableData.length;
+          }
+        })
+        .catch((error) => {})
+        .finally(() => {
+          this.loading = false;
+        });
+    },
+    editFollowupInfo(row) {
+      let obj = {
+        patientId: row.patientId,
+      };
+      api.searchFollowup(obj).then((res) => {
+        if (res.data.code == 200) {
+          this.followupForm = res.data.data.records[0];
+        }
+      });
+      this.dialogEditFormVisible = true;
+    },
+    submitEditFollowup() {
+      this.dialogEditFormVisible = false;
+      const _this = this;
+      api.editFollowup(_this.followupForm).then((res) => {
+        if (res.data.code === 200) {
+          this.$message({
+            message: "编辑成功",
+            type: "success",
+          });
+        } else {
+          this.$message.error("编辑失败");
+        }
+      });
+    },
+    handlePatientInfo(row) {
+      api.getPatientById(row.patientId).then((res) => {
+        if (res.data.code == 200) {
+          this.infoForm = res.data.data;
+        }
+      });
+      this.dialogFormVisible = true;
+    },
+    submitEditPatient() {
+      this.dialogFormVisible = false;
+      const _this = this;
+      api.editPatient(_this.infoForm).then((res) => {
+        if (res.data.code === 200) {
+          this.$message({
+            message: "编辑成功",
+            type: "success",
+          });
+        } else {
+          this.$message.error("编辑失败");
+        }
+      });
+    },
+    getData() {
+      let yesterday = this.getYesterday(0);
+      let today = this.getNowTime(0);
+      let yesterdayObj = {
+        patientId: "",
+        dateStart: "",
+        dateEnd: yesterday,
+        visitResult: 0,
+        pageNo: this.currentPage,
+        pageSize: this.pageSize,
+      };
+      let todayObj = {
+        patientId: "",
+        dateStart: today,
+        dateEnd: today,
+        visitResult: 0,
+        pageNo: this.currentPage,
+        pageSize: this.pageSize,
+      };
+      let allObj = {
+        patientId: "",
+        dateStart: "",
+        dateEnd: "",
+        visitResult: 0,
+        pageNo: this.currentPage,
+        pageSize: this.pageSize,
+      };
+      this.loading = true;
+      if (this.checkList[0] === "今日未随访") {
+        api
+          .searchFollowup(todayObj)
+          .then((res) => {
+            if (res.data.code == 200) {
+              this.tableData = res.data.data.records;
+              this.totalSize = res.data.data.total;
+            }
+          })
+          .catch((error) => {})
+          .finally(() => {
+            this.loading = false;
+          });
+      } else if (this.checkList[0] === "超期未随访") {
+        api
+          .searchFollowup(yesterdayObj)
+          .then((res) => {
+            if (res.data.code == 200) {
+              this.tableData = res.data.data.records;
+              this.totalSize = res.data.data.total;
+            }
+          })
+          .catch((error) => {})
+          .finally(() => {
+            this.loading = false;
+          });
+      } else {
+        api
+          .searchFollowup(allObj)
+          .then((res) => {
+            if (res.data.code == 200) {
+              this.tableData = res.data.data.records;
+              this.totalSize = res.data.data.total;
+            }
+          })
+          .catch((error) => {})
+          .finally(() => {
+            this.loading = false;
+          });
+      }
+    },
+    filterChange() {
+      this.currentPage = 1;
+      this.pageSize = 10;
+      this.getData();
+    },
     handleClick(tab, event) {
       // console.log(tab, event);
     },
-    todayUndoDataSizeChange() {
-      this.todayUndoSelect = this.todayUndo.filter(
-        (data) =>
-          !this.search ||
-          data.patientId.toLowerCase().includes(this.search.toLowerCase()) ||
-          data.patientName.toLowerCase().includes(this.search.toLowerCase())
-      );
+
+    handleSizeChange(size) {
+      this.pageSize = size;
+      this.getData();
     },
-    handleTodayUndoSizeChange(val) {
-      // console.log(`每页 ${val} 条`);
-      this.todayUndoCurrentPage = 1;
-      this.todayUndoPageSize = val;
+    handleCurrentChange(page) {
+      this.currentPage = page;
+      this.getData();
     },
-    //当前页改变时触发 跳转其他页
-    handleTodayUndoCurrentChange(val) {
-      // console.log(`当前页: ${val}`);
-      this.todayUndoCurrentPage = val;
-    },
-    //
-    overdueDataSizeChange() {
-      this.overdueSelect = this.overdue.filter(
-        (data) =>
-          !this.search ||
-          data.patientId.toLowerCase().includes(this.search.toLowerCase()) ||
-          data.patientName.toLowerCase().includes(this.search.toLowerCase())
-      );
-    },
-    handleOverdueSizeChange(val) {
-      // console.log(`每页 ${val} 条`);
-      this.overdueCurrentPage = 1;
-      this.overduePageSize = val;
-    },
-    //当前页改变时触发 跳转其他页
-    handleOverdueCurrentChange(val) {
-      // console.log(`当前页: ${val}`);
-      this.overdueCurrentPage = val;
-    },
-    //
-    undoDataSizeChange() {
-      this.undoSelect = this.undo.filter(
-        (data) =>
-          !this.search ||
-          data.patientId.toLowerCase().includes(this.search.toLowerCase()) ||
-          data.patientName.toLowerCase().includes(this.search.toLowerCase())
-      );
-    },
-    handleUndoSizeChange(val) {
-      // console.log(`每页 ${val} 条`);
-      this.undoCurrentPage = 1;
-      this.undoPageSize = val;
-    },
-    //当前页改变时触发 跳转其他页
-    handleUndoCurrentChange(val) {
-      // console.log(`当前页: ${val}`);
-      this.undoCurrentPage = val;
-    },
-    patientInfo(index, row) {
-      const _this = this;
-      _this.$axios
-        .get("/patient/patientIndex/" + row.patientId, {
-          headers: {
-            Authorization: _this.$store.getters.getToken,
-          },
-        })
-        .then((res) => {
-          if (res.status === 200) {
-            _this.infoForm.id = res.data.data.id;
-            _this.infoForm.patientName = res.data.data.patientName;
-            _this.infoForm.patientId = res.data.data.patientId;
-            _this.infoForm.gender = res.data.data.gender;
-            _this.infoForm.birthday = res.data.data.birthday;
-            _this.infoForm.telephone = res.data.data.telephone;
-            _this.infoForm.address = res.data.data.address;
-            _this.infoForm.unit = res.data.data.unit;
-            _this.infoForm.idcard = res.data.data.idcard;
-            _this.dialogFormVisible = true;
-          }
-        });
-    },
-    patientPastCase(index, row) {
-      const _this = this;
-      _this.$router.push({
-        name: "PostCaseDetail",
-        params: { id: row.caseId },
-      });
-    },
-    submitEditShortInfo() {
-      console.log(this.addFollow);
-      const _this = this;
-      _this.$axios
-        .post("/followup/editFollowup/", _this.addFollow, {
-          headers: {
-            Authorization: _this.$store.getters.getToken,
-          },
-        })
-        .then((res) => {
-          console.log(res);
-          _this.dialogFormVisibleFollowup = false;
-          _this.reload();
-        });
-    },
+
     addFollowup(index, row) {
       const _this = this;
-      _this.addFollow.id = row.id;
-      _this.addFollow.caseId = row.caseId;
-      _this.dialogFormVisibleFollowup = true;
+      _this.dialogAddFormVisible = true;
+      Object.assign(this.$data.addFollowForm, this.$options.data().addFollowForm);
     },
-    followupResultChange(addFollow) {
-      const _this = this;
-      if (addFollow.visitResult == "true") {
-        _this.visitresult = true;
-        _this.addFollow.visitRemark = "";
-        _this.addFollow.nextVisitDate = "";
+    submitAddShortInfoForm() {
+      this.dialogFormVisible = false;
+      console.log(this.addFollowForm)
+      api.addFollowup(this.addFollowForm).then((res) => {
+        console.log(res)
+        if (res.data.code === 200) {
+          this.$message({
+            message: "添加成功",
+            type: "success",
+          });
+        }
+      }).catch((error) => {this.$message.error("添加失败");})
+          .finally(() => {
+          });
+    },
+
+    getNowTime(isAll) {
+      let now = new Date();
+      let year = now.getFullYear(); //获取完整的年份(4位,1970-????)
+      let month = now.getMonth() + 1; //获取当前月份(0-11,0代表1月)
+      let today = now.getDate(); //获取当前日(1-31)
+      let hour = now.getHours(); //获取当前小时数(0-23)
+      let minute = now.getMinutes(); //获取当前分钟数(0-59)
+      let second = now.getSeconds(); //获取当前秒数(0-59)
+      let nowTime = "";
+      //返回年月日时分秒
+      if (isAll) {
+        nowTime =
+          year +
+          "-" +
+          this.fillZero(month) +
+          "-" +
+          this.fillZero(today) +
+          " " +
+          this.fillZero(hour) +
+          ":" +
+          this.fillZero(minute) +
+          ":" +
+          this.fillZero(second);
       } else {
-        _this.visitresult = false;
-        _this.addFollow.visitContent = "";
+        //返回年月日
+        nowTime =
+          year + "-" + this.fillZero(month) + "-" + this.fillZero(today);
       }
+      return nowTime;
+    },
+    getYesterday(isAll) {
+      let nowDate = new Date();
+      let nowDay = nowDate.getDate();
+      // 实际获取昨天日期
+      let now = new Date(nowDate.setDate(nowDay - 1));
+      let year = now.getFullYear(); //获取完整的年份(4位,1970-????)
+      let month = now.getMonth() + 1; //获取当前月份(0-11,0代表1月)
+      let today = now.getDate(); //获取当前日(1-31)
+      let hour = now.getHours(); //获取当前小时数(0-23)
+      let minute = now.getMinutes(); //获取当前分钟数(0-59)
+      let second = now.getSeconds(); //获取当前秒数(0-59)
+      let nowTime = "";
+      //返回年月日时分秒
+      if (isAll) {
+        nowTime =
+          year +
+          "-" +
+          this.fillZero(month) +
+          "-" +
+          this.fillZero(today) +
+          " " +
+          this.fillZero(hour) +
+          ":" +
+          this.fillZero(minute) +
+          ":" +
+          this.fillZero(second);
+      } else {
+        //返回年月日
+        nowTime =
+          year + "-" + this.fillZero(month) + "-" + this.fillZero(today);
+      }
+      return nowTime;
+    },
+
+    fillZero(str) {
+      var realNum;
+      if (str < 10) {
+        realNum = "0" + str;
+      } else {
+        realNum = str;
+      }
+      return realNum;
     },
   },
 };
@@ -593,7 +600,7 @@ export default {
 }
 .el-main {
   /* display: flex(center, center, row); */
-  height: calc(100vh - 60px - 65px);
+  height: calc(100vh - 60px - 50px);
   width: 100%;
   margin-top: 50px;
   background-color: #e9eef3;
@@ -606,5 +613,24 @@ export default {
 }
 .el-tabs /deep/ .el-tabs__item {
   font-size: 18px;
+}
+
+.div-popover {
+  display: inline-block;
+}
+.el-checkbox__statusFirst {
+  display: block;
+  margin-bottom: 8px;
+}
+.el-checkbox__statusOthers {
+  display: block;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+.el-popover.popoverStyle {
+  min-width: 100px;
+}
+.el-popover.popoverStyle {
+  min-width: 100px;
 }
 </style>

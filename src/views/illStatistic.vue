@@ -5,7 +5,7 @@
         <Header active-index="/illStatistic"></Header>
       </el-header>
       <el-main>
-        <div ref="myChart1" id="aaaa" style="height: 1000px" />
+        <div ref="myChart1" v-loading="loading" style="height: 1000px;" />
       </el-main>
       <el-footer
         >爱尔眼科慢病管理系统( 推荐使用IE9+,Firefox、Chrome 浏览器访问
@@ -24,65 +24,59 @@ export default {
   inject: ["reload"],
   data() {
     return {
+      loading: false,
       abstractIllData: [
-        { value: 1548, name: "糖尿病性视网膜病变", selected: true },
-        { value: 775, name: "视网膜静脉阻塞" },
-        { value: 2876, name: "高度近视" },
-        // { value: 306, name: "青光眼" },
-        // { value: 256, name: "角膜溃疡" },
-        // { value: 423, name: "黄斑变性" },
-        // { value: 215, name: "白内障" },
-        // { value: 487, name: "干眼" },
       ],
       detailIllData: [
-        {
-          type: "糖尿病性视网膜病变",
-          data: [
-            { value: 1048, name: "1型糖尿病" },
-            { value: 100, name: "2型糖尿病" },
-            { value: 200, name: "1型糖尿病性视网膜病变" },
-            { value: 200, name: "2型糖尿病性视网膜病变" },
-          ],
-        },
-        {
-          type: "视网膜静脉阻塞",
-          data: [
-            { value: 130, name: "视网膜分支静脉阻塞" },
-            { value: 335, name: "视网膜中央静脉阻塞" },
-            { value: 310, name: "视网膜部分性静脉阻塞" },
-          ],
-        },
-        {
-          type: "高度近视",
-          data: [
-            { value: 1056, name: "高度近视" },
-            { value: 1220, name: "病理性近视" },
-            { value: 120, name: "黄斑劈裂" },
-            { value: 90, name: "黄斑出血" },
-            { value: 150, name: "变性近视" },
-            { value: 101, name: "黄斑玻璃体牵拉综合症" },
-            { value: 139, name: "脉络膜新生血管" },
-          ],
-        },
+        
       ],
     };
   },
   created() {
-    let obj = {
-      "beginTime": "",
-      "endTime": ""
-    }
-    let jsonString = JSON.stringify(obj);
-    api.getIllCount(jsonString).then((res) => {
-        console.log(res);
-        // if (res.data.code == 200) {
-        //   this.infoForm = res.data.data.records;
-        //   this.loading = false;
-        //   this.totalSize = res.data.data.total;
-        // }
-      });
+    // this.setCharts();
   },
   methods: {
+    getCountData() {
+      this.loading = true;
+      let obj = {};
+      api
+        .getIllCount(obj)
+        .then((res) => {
+          let abstractData = [];
+          let detailData = [];
+          if (res.data.code == 200) {
+            let allData = res.data.data;
+            allData.forEach((item, index) => {
+              let groupName = item.groupName;
+              let categorys = [];
+              abstractData.push({
+                name: groupName,
+                value: item.totalCount,
+              });
+              if (index == 0) {
+                abstractData[index].selected = true;
+              }
+              detailData.push({
+                type: groupName,
+              });
+              item.categoryCounts.forEach((detalItem) => {
+                categorys.push({
+                  name: detalItem.categoryName,
+                  value: detalItem.count,
+                });
+              });
+              detailData[index].data = categorys;
+            });
+            this.abstractIllData = abstractData;
+            this.detailIllData = detailData;
+            this.setCharts();
+          }
+        })
+        .catch((error) => {})
+        .finally(() => {
+          this.loading = false;
+        });
+    },
     setCharts() {
       let abstractIllData = this.abstractIllData;
       let detailIllData = this.detailIllData;
@@ -93,21 +87,21 @@ export default {
           trigger: "item",
           formatter: "{a} <br/>{b}: {c} ({d}%)",
         },
-        legend: {
-          data: [
-            "糖尿病性视网膜病变",
-            "视网膜静脉阻塞",
-            "高度近视",
-            // "青光眼",
-            // "角膜溃疡",
-            // "黄斑变性",
-            // "白内障",
-            // "干眼",
-          ],
-        },
+        // legend: {
+        //   data: [
+        //     "糖尿病性视网膜病变",
+        //     "视网膜静脉阻塞",
+        //     "高度近视",
+        //     "青光眼",
+        //     "角膜溃疡",
+        //     // "黄斑变性",
+        //     "白内障",
+        //     "干眼",
+        //   ],
+        // },
         series: [
           {
-            name: "概括分类",
+            name: "疾病组别",
             type: "pie",
             selectedMode: "single",
             radius: [0, "30%"],
@@ -167,7 +161,7 @@ export default {
           },
         ],
       };
-      myChart.on("click", { seriesName: "概括分类" }, function (event) {
+      myChart.on("click", { seriesName: "疾病组别" }, function (event) {
         detailIllData.forEach((element, index) => {
           if (element.type === event.name) newId = index;
         });
@@ -178,7 +172,7 @@ export default {
               data: detailIllData[newId].data,
             },
             {
-              name: "概括分类",
+              name: "疾病组别",
               data: abstractIllData,
             },
           ],
@@ -188,7 +182,7 @@ export default {
     },
   },
   mounted() {
-    this.setCharts();
+    this.getCountData();
   },
 };
 </script>
@@ -222,12 +216,11 @@ export default {
 
 .el-main {
   /* display: flex(center, center, row); */
-  height: calc(100vh - 60px - 65px);
+  height: calc(100vh - 60px - 50px);
   width: 100%;
   margin-top: 50px;
   background-color: #e9eef3;
   color: #333;
-
   text-align: center;
   /* height: 1000px; */
   /* overflow: hidden; */

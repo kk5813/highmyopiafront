@@ -28,6 +28,14 @@ export default {
     })
   },
 
+  searchUser(data) {
+    return request({
+      url: "/user/search",
+      method: 'post',
+      data
+    })
+  },
+
   findUserById(userId) {
     return request({
       url: "/user/find/" + userId,
@@ -94,6 +102,14 @@ export default {
     })
   },
 
+  editPatient(data) {
+    return request({
+      url: '/patients/edit',
+      method: 'get',
+      data
+    })
+  },
+
   exportPatients(data) {
     return request({
       url: '/patient/export',
@@ -138,7 +154,7 @@ export default {
   getIllCount(data) {
     return request({
       url: '/today/CategoryCount',
-      method: 'get',
+      method: 'post',
       data
     })
   },
@@ -165,8 +181,67 @@ export default {
   getCaseByCondition(data) {
     return request({
       url: '/element/search',
-      method: 'get',
+      method: 'post',
       data
+    })
+  },
+
+  getPatientCheckReport(patientId) {
+    return request({
+      url: '/check_reports/find/' + patientId,
+      method: 'get'
+    })
+  },
+
+  getTodayUndo() {
+    return request({
+      url: '/followup/todayUndo/',
+      method: 'get'
+    })
+  },
+
+  getOverdue() {
+    return request({
+      url: '/followup/overdue',
+      method: 'get'
+    })
+  },
+
+  getUndo() {
+    return request({
+      url: '/followup/undo/',
+      method: 'get'
+    })
+  },
+
+  editFollowup(data) {
+    return request({
+      url: '/followup/editFollowup',
+      method: 'post',
+      data
+    })
+  },
+
+  addFollowup(data) {
+    return request({
+      url: '/followup/addFollowup',
+      method: 'post',
+      data
+    })
+  },
+
+  searchFollowup(data) {
+    return request({
+      url: '/followup/search',
+      method: 'get',
+      params: data
+    })
+  },
+
+  getCheckResult(patienId) {
+    return request({
+      url: '/check_result/find/' + patienId,
+      method: 'get',
     })
   },
 }

@@ -54,12 +54,12 @@
                 </div>
                 <el-divider></el-divider>
                 <div class="cardFooter">
-                  <el-button
+                  <!-- <el-button
                     size="mini"
                     @click="handleEditCase()"
                     type="primary"
                     >修改</el-button
-                  >
+                  > -->
                 </div>
               </el-card>
             </el-timeline-item>
@@ -176,78 +176,46 @@
         </el-tab-pane>
         <el-tab-pane label="检验结果" name="labTest">
           <el-descriptions
-            :model="labData"
-            style="width: 1000px; height: 100"
+            v-for="(item, index) in labData"
+            :key="index"
+            style="width: 1000px;margin-top:20px;"
             title=""
             :column="1"
             border
           >
             <el-descriptions-item label="检验结果ID">{{
-              labData.id
+              item.id
             }}</el-descriptions-item>
             <el-descriptions-item label="患者姓名">{{
-              labData.patientName
+              item.patientName
             }}</el-descriptions-item>
             <el-descriptions-item label="是否危急">{{
-              labData.isUrgent
+              item.isUrgent
             }}</el-descriptions-item>
             <el-descriptions-item label="检验报告名称">{{
-              labData.reportName
+              item.reportName
             }}</el-descriptions-item>
             <el-descriptions-item label="检验项目">{{
-              labData.labItemName
+              item.labItemName
             }}</el-descriptions-item>
             <el-descriptions-item label="参考范围">{{
-              labData.refRange
+              item.refRange
             }}</el-descriptions-item>
             <el-descriptions-item label="实际值">{{
-              labData.labFinalValue
+              item.labFinalValue
             }}</el-descriptions-item>
             <el-descriptions-item label="检验结果单位名称">{{
-              labData.labResultUnitName
+              item.labResultUnitName
             }}</el-descriptions-item>
             <el-descriptions-item label="审核日期">{{
-              labData.auditDate
+              item.auditDate
             }}</el-descriptions-item>
           </el-descriptions>
         </el-tab-pane>
         <el-tab-pane label="扫描激光眼底检查" name="fourth"> </el-tab-pane>
         <el-tab-pane label="光学相干断层OCT" name="fifth"> </el-tab-pane>
         <el-tab-pane label="欧宝图" name="sixth"> </el-tab-pane>
-        <el-tab-pane label="诊疗意见" name="advice">
-          <!-- <el-form class="diagnosis-result">
-            <el-form-item label="诊断结论">
-              <el-input v-model="caseData.diagnosis" disabled></el-input>
-            </el-form-item>
-            <el-form-item label="治疗建议" placeholder="暂无">
-              <el-input v-model="caseData.recommend" disabled></el-input>
-            </el-form-item>
-            <el-form-item label="就诊时间">
-              {{ caseData.checktime }}
-            </el-form-item>
-            <el-form-item label="就诊医生">
-              <el-select v-model="value" filterable placeholder="暂无" disabled>
-                <el-option
-                  v-for="item in options"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                >
-                </el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="复诊计划">
-              <el-select v-model="caseData.plan" placeholder="暂无" disabled>
-                <el-option label="一周" value="7"></el-option>
-                <el-option label="两周" value="14"></el-option>
-                <el-option label="一月" value="30"></el-option>
-                <el-option label="三月" value="90"></el-option>
-                <el-option label="半年" value="180"></el-option>
-                <el-option label="一年" value="365"></el-option>
-              </el-select>
-            </el-form-item>
-          </el-form> -->
-        </el-tab-pane>
+        <el-tab-pane label="共焦激光显微镜检查" name="confocal"> </el-tab-pane>
       </el-tabs>
       <!-- v-for="item in iolmaster" -->
       <div v-show="activeName == 'third'">
@@ -397,23 +365,49 @@ export default {
       opt: [],
       oct: [],
       optimg: "",
-      labData: {
-        patientName: "杨奇韵",
-        isUrgent: 0,
-        labItemName: "乙肝E抗体",
-        reportName:
-          "乙肝五项（定量分析法）+丙肝抗体发光法+HIV抗体检查+梅毒抗体发光法",
-        patientId: 1796786711460069400,
-        labItemCode: "Anti-HBe",
-        refRange: "0-0.5",
-        labResultSignName: null,
-        labFinalValue: "0.01",
-        visitingNo: "MZ202406010634",
-        sexName: "男",
-        patientBrithday: "1986-03-27 00:00:00",
-        labResultUnitName: "S/CO",
-        id: 1799240480341352400,
-        auditDate: "2024-08-08 10:54:18",
+      labData: [
+        {
+          patientName: "杨奇韵",
+          isUrgent: 0,
+          labItemName: "乙肝E抗体",
+          reportName:
+            "乙肝五项（定量分析法）+丙肝抗体发光法+HIV抗体检查+梅毒抗体发光法",
+          patientId: 1796786711460069400,
+          labItemCode: "Anti-HBe",
+          refRange: "0-0.5",
+          labResultSignName: null,
+          labFinalValue: "0.01",
+          visitingNo: "MZ202406010634",
+          sexName: "男",
+          patientBrithday: "1986-03-27 00:00:00",
+          labResultUnitName: "S/CO",
+          id: 1799240480341352400,
+          auditDate: "2024-08-08 10:54:18",
+        },
+        {
+          patientName: "杨奇韵",
+          isUrgent: 0,
+          labItemName: "乙肝E抗体",
+          reportName:
+            "乙肝五项（定量分析法）+丙肝抗体发光法+HIV抗体检查+梅毒抗体发光法",
+          patientId: 1796786711460069400,
+          labItemCode: "Anti-HBe",
+          refRange: "0-0.5",
+          labResultSignName: null,
+          labFinalValue: "0.01",
+          visitingNo: "MZ202406010634",
+          sexName: "男",
+          patientBrithday: "1986-03-27 00:00:00",
+          labResultUnitName: "S/CO",
+          id: 1799240480341352400,
+          auditDate: "2024-08-08 10:54:18",
+        },
+      ],
+      diagnosisData: {
+        diagnosis: "",
+        recommend: "",
+        checktime: "",
+        plan: "",
       },
       pdfUrl: "/img/PDF/IOL-Haigis_408.pdf",
     };
@@ -422,13 +416,25 @@ export default {
     handleClick(tab, event) {
       // console.log(tab, event);
     },
+    getLabData(){
+      api.getCheckResult("1796786711460069377").then((res) => {
+        console.log(res)
+        if(res.data.code == 200) {
+          let data = res.data.data
+          data.forEach((item,index) => {
+            data[index].patientName = 'sss'
+          })
+          this.labData = data
+        }
+      });
+    },
     toggleBody(isPin) {
       if (isPin) {
-        document.body.style.height = '100vh'
-        document.body.style['overflow-y'] = 'hidden'
+        document.body.style.height = "100vh";
+        document.body.style["overflow-y"] = "hidden";
       } else {
-        document.body.style.height = 'unset'
-        document.body.style['overflow-y'] = 'auto'
+        document.body.style.height = "unset";
+        document.body.style["overflow-y"] = "auto";
       }
     },
 
@@ -458,7 +464,7 @@ export default {
         patientName: "",
         patientId: "1809970417345019907",
       };
-      console.log(obj)
+      console.log(obj);
       api.getCaseByCondition(obj).then((res) => {
         console.log(res);
         // if (res.data.code == 200) {
@@ -470,8 +476,17 @@ export default {
     },
   },
   created() {
+    api.getPatientCheckReport("1").then((res) => {
+      console.log(res);
+      // if (res.data.code == 200) {
+      //   this.infoForm = res.data.data.records;
+      //   this.loading = false;
+      //   this.totalSize = res.data.data.total;
+      // }
+    });
     this.visitNumber = this.$route.params.id;
     this.getHistoryCase();
+    this.getLabData()
   },
 };
 </script>
@@ -585,6 +600,4 @@ export default {
   height: 260px;
   overflow: auto;
 }
-
-
 </style>
