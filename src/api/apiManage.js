@@ -74,7 +74,7 @@ export default {
   getPatientById(patientId) {
     return request({
       url: '/patients/find/' + patientId,
-      method: 'get'
+      method: 'get',
     })
   },
 
@@ -105,7 +105,7 @@ export default {
   editPatient(data) {
     return request({
       url: '/patients/edit',
-      method: 'get',
+      method: 'post',
       data
     })
   },
@@ -159,15 +159,18 @@ export default {
     })
   },
 
-  getVisitList(pageSize,pageNumber,diagName) {
+  getVisitList(data) {
     return request({
-      url: '/visits/page',
+      url: '/visits/page/',
       method: 'get',
-      params: {
-        pageSize,
-        pageNumber,
-        diagName
-      },
+      params: data,
+    })
+  },
+
+  getVisitById(patientId) {
+    return request({
+      url: '/visits/find/' + patientId,
+      method: 'get'
     })
   },
 
@@ -242,6 +245,14 @@ export default {
     return request({
       url: '/check_result/find/' + patienId,
       method: 'get',
+    })
+  },
+
+  getCaseTimeline(data) {
+    return request({
+      url: '/patients/element_time_line',
+      method: 'get',
+      params: data
     })
   },
 }

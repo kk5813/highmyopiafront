@@ -6,7 +6,8 @@
         <Header active-index="/Main"></Header>
       </el-header>
       <el-main>
-        <el-table :data="tableData" style="width: 100%" v-loading="loading">
+        <div class="tableContainer" style="padding-bottom: 10px;border-radius: 20px;background:white;margin-top: 10px;box-shadow:  8px 20px 30px 8px rgba(21,60,204,0.09);">
+          <el-table border :data="tableData" style="background: #e9eef3;width: 100%;border-radius: 20px;" v-loading="loading">
           <el-table-column width="90" label="用户ID" prop="userId">
           </el-table-column>
           <el-table-column label="登录账号" prop="userLoginName">
@@ -32,7 +33,7 @@
               >
               <!-- v-on:input="dataSizeChange()" -->
               <el-input
-                @keyup.enter.native="searchById()"
+                @keyup.enter.native="searchByLoginName()"
                 v-model="search"
                 size="medium"
                 style="width: 250px"
@@ -56,6 +57,7 @@
         </el-table>
         <!--                                表格分页-->
         <el-pagination
+          style="margin-top: 10px;"
           align="center"
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
@@ -66,6 +68,8 @@
           :total="totalSize"
         >
         </el-pagination>
+        </div>
+        
         <!--                添加用户的弹出对话框-->
         <el-dialog
           title="添加用户"
@@ -262,7 +266,14 @@ export default {
       this.getUserTableData();
     },
     //          搜索功能
-    searchById() {
+    searchByLoginName() {
+      if(!this.search){
+        this.$message({
+              message: "搜索信息不能为空！",
+              type: "danger",
+            });
+        return
+      }
       let obj = {
         userLoginName: this.search,
       };
@@ -405,7 +416,11 @@ export default {
   /* overflow: hidden; */
   overflow: auto;
 }
-.el-table /deep/ .success-row {
-  background: #f0f9eb;
+
+::v-deep .el-table th,
+::v-deep .el-table tr,
+::v-deep .el-table td {
+  
 }
+
 </style>

@@ -4,9 +4,9 @@
       <Header active-index=""></Header>
     </el-header>
     <el-main>
-      <el-page-header @back="goBack" :content="'test' + '的病历详情'">
+      <el-page-header @back="goBack" :content="patientName + '的病历详情'">
       </el-page-header>
-      <el-tabs v-model="activeName" @tab-click="handleClick">
+      <el-tabs v-model="activeName">
         <el-tab-pane label="门诊病历" name="second" style="float: left">
           <el-timeline>
             <el-timeline-item
@@ -14,11 +14,11 @@
               color="#409EFF"
               v-for="caseData in caseDataList"
               :key="caseData.patiendId"
-              :timestamp="caseData.date"
+              :timestamp="caseData.diagTime"
             >
               <el-card
                 :id="caseData.patiendId"
-                style="margin: 5px 5px 0px 0px; width: 600px"
+                style="margin: 5px 5px 0px 0px; width: 800px"
               >
                 <div slot="header" class="header">
                   <span style="">{{ caseData.name }}</span>
@@ -27,7 +27,7 @@
                 <div class="content">
                   <el-descriptions :column="1">
                     <el-descriptions-item label="视力">{{
-                      caseData.eye
+                      caseData.eyeSummary
                     }}</el-descriptions-item>
                     <el-descriptions-item label="主述">{{
                       caseData.mainAppeal
@@ -47,20 +47,16 @@
                     <el-descriptions-item label="体格检查">{{
                       caseData.physicalExam
                     }}</el-descriptions-item>
+                    <el-descriptions-item label="诊断">{{
+                      caseData.diagName
+                    }}</el-descriptions-item>
                     <el-descriptions-item label="处理意见">{{
                       caseData.dispose
                     }}</el-descriptions-item>
                   </el-descriptions>
                 </div>
                 <el-divider></el-divider>
-                <div class="cardFooter">
-                  <!-- <el-button
-                    size="mini"
-                    @click="handleEditCase()"
-                    type="primary"
-                    >修改</el-button
-                  > -->
-                </div>
+                <div class="cardFooter"></div>
               </el-card>
             </el-timeline-item>
           </el-timeline>
@@ -159,8 +155,8 @@
             >确认修改</el-button
           > -->
         </el-tab-pane>
-        <el-tab-pane label="IOL Master" name="third">
-          <!-- <el-form :model="caseData">
+        <!-- <el-tab-pane label="IOL Master" name="third"> -->
+        <!-- <el-form :model="caseData">
                         <el-form-item label="左眼眼轴" :label-width="formLabelWidth">
                             <el-row :gutter="20">
                                 <el-col :span="8">
@@ -173,12 +169,12 @@
                             </el-row>
                         </el-form-item>
                     </el-form> -->
-        </el-tab-pane>
+        <!-- </el-tab-pane> -->
         <el-tab-pane label="检验结果" name="labTest">
           <el-descriptions
             v-for="(item, index) in labData"
             :key="index"
-            style="width: 1000px;margin-top:20px;"
+            style="width: 1000px; margin-top: 20px"
             title=""
             :column="1"
             border
@@ -212,58 +208,26 @@
             }}</el-descriptions-item>
           </el-descriptions>
         </el-tab-pane>
-        <el-tab-pane label="扫描激光眼底检查" name="fourth"> </el-tab-pane>
-        <el-tab-pane label="光学相干断层OCT" name="fifth"> </el-tab-pane>
-        <el-tab-pane label="欧宝图" name="sixth"> </el-tab-pane>
-        <el-tab-pane label="共焦激光显微镜检查" name="confocal"> </el-tab-pane>
+        <el-tab-pane label="检查资料" name="fourth">
+          <el-table :data="pdfDataList" style="width: 60%">
+            <el-table-column
+              prop="name"
+              label="名称"
+              width="180"
+            ></el-table-column>
+            <el-table-column prop="url" label="图像资料" width="180">
+              <template #default="scope">
+                <el-image
+                  style="width: 100px; height: 100px"
+                  src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
+                  :preview-src-list="scope.row.url"
+                >
+                </el-image>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
       </el-tabs>
-      <!-- v-for="item in iolmaster" -->
-      <div v-show="activeName == 'third'">
-        <pdf
-          class="case-pdf"
-          style="width: 600px; height: 700px; margin-top: 0; margin-left: 500px"
-          ref="pdf"
-          :src="pdfUrl"
-        >
-        </pdf>
-      </div>
-      <div class="opt-img">
-        <div v-show="activeName == 'fourth'" v-for="item in opt">
-          <div @click="onPreview(item)" v-if="item.type === 'JPG'">
-            <img class="case-img" :src="item.localpath" alt="" />
-          </div>
-        </div>
-      </div>
-      <el-image-viewer
-        v-if="showViewer"
-        :on-close="closeViewer"
-        :url-list="[optimg]"
-      />
-      <div
-        style="margin-bottom: 30px"
-        v-show="activeName == 'fifth'"
-        v-for="item in oct"
-      >
-        <pdf
-          style="width: 300px; height: 60%; margin-top: 0px; margin-left: 500px"
-          ref="pdf"
-          :src="item.localpath"
-        >
-        </pdf>
-      </div>
-      <div v-show="activeName == 'sixth'" v-for="item in opt">
-        <pdf
-          style="
-            width: 900px;
-            height: 120%;
-            margin-top: 0px;
-            margin-left: 500px;
-          "
-          ref="pdf"
-          :src="item.localpath"
-        >
-        </pdf>
-      </div>
     </el-main>
     <el-footer
       >爱尔眼科慢病管理系统( 推荐使用IE9+,Firefox、Chrome 浏览器访问
@@ -285,6 +249,8 @@ export default {
       showViewer: false,
       activeName: "second",
       id: "",
+      patientId: "",
+      patientName: "",
       dialogEditFormVisible: false,
       editCase: {
         patientId: 1,
@@ -336,18 +302,27 @@ export default {
           date: "2020-02-02",
         },
       ],
-      options: [
+      pdfDataList: [
         {
-          value: "选项1",
-          label: "秦小林",
+          name: "选项1",
+          url: [
+            "https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg",
+            "https://fuss10.elemecdn.com/1/8e/aeffeb4de74e2fde4bd74fc7b4486jpeg.jpeg",
+          ],
         },
         {
-          value: "选项2",
-          label: "胡建斌",
+          name: "选项2",
+          url: [
+            "https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg",
+            "https://fuss10.elemecdn.com/1/8e/aeffeb4de74e2fde4bd74fc7b4486jpeg.jpeg",
+          ],
         },
         {
-          value: "选项3",
-          label: "王杰",
+          name: "选项3",
+          url: [
+            "https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg",
+            "https://fuss10.elemecdn.com/1/8e/aeffeb4de74e2fde4bd74fc7b4486jpeg.jpeg",
+          ],
         },
       ],
       value: "",
@@ -412,19 +387,29 @@ export default {
       pdfUrl: "/img/PDF/IOL-Haigis_408.pdf",
     };
   },
+  created() {
+    this.patientId = this.$route.params.id;
+    this.patientName = this.$route.params.patientName;
+    api.getPatientCheckReport("1858391994866434050").then((res) => {
+      console.log(res);
+      // if (res.data.code == 200) {
+      //   this.infoForm = res.data.data.records;
+      //   this.loading = false;
+      //   this.totalSize = res.data.data.total;
+      // }
+    });
+    this.getHistoryCase();
+    this.getLabData();
+  },
   methods: {
-    handleClick(tab, event) {
-      // console.log(tab, event);
-    },
-    getLabData(){
+    getLabData() {
       api.getCheckResult("1796786711460069377").then((res) => {
-        console.log(res)
-        if(res.data.code == 200) {
-          let data = res.data.data
-          data.forEach((item,index) => {
-            data[index].patientName = 'sss'
-          })
-          this.labData = data
+        if (res.data.code == 200) {
+          let data = res.data.data;
+          data.forEach((item, index) => {
+            data[index].patientName = this.patientName;
+          });
+          this.labData = data;
         }
       });
     },
@@ -436,13 +421,6 @@ export default {
         document.body.style.height = "unset";
         document.body.style["overflow-y"] = "auto";
       }
-    },
-
-    handleEditCase() {
-      this.dialogEditFormVisible = true;
-    },
-    editPatientInfo() {
-      console.log(this.infoForm);
     },
     goBack() {
       this.$router.go(-1);
@@ -456,37 +434,39 @@ export default {
     closeViewer() {
       this.showViewer = false;
     },
-
     getHistoryCase() {
       let obj = {
         dataEnd: "",
         dataStart: "",
         patientName: "",
-        patientId: "1809970417345019907",
+        patientId: this.patientId,
       };
-      console.log(obj);
-      api.getCaseByCondition(obj).then((res) => {
+      api.getCaseTimeline(obj).then((res) => {
         console.log(res);
-        // if (res.data.code == 200) {
-        //   this.infoForm = res.data.data.records;
-        //   this.loading = false;
-        //   this.totalSize = res.data.data.total;
-        // }
+        if (res.data.code == 200) {
+          let cases = res.data.data.records;
+          cases.forEach((item, index) => {
+            cases[index].eyeSummary =
+              "左/右眼眼压：(" +
+              item.iopOs +
+              "/" +
+              item.iopOd +
+              ")  |  " +
+              "左/右眼裸眼视力：(" +
+              item.scdOsValue +
+              "/" +
+              item.scdOdValue +
+              ")  |  " +
+              "左/右眼矫正视力：(" +
+              item.ccdOsValue +
+              "/" +
+              item.ccdOdValue +
+              ")  ";
+          });
+          this.caseDataList = cases;
+        }
       });
     },
-  },
-  created() {
-    api.getPatientCheckReport("1").then((res) => {
-      console.log(res);
-      // if (res.data.code == 200) {
-      //   this.infoForm = res.data.data.records;
-      //   this.loading = false;
-      //   this.totalSize = res.data.data.total;
-      // }
-    });
-    this.visitNumber = this.$route.params.id;
-    this.getHistoryCase();
-    this.getLabData()
   },
 };
 </script>

@@ -5,56 +5,75 @@
         <Header active-index="/patientmanagement"></Header>
       </el-header>
       <el-main>
-        <!--                            患者档案表格-->
-        <el-table :data="tableData" style="width: 100%" v-loading="loading">
-          <el-table-column label="就诊号" prop="visitNumber"> </el-table-column>
-          <el-table-column
-            label="患者姓名"
-            prop="patientName"
-          ></el-table-column>
-          <el-table-column label="诊断" prop="diagName"> </el-table-column>
-          <el-table-column label="诊断时间" prop="diagTime"> </el-table-column>
-          <el-table-column label="眼别" prop="siteName"> </el-table-column>
-          <el-table-column label="科室" prop="deptName"> </el-table-column>
-          <el-table-column width="400 px" align="right">
-            <template slot="header" slot-scope="scope">
-              <el-input
-                v-on:input="dataSizeChange()"
-                v-model="search"
-                size="medium"
-                placeholder="输入关键字搜索"
-              />
-            </template>
-            <template slot-scope="scope" class="table-operate">
-              <el-button
-                size="mini"
-                @click="patientInfo(scope.$index, scope.row)"
-                type="primary"
-                plain
-              >
-                基本信息</el-button
-              >
-              <el-button
-                size="mini"
-                type="success"
-                @click="toCaseDetail(scope.row)"
-                >详细病历</el-button
-              >
-            </template>
-          </el-table-column>
-        </el-table>
-        <!--                                            表格分页-->
-        <el-pagination
-          align="center"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-          :current-page="currentPage"
-          :page-sizes="[1, 5, 10, 20]"
-          :page-size="pageSize"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="totalSize"
+        <div
+          class="tableContainer"
+          style="
+            padding-bottom: 10px;
+            border-radius: 20px;
+            background: white;
+            margin-top: 10px;
+            box-shadow: 8px 20px 30px 8px rgba(21, 60, 204, 0.09);
+          "
         >
-        </el-pagination>
+          <!--                            患者档案表格-->
+          <el-table
+            :data="tableData"
+            border
+            style="background: #e9eef3; width: 100%; border-radius: 20px"
+            v-loading="loading"
+          >
+            <el-table-column label="就诊号" prop="visitNumber">
+            </el-table-column>
+            <el-table-column
+              label="患者姓名"
+              prop="patientName"
+            ></el-table-column>
+            <el-table-column label="诊断" prop="diagName"> </el-table-column>
+            <el-table-column label="诊断时间" prop="diagTime">
+            </el-table-column>
+            <el-table-column label="眼别" prop="siteName"> </el-table-column>
+            <el-table-column label="科室" prop="deptName"> </el-table-column>
+            <el-table-column width="400 px" align="right">
+              <template slot="header" slot-scope="scope">
+                <el-input
+                  v-model="search"
+                  @keyup.enter.native="searchByInput()"
+                  size="medium"
+                  placeholder="请输入患者ID或诊断名称,按下回车搜索"
+                />
+              </template>
+              <template slot-scope="scope" class="table-operate">
+                <el-button
+                  size="mini"
+                  @click="patientInfo(scope.$index, scope.row)"
+                  type="primary"
+                  plain
+                >
+                  基本信息</el-button
+                >
+                <el-button
+                  size="mini"
+                  type="success"
+                  @click="toCaseDetail(scope.row)"
+                  >详细病历</el-button
+                >
+              </template>
+            </el-table-column>
+          </el-table>
+          <!--                                            表格分页-->
+          <el-pagination
+            style="margin-top: 10px"
+            align="center"
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="currentPage"
+            :page-sizes="[1, 5, 10, 20]"
+            :page-size="pageSize"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="totalSize"
+          >
+          </el-pagination>
+        </div>
         <!--                                            患者信息编辑-->
         <el-dialog
           :title="currentPatientName + '基本信息'"
@@ -116,6 +135,7 @@
 <script>
 import Header from "../components/Header";
 import api from "@/api/apiManage";
+import request from '@/axios'
 export default {
   name: "PatientManagement",
   components: { Header },
@@ -144,27 +164,56 @@ export default {
       //      患者过往病历
       caseData: [{}],
       dialogFormVisible: false,
-      dialogFormVisibleShortInfo: false,
-      dialogFormVisiblePastCase: false,
       currentPatientName: "",
     };
   },
   created() {
     // this.getPatientData()
-    
   },
   methods: {
+    searchByInput() {
+      const _this = this
+      this.loading = true;
+      this.currentPage = 1;
+      this.pageSize = 10;
+      let obj = {
+        pageNumber: this.currentPage,
+        pageSize: this.pageSize,
+        diagName: this.search,
+      };
+      _this.$axios
+        .all([
+          request("/visits/page", { method: 'get',params: obj }),
+          request("/visits/find/" + this.search,{ method: 'get'}),
+        ])
+        .then(
+          // diagResp.data.data.records
+          //     ? diagResp.data.data.records
+          //     : 
+          this.$axios.spread(function (diagResp, idResp) {
+            console.log(diagResp, idResp)
+            _this.tableData = idResp.data.data;
+            _this.totalSize = _this.tableData.length;
+          })
+        )
+        .catch((error) => {})
+        .finally(() => {
+          this.loading = false;
+        });
+    },
     handleSelect(key, keyPath) {
       console.log(key, keyPath);
     },
     toCaseDetail(row) {
       this.$router.push({
         name: "PostCaseDetail",
-        params: { id: row.visitNumber },
+        params: { id: row.patientId, name: row.patientName },
       });
     },
     //          患者基本信息
     patientInfo(index, row) {
+      // row.patientId
+      // row.patientId = '1797070219990548481'
       api.getPatientById(row.patientId).then((res) => {
         if (res.data.code == 200) {
           this.infoForm = res.data.data;
@@ -186,11 +235,16 @@ export default {
     getPatientData() {
       const _this = this;
       this.loading = true;
+      let obj = {
+        pageNumber: this.currentPage,
+        pageSize: this.pageSize,
+        diagName: "",
+      };
       api
-        .getVisitList(this.pageSize, this.currentPage, this.search)
+        .getVisitList(obj)
         .then((res) => {
-          console.log(res)
           if (res.data.code == 200) {
+            console.log(res)
             this.tableData = res.data.data.records;
             this.totalSize = res.data.data.total;
           }
@@ -200,35 +254,20 @@ export default {
           this.loading = false;
         });
     },
-    dataSizeChange() {
-      this.dataSelect = this.tableData.filter(
-        (data) =>
-          !this.search ||
-          (data.patientId &&
-            data.patientId.toLowerCase().includes(this.search.toLowerCase())) ||
-          (data.patientName &&
-            data.patientName
-              .toLowerCase()
-              .includes(this.search.toLowerCase())) ||
-          (data.telephone &&
-            data.telephone.toLowerCase().includes(this.search.toLowerCase()))
-      );
-    },
     //          编辑患者基本信息
     submitEditPatient() {
       this.dialogFormVisible = false;
       const _this = this;
-      api.editPatient(_this.infoForm)
-        .then((res) => {
-          if (res.data.code === 200) {
-            this.$message({
-              message: "编辑成功",
-              type: "success",
-            });
-          } else {
-            this.$message.error("编辑失败");
-          }
-        });
+      api.editPatient(_this.infoForm).then((res) => {
+        if (res.data.code === 200) {
+          this.$message({
+            message: "编辑成功",
+            type: "success",
+          });
+        } else {
+          this.$message.error("编辑失败");
+        }
+      });
     },
   },
   mounted() {
@@ -275,5 +314,24 @@ export default {
   /* height: 1000px; */
   /* overflow: hidden; */
   overflow: auto;
+}
+
+.div-popover {
+  display: inline-block;
+}
+.el-checkbox__statusFirst {
+  display: block;
+  margin-bottom: 8px;
+}
+.el-checkbox__statusOthers {
+  display: block;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+.el-popover.popoverStyle {
+  min-width: 100px;
+}
+.el-popover.popoverStyle {
+  min-width: 100px;
 }
 </style>

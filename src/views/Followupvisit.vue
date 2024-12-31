@@ -4,99 +4,114 @@
       <Header active-index="/Followupvisit"></Header>
     </el-header>
     <el-main>
-      <el-table :data="tableData" style="width: 100%" v-loading="loading">
-        <!-- .slice((currentPage - 1) * pageSize, currentPage * pageSize) -->
-        <el-table-column label="患者卡号" prop="patientId"> </el-table-column>
-        <el-table-column label="患者姓名" prop="patientName"> </el-table-column>
-        <el-table-column label="手机号" prop="telephone"> </el-table-column>
-        <el-table-column label="计划随访时间" prop="planVisitDate">
-          <template slot="header" slot-scope="scope">
-            <el-popover
-              ref="popover"
-              placement="bottom"
-              trigger="click"
-              popper-class="popoverStyle"
-            >
-              <div slot="reference" class="div-popover">
-                计划随访时间<i class="el-icon-arrow-down" />
-              </div>
-              <el-checkbox-group
-                :max="1"
-                v-model="checkList"
-                style="width: 80px"
-              >
-                <el-checkbox label="全部未随访" class="el-checkbox__statusFirst"
-                  >全部未随访</el-checkbox
-                >
-                <el-checkbox
-                  label="今日未随访"
-                  class="el-checkbox__statusOthers"
-                  >今日未随访</el-checkbox
-                >
-                <el-checkbox
-                  label="超期未随访"
-                  class="el-checkbox__statusOthers"
-                  >超期未随访</el-checkbox
-                >
-              </el-checkbox-group>
-              <el-row :gutter="1">
-                <el-col :span="12">
-                  <el-link
-                    :underline="false"
-                    type="primary"
-                    :disabled="checkList.length == 0"
-                    @click="filterChange"
-                    >筛选</el-link
-                  >
-                </el-col>
-              </el-row>
-            </el-popover>
-          </template>
-        </el-table-column>
-        <el-table-column width="400 px" align="right">
-          <template slot="header" slot-scope="scope">
-            <el-button
-              size="medium"
-              type="success"
-              style="margin-right: 10px"
-              @click="addFollowup(scope.$index, scope.row)"
-              >新增随访</el-button
-            >
-            <el-input
-              @keyup.enter.native="searchByIdInput()"
-              v-model="search"
-              size="medium"
-              placeholder="输入患者ID回车搜索"
-              style="width: 200px"
-            />
-          </template>
-          <template slot-scope="scope" class="table-operate">
-            <el-button
-              size="mini"
-              @click="editFollowupInfo(scope.row)"
-              type="primary"
-              plain
-            >
-              随访信息</el-button
-            >
-            <el-button size="mini" @click="handlePatientInfo(scope.row)">
-              病人资料</el-button
-            >
-          </template>
-        </el-table-column>
-      </el-table>
-      <!--                                            表格分页-->
-      <el-pagination
-        align="center"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        :current-page="currentPage"
-        :page-sizes="[1, 5, 10, 20]"
-        :page-size="pageSize"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="totalSize"
+      <div
+        class="tableContainer"
+        style="
+          padding-bottom: 10px;
+          border-radius: 20px;
+          background: white;
+          margin-top: 10px;
+          box-shadow: 8px 20px 30px 8px rgba(21, 60, 204, 0.09);
+        "
       >
-      </el-pagination>
+        <el-table :data="tableData" border style="background: #e9eef3;width: 100%;border-radius: 20px;" v-loading="loading">
+          <!-- .slice((currentPage - 1) * pageSize, currentPage * pageSize) -->
+          <el-table-column label="患者ID" prop="patientId"> </el-table-column>
+          <el-table-column label="患者姓名" prop="patientName">
+          </el-table-column>
+          <el-table-column label="手机号" prop="telephone"> </el-table-column>
+          <el-table-column label="计划随访时间" prop="planVisitDate">
+            <template slot="header" slot-scope="scope">
+              <el-popover
+                ref="popover"
+                placement="bottom"
+                trigger="click"
+                popper-class="popoverStyle"
+              >
+                <div slot="reference" class="div-popover">
+                  计划随访时间<i class="el-icon-arrow-down" />
+                </div>
+                <el-checkbox-group
+                  :max="1"
+                  v-model="checkList"
+                  style="width: 80px"
+                >
+                  <el-checkbox
+                    label="全部未随访"
+                    class="el-checkbox__statusFirst"
+                    >全部未随访</el-checkbox
+                  >
+                  <el-checkbox
+                    label="今日未随访"
+                    class="el-checkbox__statusOthers"
+                    >今日未随访</el-checkbox
+                  >
+                  <el-checkbox
+                    label="超期未随访"
+                    class="el-checkbox__statusOthers"
+                    >超期未随访</el-checkbox
+                  >
+                </el-checkbox-group>
+                <el-row :gutter="1">
+                  <el-col :span="12">
+                    <el-link
+                      :underline="false"
+                      type="primary"
+                      :disabled="checkList.length == 0"
+                      @click="filterChange"
+                      >筛选</el-link
+                    >
+                  </el-col>
+                </el-row>
+              </el-popover>
+            </template>
+          </el-table-column>
+          <el-table-column width="400 px" align="right">
+            <template slot="header" slot-scope="scope">
+              <el-button
+                size="medium"
+                type="success"
+                style="margin-right: 10px"
+                @click="addFollowup(scope.$index, scope.row)"
+                >新增随访</el-button
+              >
+              <el-input
+                @keyup.enter.native="searchByIdInput()"
+                v-model="search"
+                size="medium"
+                placeholder="输入患者ID回车搜索"
+                style="width: 200px"
+              />
+            </template>
+            <template slot-scope="scope" class="table-operate">
+              <el-button
+                size="mini"
+                @click="editFollowupInfo(scope.row)"
+                type="primary"
+                plain
+              >
+                随访信息</el-button
+              >
+              <el-button size="mini" @click="handlePatientInfo(scope.row)">
+                病人资料</el-button
+              >
+            </template>
+          </el-table-column>
+        </el-table>
+        <!--                                            表格分页-->
+        <el-pagination
+          style="margin-top: 10px;"
+          align="center"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page="currentPage"
+          :page-sizes="[1, 5, 10, 20]"
+          :page-size="pageSize"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="totalSize"
+        >
+        </el-pagination>
+      </div>
       <!-- 随访信息 -->
       <el-dialog
         title="随访信息"
@@ -118,10 +133,16 @@
             ></el-input>
           </el-form-item>
           <el-form-item label="计划随访日期" :label-width="formLabelWidth">
-            <el-input
+            <el-date-picker
+              style="float: left"
+              :picker-options="pickerOptions"
               v-model="followupForm.planVisitDate"
-              autocomplete="off"
-            ></el-input>
+              align="left"
+              type="date"
+              placeholder=""
+              value-format="yyyy-MM-dd"
+            >
+            </el-date-picker>
           </el-form-item>
           <el-form-item label="随访计划" :label-width="formLabelWidth">
             <el-input
@@ -130,10 +151,15 @@
             ></el-input>
           </el-form-item>
           <el-form-item label="实际随访日期" :label-width="formLabelWidth">
-            <el-input
+            <el-date-picker
+              style="float: left"
               v-model="followupForm.visitDate"
-              autocomplete="off"
-            ></el-input>
+              align="left"
+              type="date"
+              placeholder=""
+              value-format="yyyy-MM-dd"
+            >
+            </el-date-picker>
           </el-form-item>
           <el-form-item label="随访结果记录" :label-width="formLabelWidth">
             <el-input
@@ -228,6 +254,7 @@
               align="left"
               type="date"
               placeholder="选择日期"
+              value-format="yyyy-MM-dd"
               :picker-options="pickerOptions"
             >
             </el-date-picker>
@@ -273,12 +300,6 @@ export default {
       dialogFormVisible: false,
       dialogEditFormVisible: false,
       infoForm: {
-        id: "123",
-        name: "123",
-        sexName: "123",
-        birthday: "123",
-        phone: "123",
-        idNumber: "123",
       },
       followupForm: {
         gender: "",
@@ -347,6 +368,7 @@ export default {
       api.searchFollowup(obj).then((res) => {
         if (res.data.code == 200) {
           this.followupForm = res.data.data.records[0];
+          this.followupForm.id = this.followupForm.followupId
         }
       });
       this.dialogEditFormVisible = true;
@@ -355,20 +377,23 @@ export default {
       this.dialogEditFormVisible = false;
       const _this = this;
       api.editFollowup(_this.followupForm).then((res) => {
+        console.log(res)
         if (res.data.code === 200) {
           this.$message({
             message: "编辑成功",
             type: "success",
           });
-        } else {
-          this.$message.error("编辑失败");
+        } else if (res.data.code === 40004) {
+          this.$message.error("计划随访日期仅能设置为今天之后");
         }
       });
     },
     handlePatientInfo(row) {
+      console.log(row.patientId)
       api.getPatientById(row.patientId).then((res) => {
         if (res.data.code == 200) {
           this.infoForm = res.data.data;
+          console.log(res)
         }
       });
       this.dialogFormVisible = true;
@@ -445,6 +470,7 @@ export default {
         api
           .searchFollowup(allObj)
           .then((res) => {
+            console.log(res)
             if (res.data.code == 200) {
               this.tableData = res.data.data.records;
               this.totalSize = res.data.data.total;
@@ -477,22 +503,29 @@ export default {
     addFollowup(index, row) {
       const _this = this;
       _this.dialogAddFormVisible = true;
-      Object.assign(this.$data.addFollowForm, this.$options.data().addFollowForm);
+      Object.assign(
+        this.$data.addFollowForm,
+        this.$options.data().addFollowForm
+      );
     },
     submitAddShortInfoForm() {
-      this.dialogFormVisible = false;
-      console.log(this.addFollowForm)
-      api.addFollowup(this.addFollowForm).then((res) => {
-        console.log(res)
-        if (res.data.code === 200) {
-          this.$message({
-            message: "添加成功",
-            type: "success",
-          });
-        }
-      }).catch((error) => {this.$message.error("添加失败");})
-          .finally(() => {
-          });
+      this.dialogAddFormVisible = false;
+      console.log(this.addFollowForm);
+      api
+        .addFollowup(this.addFollowForm)
+        .then((res) => {
+          console.log(res);
+          if (res.data.code === 200) {
+            this.$message({
+              message: "添加成功",
+              type: "success",
+            });
+          }
+        })
+        .catch((error) => {
+          this.$message.error("添加失败");
+        })
+        .finally(() => {});
     },
 
     getNowTime(isAll) {
