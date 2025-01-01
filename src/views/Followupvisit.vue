@@ -14,13 +14,24 @@
           box-shadow: 8px 20px 30px 8px rgba(21, 60, 204, 0.09);
         "
       >
-        <el-table :data="tableData" border style="background: #e9eef3;width: 100%;border-radius: 20px;" v-loading="loading">
+        <el-table
+          :data="tableData"
+          border
+          style="background: #e9eef3; width: 100%; border-radius: 20px"
+          v-loading="loading"
+        >
           <!-- .slice((currentPage - 1) * pageSize, currentPage * pageSize) -->
-          <el-table-column label="患者ID" prop="patientId"> </el-table-column>
-          <el-table-column label="患者姓名" prop="patientName">
+          <el-table-column label="患者ID" prop="patientId" align="center">
           </el-table-column>
-          <el-table-column label="手机号" prop="telephone"> </el-table-column>
-          <el-table-column label="计划随访时间" prop="planVisitDate">
+          <el-table-column label="患者姓名" prop="patientName" align="center">
+          </el-table-column>
+          <el-table-column label="手机号" prop="telephone" align="center">
+          </el-table-column>
+          <el-table-column
+            label="计划随访时间"
+            prop="planVisitDate"
+            align="center"
+          >
             <template slot="header" slot-scope="scope">
               <el-popover
                 ref="popover"
@@ -100,7 +111,7 @@
         </el-table>
         <!--                                            表格分页-->
         <el-pagination
-          style="margin-top: 10px;"
+          style="margin-top: 10px"
           align="center"
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
@@ -212,20 +223,28 @@
             <el-radio-group
               style="margin-left: -200px"
               v-model="infoForm.sexName"
-              disabled 
+              disabled
             >
               <el-radio label="男">男</el-radio>
               <el-radio label="女">女</el-radio>
             </el-radio-group>
           </el-form-item>
           <el-form-item label="出生日期" :label-width="formLabelWidth">
-            <el-input v-model="infoForm.birthday" autocomplete="off" disabled></el-input>
+            <el-input
+              v-model="infoForm.birthday"
+              autocomplete="off"
+              disabled
+            ></el-input>
           </el-form-item>
           <el-form-item label="患者电话" :label-width="formLabelWidth">
             <el-input v-model="infoForm.phone" autocomplete="off"></el-input>
           </el-form-item>
           <el-form-item label="身份证号" :label-width="formLabelWidth">
-            <el-input v-model="infoForm.idNumber" autocomplete="off" disabled></el-input>
+            <el-input
+              v-model="infoForm.idNumber"
+              autocomplete="off"
+              disabled
+            ></el-input>
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -300,8 +319,7 @@ export default {
       currentPatientName: "",
       dialogFormVisible: false,
       dialogEditFormVisible: false,
-      infoForm: {
-      },
+      infoForm: {},
       followupForm: {
         gender: "",
         id: 0,
@@ -369,7 +387,7 @@ export default {
       api.searchFollowup(obj).then((res) => {
         if (res.data.code == 200) {
           this.followupForm = res.data.data.records[0];
-          this.followupForm.id = this.followupForm.followupId
+          this.followupForm.id = this.followupForm.followupId;
         }
       });
       this.dialogEditFormVisible = true;
@@ -377,21 +395,29 @@ export default {
     submitEditFollowup() {
       this.dialogEditFormVisible = false;
       const _this = this;
-      api.editFollowup(_this.followupForm).then((res) => {
-        console.log(res)
-        if (res.data.code === 200) {
-          this.$message({
-            message: "编辑成功",
-            type: "success",
-          });
-        } else if (res.data.code === 40004) {
-          this.$message.error("计划随访日期仅能设置为今天之后");
-        }
-      });
+      api
+        .editFollowup(_this.followupForm)
+        .then((res) => {
+          console.log(res);
+          if (res.data.code === 200) {
+            this.$message({
+              message: "编辑成功",
+              type: "success",
+            });
+          } else if (res.data.code === 40004) {
+            this.$message.error("计划随访日期仅能设置为今天之后");
+          }
+        })
+        .catch((error) => {
+          this.$message.error("编辑失败");
+        })
+        .finally(() => {
+          this.getData();
+        });
     },
     handlePatientInfo(row) {
       api.getPatientById(row.patientId).then((res) => {
-        console.log(res)
+        console.log(res);
         if (res.data.code == 200) {
           this.infoForm = res.data.data;
         }
@@ -401,16 +427,24 @@ export default {
     submitEditPatient() {
       this.dialogFormVisible = false;
       const _this = this;
-      api.editPatient(_this.infoForm).then((res) => {
-        if (res.data.code === 200) {
-          this.$message({
-            message: "编辑成功",
-            type: "success",
-          });
-        } else {
+      api
+        .editPatient(_this.infoForm)
+        .then((res) => {
+          if (res.data.code === 200) {
+            this.$message({
+              message: "编辑成功",
+              type: "success",
+            });
+          } else {
+            this.$message.error("编辑失败");
+          }
+        })
+        .catch((error) => {
           this.$message.error("编辑失败");
-        }
-      });
+        })
+        .finally(() => {
+          this.getData();
+        });
     },
     getData() {
       let yesterday = this.getYesterday(0);
@@ -470,7 +504,7 @@ export default {
         api
           .searchFollowup(allObj)
           .then((res) => {
-            console.log(res)
+            console.log(res);
             if (res.data.code == 200) {
               this.tableData = res.data.data.records;
               this.totalSize = res.data.data.total;
@@ -525,7 +559,9 @@ export default {
         .catch((error) => {
           this.$message.error("添加失败");
         })
-        .finally(() => {});
+        .finally(() => {
+          this.getData();
+        });
     },
 
     getNowTime(isAll) {

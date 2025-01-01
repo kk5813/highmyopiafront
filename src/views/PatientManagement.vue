@@ -22,27 +22,40 @@
             style="background: #e9eef3; width: 100%; border-radius: 20px"
             v-loading="loading"
           >
-            <el-table-column label="就诊号" prop="visitNumber">
+            <el-table-column label="就诊号" prop="visitNumber" align="center">
             </el-table-column>
             <el-table-column
               label="患者姓名"
               prop="patientName"
+              align="center"
             ></el-table-column>
-            <el-table-column label="诊断" prop="diagName"> </el-table-column>
-            <el-table-column label="诊断时间" prop="diagTime">
+            <el-table-column label="诊断" prop="diagName" align="center">
             </el-table-column>
-            <el-table-column label="眼别" prop="siteName"> </el-table-column>
-            <el-table-column label="科室" prop="deptName"> </el-table-column>
+            <el-table-column label="眼别" prop="siteName" align="center">
+            </el-table-column>
+            <el-table-column label="诊断医生" prop="doctorName" align="center">
+            </el-table-column>
+            <el-table-column
+              label="科室"
+              prop="deptName"
+              align="center"
+            ></el-table-column>
+            <el-table-column label="诊断时间" prop="diagTime" align="center">
+            </el-table-column>
             <el-table-column width="400 px" align="right">
               <template slot="header" slot-scope="scope">
                 <el-input
                   v-model="search"
-                  @keyup.enter.native="searchByInput()"
+                  @keyup.enter.native="
+                    () => {
+                      (currentPage = 1), (pageSize = 10), searchByInput(1, 10);
+                    }
+                  "
                   size="medium"
                   placeholder="请输入患者ID或诊断名称,按下回车搜索"
                 />
               </template>
-              <template slot-scope="scope" class="table-operate">
+              <template slot-scope="scope">
                 <el-button
                   size="mini"
                   @click="patientInfo(scope.$index, scope.row)"
@@ -93,6 +106,7 @@
             </el-form-item>
             <el-form-item label="患者性别" :label-width="formLabelWidth">
               <el-radio-group
+                disabled
                 style="margin-left: -200px"
                 v-model="infoForm.sexName"
               >
@@ -102,6 +116,7 @@
             </el-form-item>
             <el-form-item label="出生日期" :label-width="formLabelWidth">
               <el-input
+                disabled
                 v-model="infoForm.birthday"
                 autocomplete="off"
               ></el-input>
@@ -111,6 +126,7 @@
             </el-form-item>
             <el-form-item label="身份证号" :label-width="formLabelWidth">
               <el-input
+                disabled
                 v-model="infoForm.idNumber"
                 autocomplete="off"
               ></el-input>
@@ -135,7 +151,7 @@
 <script>
 import Header from "../components/Header";
 import api from "@/api/apiManage";
-import request from '@/axios'
+import request from "@/axios";
 export default {
   name: "PatientManagement",
   components: { Header },
@@ -152,6 +168,7 @@ export default {
       totalSize: 0,
       loading: false,
       dataSelect: [{}],
+      isSearched: false,
       //   患者基本信息
       infoForm: {
         id: "123",
@@ -171,29 +188,35 @@ export default {
     // this.getPatientData()
   },
   methods: {
-    searchByInput() {
-      const _this = this
+    searchByInput(page, pageSize) {
+      const _this = this;
       this.loading = true;
-      this.currentPage = 1;
-      this.pageSize = 10;
       let obj = {
-        pageNumber: this.currentPage,
-        pageSize: this.pageSize,
+        pageNumber: page,
+        pageSize: pageSize,
         diagName: this.search,
       };
+      let reqArr = [
+        request("/visits/page", { method: "get", params: obj }),
+        request("/visits/find/" + this.search, { method: "get" }),
+      ];
+      let handledErrReqs = reqArr.map((item) =>
+        item.catch((error) => {
+          // 错误处理代码
+          console.log("请求出错", error);
+        })
+      );
       _this.$axios
-        .all([
-          request("/visits/page", { method: 'get',params: obj }),
-          request("/visits/find/" + this.search,{ method: 'get'}),
-        ])
+        .all(handledErrReqs)
         .then(
-          // diagResp.data.data.records
-          //     ? diagResp.data.data.records
-          //     : 
           this.$axios.spread(function (diagResp, idResp) {
-            console.log(diagResp, idResp)
-            _this.tableData = idResp.data.data;
-            _this.totalSize = _this.tableData.length;
+            console.log(diagResp, idResp);
+            _this.tableData = diagResp.data.data.total
+              ? diagResp.data.data.records
+              : idResp.data.data;
+            _this.totalSize = diagResp.data.data.total
+              ? diagResp.data.data.total
+              : idResp.data.data.length;
           })
         )
         .catch((error) => {})
@@ -201,35 +224,41 @@ export default {
           this.loading = false;
         });
     },
-    handleSelect(key, keyPath) {
-      console.log(key, keyPath);
-    },
     toCaseDetail(row) {
       this.$router.push({
-        name: "PostCaseDetail",
-        params: { id: row.patientId, name: row.patientName },
+        path: "/postcasedetail",
+        query: { id: row.patientId, name: row.patientName },
       });
     },
     //          患者基本信息
     patientInfo(index, row) {
-      // row.patientId
-      // row.patientId = '1797070219990548481'
-      api.getPatientById(row.patientId).then((res) => {
-        if (res.data.code == 200) {
-          this.infoForm = res.data.data;
-        }
-      });
-      this.dialogFormVisible = true;
+      api
+        .getPatientById(row.patientId)
+        .then((res) => {
+          if (res.data.code == 200) {
+            this.infoForm = res.data.data;
+            this.dialogFormVisible = true;
+          }
+        })
+        .catch((error) => {
+          this.$message({
+            message: "该用户基本信息不存在！",
+            type: "warning",
+          });
+        })
+        .finally(() => {});
     },
     //每页条数改变时触发 选择一页显示多少行
     handleSizeChange(size) {
       this.pageSize = size;
-      this.getPatientData();
+      if (!this.search) this.getPatientData();
+      else this.searchByInput(this.currentPage, size);
     },
     //当前页改变时触发 跳转其他页
     handleCurrentChange(page) {
       this.currentPage = page;
-      this.getPatientData();
+      if (!this.search) this.getPatientData();
+      else this.searchByInput(page, this.pageSize);
     },
     //          页面加载，获取数据
     getPatientData() {
@@ -244,7 +273,7 @@ export default {
         .getVisitList(obj)
         .then((res) => {
           if (res.data.code == 200) {
-            console.log(res)
+            console.log(res);
             this.tableData = res.data.data.records;
             this.totalSize = res.data.data.total;
           }
@@ -258,16 +287,24 @@ export default {
     submitEditPatient() {
       this.dialogFormVisible = false;
       const _this = this;
-      api.editPatient(_this.infoForm).then((res) => {
-        if (res.data.code === 200) {
-          this.$message({
-            message: "编辑成功",
-            type: "success",
-          });
-        } else {
+      api
+        .editPatient(_this.infoForm)
+        .then((res) => {
+          if (res.data.code === 200) {
+            this.$message({
+              message: "编辑成功",
+              type: "success",
+            });
+          } else {
+            this.$message.error("编辑失败");
+          }
+        })
+        .catch((error) => {
           this.$message.error("编辑失败");
-        }
-      });
+        })
+        .finally(() => {
+          this.getPatientData();
+        });
     },
   },
   mounted() {

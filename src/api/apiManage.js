@@ -250,7 +250,7 @@ export default {
 
   getCaseTimeline(data) {
     return request({
-      url: '/patients/element_time_line',
+      url: '/patients/element_time_line/',
       method: 'get',
       params: data
     })
@@ -261,6 +261,28 @@ export default {
       url: '/check_reports/reportFiles',
       method: 'get',
       params: data
+    })
+  },
+
+  getAiDisease() {
+    return request({
+      url: '/disease/get_disease',
+      method: 'get'
+    })
+  },
+
+  getAiDiagnose(data) {
+    return request({
+      url: '/disease/diagnose',
+      method: 'post',
+      data
+    })
+  },
+
+  getPatientTodayReport(patientId) {
+    return request({
+      url: '/today/onlySearch/' + patientId,
+      method: 'get'
     })
   },
 }

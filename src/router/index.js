@@ -60,7 +60,7 @@ const routes = [
   //   component: CompletedCase
   // },
   {
-    path: '/postcasedetail/:id',
+    path: '/postcasedetail',
     name: 'PostCaseDetail',
     component: PostCaseDetail
   },
