@@ -250,7 +250,7 @@ export default {
 
   getCaseTimeline(data) {
     return request({
-      url: '/patients/element_time_line',
+      url: '/patients/element_time_line/',
       method: 'get',
       params: data
     })

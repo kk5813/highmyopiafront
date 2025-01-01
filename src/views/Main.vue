@@ -6,70 +6,96 @@
         <Header active-index="/Main"></Header>
       </el-header>
       <el-main>
-        <div class="tableContainer" style="padding-bottom: 10px;border-radius: 20px;background:white;margin-top: 10px;box-shadow:  8px 20px 30px 8px rgba(21,60,204,0.09);">
-          <el-table border :data="tableData" style="background: #e9eef3;width: 100%;border-radius: 20px;" v-loading="loading">
-          <el-table-column width="90" label="用户ID" prop="userId">
-          </el-table-column>
-          <el-table-column label="登录账号" prop="userLoginName">
-          </el-table-column>
-          <el-table-column label="用户名" prop="userName"> </el-table-column>
-          <el-table-column label="用户状态" prop="userStatus">
-          </el-table-column>
-          <el-table-column label="创建人" prop="creator"> </el-table-column>
-          <el-table-column label="创建时间" prop="createTime">
-          </el-table-column>
-          <el-table-column label="修改人" prop="modifier"> </el-table-column>
-          <el-table-column label="修改时间" prop="updateTime">
-          </el-table-column>
-          <el-table-column width="400 px" align="right">
-            <template slot="header" slot-scope="scope">
-              <el-button
-                size="medium"
-                @click="handleAdd()"
-                type="primary"
-                plain
-                style="margin-right: 10px"
-                >添加用户</el-button
-              >
-              <!-- v-on:input="dataSizeChange()" -->
-              <el-input
-                @keyup.enter.native="searchByLoginName()"
-                v-model="search"
-                size="medium"
-                style="width: 250px"
-                placeholder="输入用户登录账号并按下回车搜索"
-              />
-            </template>
-            <template slot-scope="scope">
-              <el-button
-                size="mini"
-                @click="handleEdit(scope.$index, scope.row)"
-                >编辑</el-button
-              >
-              <el-button
-                size="mini"
-                type="danger"
-                @click="handleDelete(scope.$index, scope.row)"
-                >失效</el-button
-              >
-            </template>
-          </el-table-column>
-        </el-table>
-        <!--                                表格分页-->
-        <el-pagination
-          style="margin-top: 10px;"
-          align="center"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-          :current-page="currentPage"
-          :page-sizes="[1, 5, 10, 20]"
-          :page-size="pageSize"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="totalSize"
+        <div
+          class="tableContainer"
+          style="
+            padding-bottom: 10px;
+            border-radius: 20px;
+            background: white;
+            margin-top: 10px;
+            box-shadow: 8px 20px 30px 8px rgba(21, 60, 204, 0.09);
+          "
         >
-        </el-pagination>
+          <el-table
+            border
+            :data="tableData"
+            style="background: #e9eef3; width: 100%; border-radius: 20px"
+            v-loading="loading"
+          >
+            <el-table-column
+              width="90"
+              label="用户ID"
+              prop="userId"
+              align="center"
+            >
+            </el-table-column>
+            <el-table-column
+              label="登录账号"
+              prop="userLoginName"
+              align="center"
+            >
+            </el-table-column>
+            <el-table-column label="用户名" prop="userName" align="center">
+            </el-table-column>
+            <el-table-column label="用户状态" prop="userStatus" align="center">
+            </el-table-column>
+            <el-table-column label="创建人" prop="creator" align="center">
+            </el-table-column>
+            <el-table-column label="创建时间" prop="createTime" align="center">
+            </el-table-column>
+            <el-table-column label="修改人" prop="modifier" align="center">
+            </el-table-column>
+            <el-table-column label="修改时间" prop="updateTime" align="center">
+            </el-table-column>
+            <el-table-column width="400 px" align="right">
+              <template slot="header" slot-scope="scope">
+                <el-button
+                  size="medium"
+                  @click="handleAdd()"
+                  type="primary"
+                  plain
+                  style="margin-right: 10px"
+                  >添加用户</el-button
+                >
+                <!-- v-on:input="dataSizeChange()" -->
+                <el-input
+                  @keyup.enter.native="searchByLoginName()"
+                  v-model="search"
+                  size="medium"
+                  style="width: 250px"
+                  placeholder="输入用户登录账号并按下回车搜索"
+                />
+              </template>
+              <template slot-scope="scope">
+                <el-button
+                  size="mini"
+                  @click="handleEdit(scope.$index, scope.row)"
+                  >编辑</el-button
+                >
+                <el-button
+                  size="mini"
+                  type="danger"
+                  @click="handleDelete(scope.$index, scope.row)"
+                  >失效</el-button
+                >
+              </template>
+            </el-table-column>
+          </el-table>
+          <!--                                表格分页-->
+          <el-pagination
+            style="margin-top: 10px"
+            align="center"
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="currentPage"
+            :page-sizes="[1, 5, 10, 20]"
+            :page-size="pageSize"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="totalSize"
+          >
+          </el-pagination>
         </div>
-        
+
         <!--                添加用户的弹出对话框-->
         <el-dialog
           title="添加用户"
@@ -242,17 +268,15 @@ export default {
                 type: "success",
                 message: "成功失效用户!",
               });
-              this.getUserTableData();
             } else {
               _this.$message.error("操作失败");
             }
           });
         })
-        .catch(() => {
-          _this.$message({
-            type: "info",
-            message: "已取消",
-          });
+        .catch((error) => {_this.$message.error("操作失败");})
+        .finally(() => {
+          this.getUserTableData();
+          this.loading = false;
         });
     },
     //每页条数改变时触发 选择一页显示多少行
@@ -267,12 +291,12 @@ export default {
     },
     //          搜索功能
     searchByLoginName() {
-      if(!this.search){
+      if (!this.search) {
         this.$message({
-              message: "搜索信息不能为空！",
-              type: "danger",
-            });
-        return
+          message: "搜索信息不能为空！",
+          type: "danger",
+        });
+        return;
       }
       let obj = {
         userLoginName: this.search,
@@ -337,38 +361,57 @@ export default {
     //      添加用户
     submitAddUser() {
       const _this = this;
-      api.addUser(this.addForm).then((res) => {
-        if (res.data.code == 200) {
-          this.$message({
-            message: "成功创建用户",
-            type: "success",
-          });
-        } else if (res.data.code == 400 && res.data.msg == "该用户名已注册！") {
-          this.$message.error("该登录账号已存在");
-        } else {
+      api
+        .addUser(this.addForm)
+        .then((res) => {
+          if (res.data.code == 200) {
+            this.$message({
+              message: "成功创建用户",
+              type: "success",
+            });
+          } else if (
+            res.data.code == 400 &&
+            res.data.msg == "该用户名已注册！"
+          ) {
+            this.$message.error("该登录账号已存在");
+          } else {
+            this.$message.error("创建失败");
+          }
+          _this.dialogFormVisible = false;
+        })
+        .catch((error) => {
           this.$message.error("创建失败");
-        }
-        _this.dialogFormVisible = false;
-      });
+        })
+        .finally(() => {
+          this.getUserTableData();
+        });
     },
     //      编辑用户
     submitEditUser() {
       const _this = this;
       _this.dialogEditFormVisible = false;
       console.log(_this.editForm);
-      api.editUser(_this.editForm).then((res) => {
-        console.log(res);
-        if (res.data.code === 200) {
-          this.$message({
-            message: "编辑成功",
-            type: "success",
-          });
-          this.getUserTableData();
-        } else {
+      api
+        .editUser(_this.editForm)
+        .then((res) => {
+          console.log(res);
+          if (res.data.code === 200) {
+            this.$message({
+              message: "编辑成功",
+              type: "success",
+            });
+            this.getUserTableData();
+          } else {
+            this.$message.error("编辑失败");
+          }
+          _this.dialogFormVisible = false;
+        })
+        .catch((error) => {
           this.$message.error("编辑失败");
-        }
-        _this.dialogFormVisible = false;
-      });
+        })
+        .finally(() => {
+          this.getUserTableData();
+        });
     },
   },
   mounted() {
@@ -420,7 +463,5 @@ export default {
 ::v-deep .el-table th,
 ::v-deep .el-table tr,
 ::v-deep .el-table td {
-  
 }
-
 </style>

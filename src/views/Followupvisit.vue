@@ -16,11 +16,11 @@
       >
         <el-table :data="tableData" border style="background: #e9eef3;width: 100%;border-radius: 20px;" v-loading="loading">
           <!-- .slice((currentPage - 1) * pageSize, currentPage * pageSize) -->
-          <el-table-column label="患者ID" prop="patientId"> </el-table-column>
-          <el-table-column label="患者姓名" prop="patientName">
+          <el-table-column label="患者ID" prop="patientId"  align="center"> </el-table-column>
+          <el-table-column label="患者姓名" prop="patientName"  align="center">
           </el-table-column>
-          <el-table-column label="手机号" prop="telephone"> </el-table-column>
-          <el-table-column label="计划随访时间" prop="planVisitDate">
+          <el-table-column label="手机号" prop="telephone" align="center"> </el-table-column>
+          <el-table-column label="计划随访时间" prop="planVisitDate" align="center">
             <template slot="header" slot-scope="scope">
               <el-popover
                 ref="popover"
@@ -387,7 +387,10 @@ export default {
         } else if (res.data.code === 40004) {
           this.$message.error("计划随访日期仅能设置为今天之后");
         }
-      });
+      }).catch((error) => {this.$message.error("编辑失败");})
+          .finally(() => {
+            this.getData()
+          });
     },
     handlePatientInfo(row) {
       api.getPatientById(row.patientId).then((res) => {
@@ -410,7 +413,11 @@ export default {
         } else {
           this.$message.error("编辑失败");
         }
-      });
+      }).catch((error) => {this.$message.error("编辑失败");})
+          .finally(() => {
+            this.getData()
+          });
+      
     },
     getData() {
       let yesterday = this.getYesterday(0);
@@ -525,7 +532,7 @@ export default {
         .catch((error) => {
           this.$message.error("添加失败");
         })
-        .finally(() => {});
+        .finally(() => {this.getData()});
     },
 
     getNowTime(isAll) {

@@ -4,9 +4,9 @@
       <Header active-index=""></Header>
     </el-header>
     <el-main>
-      <el-page-header @back="goBack" :content="patientName + '的病历详情'">
+      <el-page-header @back="goBack" :content="patientName + '的病历详情'" style="margin:0px;">
       </el-page-header>
-      <el-tabs v-model="activeName">
+      <el-tabs v-model="activeName" @tab-click="handleClick">
         <el-tab-pane label="门诊病历" name="second" style="float: left">
           <el-timeline>
             <el-timeline-item
@@ -61,7 +61,12 @@
                     style="display: flex; margin-left: 100px"
                     type="primary"
                     size="small"
-                    @click="handleCheckReport(caseData.patiendId,caseData.visitNumber)"
+                    @click="
+                      handleCheckReport(
+                        caseData.patiendId,
+                        caseData.visitNumber
+                      )
+                    "
                     round
                     >查看检查报告</el-button
                   >
@@ -76,7 +81,7 @@
             width="40%"
             :append-to-body="true"
           >
-            <el-table :data="pdfDataList" style="width: 100%" max-height="500">
+            <el-table :data="pdfDataList" max-height="500">
               <el-table-column
                 prop="checkReports.itemName"
                 label="名称"
@@ -87,7 +92,11 @@
                 label="检查时间"
                 width="180"
               ></el-table-column>
-              <el-table-column prop="url" label="报告资料(点击图片查看)" width="300">
+              <el-table-column
+                prop="url"
+                label="报告资料(点击图片查看)"
+                width="300"
+              >
                 <template #default="scope">
                   <el-image
                     style="width: 100px; height: 100px"
@@ -97,11 +106,10 @@
                   </el-image>
                 </template>
               </el-table-column>
-              
             </el-table>
           </el-dialog>
         </el-tab-pane>
-        <el-tab-pane label="检验结果" name="labTest">
+        <el-tab-pane @click="getLabData()" label="检验结果" name="labTest">
           <el-descriptions
             v-for="(item, index) in labData"
             :key="index"
@@ -139,25 +147,6 @@
             }}</el-descriptions-item>
           </el-descriptions>
         </el-tab-pane>
-        <!-- <el-tab-pane label="检查资料" name="fourth">
-          <el-table :data="pdfDataList" style="width: 60%">
-            <el-table-column
-              prop="name"
-              label="名称"
-              width="180"
-            ></el-table-column>
-            <el-table-column prop="url" label="图像资料" width="180">
-              <template #default="scope">
-                <el-image
-                  style="width: 100px; height: 100px"
-                  src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
-                  :preview-src-list="scope.row.url"
-                >
-                </el-image>
-              </template>
-            </el-table-column>
-          </el-table>
-        </el-tab-pane> -->
       </el-tabs>
     </el-main>
     <el-footer
@@ -220,8 +209,8 @@ export default {
       pdfDataList: [
         {
           checkReports: {
-            itemName: 'slo',
-            checkTime: '2020-02-02'
+            itemName: "slo",
+            checkTime: "2020-02-02",
           },
           url: [
             "https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg",
@@ -230,8 +219,8 @@ export default {
         },
         {
           checkReports: {
-            itemName: 'slo',
-            checkTime: '2020-02-02'
+            itemName: "slo",
+            checkTime: "2020-02-02",
           },
           url: [
             "https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg",
@@ -240,8 +229,8 @@ export default {
         },
         {
           checkReports: {
-            itemName: 'slo',
-            checkTime: '2020-02-02'
+            itemName: "slo",
+            checkTime: "2020-02-02",
           },
           url: [
             "https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg",
@@ -252,72 +241,35 @@ export default {
       value: "",
       formLabelWidth: "120px",
       iolmaster: "",
-      labData: [
-        {
-          patientName: "杨奇韵",
-          isUrgent: 0,
-          labItemName: "乙肝E抗体",
-          reportName:
-            "乙肝五项（定量分析法）+丙肝抗体发光法+HIV抗体检查+梅毒抗体发光法",
-          patientId: 1796786711460069400,
-          labItemCode: "Anti-HBe",
-          refRange: "0-0.5",
-          labResultSignName: null,
-          labFinalValue: "0.01",
-          visitingNo: "MZ202406010634",
-          sexName: "男",
-          patientBrithday: "1986-03-27 00:00:00",
-          labResultUnitName: "S/CO",
-          id: 1799240480341352400,
-          auditDate: "2024-08-08 10:54:18",
-        },
-        {
-          patientName: "杨奇韵",
-          isUrgent: 0,
-          labItemName: "乙肝E抗体",
-          reportName:
-            "乙肝五项（定量分析法）+丙肝抗体发光法+HIV抗体检查+梅毒抗体发光法",
-          patientId: 1796786711460069400,
-          labItemCode: "Anti-HBe",
-          refRange: "0-0.5",
-          labResultSignName: null,
-          labFinalValue: "0.01",
-          visitingNo: "MZ202406010634",
-          sexName: "男",
-          patientBrithday: "1986-03-27 00:00:00",
-          labResultUnitName: "S/CO",
-          id: 1799240480341352400,
-          auditDate: "2024-08-08 10:54:18",
-        },
-      ],
+      labData: [{}],
     };
   },
   created() {
     this.patientId = this.$route.params.id;
-    this.patientName = this.$route.params.patientName;
+    this.patientName = this.$route.params.name;
     this.getHistoryCase();
     this.getLabData();
   },
   methods: {
-    handleCheckReport(patientId,visitNumber) {
+    handleClick(tab, event){console.log(tab, event);},
+    handleCheckReport(patientId, visitNumber) {
       let obj = {
-        patientId,
-        visitNumber
-      }
+        patientId: patientId,
+        visitNumber: visitNumber,
+      };
       this.dialogCheckReportVisible = true;
       api
         .getCaseTimelineReport(obj)
         .then((res) => {
           if (res.data.code == 200) {
-            console.log(res)
+            console.log(res);
           }
         })
         .catch((error) => {})
-        .finally(() => {
-        });
+        .finally(() => {});
     },
     getLabData() {
-      api.getCheckResult("1796786711460069377").then((res) => {
+      api.getCheckResult(this.patientId).then((res) => {
         if (res.data.code == 200) {
           let data = res.data.data;
           data.forEach((item, index) => {
@@ -327,30 +279,12 @@ export default {
         }
       });
     },
-    toggleBody(isPin) {
-      if (isPin) {
-        document.body.style.height = "100vh";
-        document.body.style["overflow-y"] = "hidden";
-      } else {
-        document.body.style.height = "unset";
-        document.body.style["overflow-y"] = "auto";
-      }
-    },
     goBack() {
       this.$router.go(-1);
     },
-    onPreview(item) {
-      this.optimg = item.localpath;
-      console.log(item.localpath);
-      this.showViewer = true;
-    },
-    // 关闭查看器
-    closeViewer() {
-      this.showViewer = false;
-    },
     getHistoryCase() {
+      console.log(this.patientId)
       let obj = {
-        visitNumber: "",
         patientId: this.patientId,
       };
       api.getCaseTimeline(obj).then((res) => {
