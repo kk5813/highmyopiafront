@@ -33,7 +33,7 @@
             placeholder="验证码"
             v-model="ruleForm.code"
             prefix-icon="el-icon-check"
-            type="password"
+            @keyup.enter.native="submitForm('ruleForm')"
           />
           <div id="v_container" class="codeImg"></div>
         </el-form-item>
@@ -42,6 +42,7 @@
             :plain="true"
             type="primary"
             @click="submitForm('ruleForm')"
+            
             >登录</el-button
           >
         </el-form-item>

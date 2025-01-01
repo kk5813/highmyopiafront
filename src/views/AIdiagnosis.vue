@@ -35,19 +35,26 @@
             style="position: fixed; top: 70px; z-index: 999; left: 400px"
           >
             <el-select
-            style="width:200px;"
+              style="width: 200px"
               v-model="selectedModel"
               placeholder="请选择疑似病症"
               v-on:change="handleAiImg()"
               :disabled="showOriginImage == false"
             >
-              <el-option
+              <el-tooltip
+                class="item"
+                effect="dark"
+                content="item.description"
+                placement="right"
                 v-for="item in modelOptions"
                 :key="item.value"
-                :label="item.label"
-                :value="item.value"
               >
-              </el-option>
+                <el-option
+                  :label="item.label"
+                  :value="item.value"
+                >
+                </el-option>
+              </el-tooltip>
             </el-select>
           </el-col>
         </el-row>
@@ -100,18 +107,20 @@
               </div>
             </div>
             <div style="width: 100%">
-              <el-button type="primary" @click="addFollowup()">添加随访<i class="el-icon-upload el-icon--right"></i></el-button>
+              <el-button type="primary" @click="addFollowup()"
+                >添加随访<i class="el-icon-upload el-icon--right"></i
+              ></el-button>
             </div>
           </el-col>
         </el-row>
 
         <!--                            新增随访          -->
-      <el-dialog
-        title="添加随访"
-        :visible.sync="dialogAddFormVisible"
-        width="30%"
-      >
-        <el-form :model="addFollowForm">
+        <el-dialog
+          title="添加随访"
+          :visible.sync="dialogAddFormVisible"
+          width="30%"
+        >
+          <el-form :model="addFollowForm">
           <el-form-item label="患者ID" :label-width="formLabelWidth">
             <el-input
               v-model="addFollowForm.patientId"
@@ -125,6 +134,7 @@
               align="left"
               type="date"
               placeholder="选择日期"
+              value-format="yyyy-MM-dd"
               :picker-options="pickerOptions"
             >
             </el-date-picker>
@@ -135,14 +145,14 @@
               autocomplete="off"
             ></el-input>
           </el-form-item>
-        </el-form>
-        <div slot="footer" class="dialog-footer">
-          <el-button @click="dialogAddFormVisible = false">取 消</el-button>
-          <el-button type="primary" @click="submitAddShortInfoForm()"
-            >确 定</el-button
-          >
-        </div>
-      </el-dialog>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogAddFormVisible = false">取 消</el-button>
+            <el-button type="primary" @click="submitAddShortInfoForm()"
+              >确 定</el-button
+            >
+          </div>
+        </el-dialog>
       </el-main>
       <el-footer
         >爱尔眼科慢病管理系统( 推荐使用IE9+,Firefox、Chrome 浏览器访问
@@ -162,7 +172,7 @@ export default {
   inject: ["reload"],
   data() {
     return {
-      selectedModel: '',
+      selectedModel: "",
       pickerOptions: {
         //          日期限制，只能选择今日以后的时间
         disabledDate(time) {
@@ -253,39 +263,64 @@ export default {
       ],
     };
   },
-  created() {},
+  created() {
+    this.getAiDisease();
+  },
   methods: {
+    getAiDisease() {
+      const _this = this;
+      api
+        .getAiDisease()
+        .then((res) => {
+          console.log(res);
+          if (res.data.code === 200) {
+            let deseaseData = res.data.data;
+            let opData = [];
+            deseaseData.forEach((item, index) => {
+              opData.push({
+                label: item.name,
+                value: item.id,
+                description: item.description,
+              });
+            });
+            console.log(opData)
+            _this.modelOptions = opData;
+          }
+        })
+        .catch((error) => {})
+        .finally(() => {});
+    },
     addFollowup(index, row) {
       const _this = this;
-      this.addFollowForm.patientId = this.search
+      this.addFollowForm.patientId = this.search;
       _this.dialogAddFormVisible = true;
     },
     submitAddShortInfoForm() {
-      this.dialogFormVisible = false;
-      api.addFollowup(this.addFollowForm).then((res) => {
-        if (res.data.code === 200) {
-          this.$message({
-            message: "添加成功",
-            type: "success",
-          });
-        }
-      }).catch((error) => {this.$message.error("添加失败");})
-          .finally(() => {
-          });
+      this.dialogAddFormVisible = false;
+      api
+        .addFollowup(this.addFollowForm)
+        .then((res) => {
+          if (res.data.code === 200) {
+            this.$message({
+              message: "添加成功",
+              type: "success",
+            });
+          }
+        })
+        .catch((error) => {
+          this.$message.error("添加失败");
+        })
+        .finally(() => {});
     },
     handleAiImg() {
       this.showAiImage = true;
       this.loadAiImage = true;
       let allObj = {
-        patientId: "",
-        dateStart: "",
-        dateEnd: "",
-        visitResult: 0,
-        pageNo: 1,
-        pageSize: 10,
+        diseaseId: this.selectedModel,
+        patientId: '1'
       };
       api
-        .searchFollowup(allObj)
+        .getAiDiagnose(allObj)
         .then((res) => {
           if (res.data.code == 200) {
           }
@@ -304,21 +339,14 @@ export default {
       target.blur();
       this.showOriginImage = true;
       this.loadOriginImage = true;
-      let allObj = {
-        patientId: "",
-        dateStart: "",
-        dateEnd: "",
-        visitResult: 0,
-        pageNo: 1,
-        pageSize: 10,
-      };
       api
-        .searchFollowup(allObj)
+        .getPatientTodayReport(this.search)
         .then((res) => {
+          console.log(res)
           if (res.data.code == 200) {
           }
         })
-        .catch((error) => {})
+        .catch((error) => {this.$message.error("查找患者ID失败");})
         .finally(() => {
           this.loadOriginImage = false;
         });

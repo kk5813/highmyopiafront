@@ -4,10 +4,15 @@
       <Header active-index=""></Header>
     </el-header>
     <el-main>
-      <el-page-header @back="goBack" :content="patientName + '的病历详情'" style="margin:0px;">
+      <el-page-header
+        @back="goBack"
+        :content="patientName + '的病历详情'"
+        style="margin: 0px"
+      >
       </el-page-header>
       <el-tabs v-model="activeName" @tab-click="handleClick">
         <el-tab-pane label="门诊病历" name="second" style="float: left">
+          <el-empty v-if="!caseDataList" description="暂无数据" style="width:100vw;"></el-empty>
           <el-timeline>
             <el-timeline-item
               placement="top"
@@ -63,7 +68,6 @@
                     size="small"
                     @click="
                       handleCheckReport(
-                        caseData.patiendId,
                         caseData.visitNumber
                       )
                     "
@@ -110,6 +114,7 @@
           </el-dialog>
         </el-tab-pane>
         <el-tab-pane @click="getLabData()" label="检验结果" name="labTest">
+          <el-empty :v-if="!this.labData" description="暂无数据" style="width:100vw;"></el-empty>
           <el-descriptions
             v-for="(item, index) in labData"
             :key="index"
@@ -173,38 +178,38 @@ export default {
       patientName: "",
       dialogCheckReportVisible: false,
       caseDataList: [
-        {
-          patientId: 1,
-          eye: "sss",
-          name: "艾弗森",
-          mainAppeal: "候除理说本些理七。",
-          pastHistory: "及改流目飞。",
-          presentIllness: "大则段马。",
-          allergy: "天日然。",
-          specialOs: "转步类以需感先在。",
-          specialOd: "总员题据识式认。",
-          visitNumber: "业成角花。",
-          physicalExam:
-            "2021年7月，作为强制碳市场的全国碳排放权交易市场启动上线交易，年覆盖二氧化碳排放量约51亿吨，占全国二氧化碳排放总量的40%以上。然而，目前全国碳排放权交易市场仅在发电企业开展，按计划将逐步覆盖其他重点排放行业，但仍有可再生能源、林业碳汇等行业无法通过市场机制获得减排经济收益。启动自愿碳市场，有利于统筹全国碳资源，激励更广泛的行业、企业参与温室气体减排行动。2021年7月，作为强制碳市场的全国碳排放权交易市场启动上线交易，年覆盖二氧化碳排放量约51亿吨，占全国二氧化碳排放总量的40%以上。然而，目前全国碳排放权交易市场仅在发电企业开展，按计划将逐步覆盖其他重点排放行业，但仍有可再生能源、林业碳汇等行业无法通过市场机制获得减排经济收益。启动自愿碳市场，有利于统筹全国碳资源，激励更广泛的行业、企业参与温室气体减排行动。2021年7月，作为强制碳市场的全国碳排放权交易市场启动上线交易，年覆盖二氧化碳排放量约51亿吨，占全国二氧化碳排放总量的40%以上。然而，目前全国碳排放权交易市场仅在发电企业开展，按计划将逐步覆盖其他重点排放行业，但仍有可再生能源、林业碳汇等行业无法通过市场机制获得减排经济收益。启动自愿碳市场，有利于统筹全国碳资源，激励更广泛的行业、企业参与温室气体减排行动。",
-          dispose: "低交如九年。",
-          date: "2021-02-02",
-        },
-        {
-          patientId: 2,
-          eye: "sss",
-          name: "艾弗森",
-          mainAppeal: "候除理说本些理七。",
-          pastHistory: "及改流目飞。",
-          presentIllness: "大则段马。",
-          allergy: "天日然。",
-          specialOs: "转步类以需感先在。",
-          specialOd: "总员题据识式认。",
-          visitNumber: "业成角花。",
-          physicalExam:
-            "2021年7月，作为强制碳市场的全国碳排放权交易市场启动上线交易，年覆盖二氧化碳排放量约51亿吨，占全国二氧化碳排放总量的40%以上。然而，目前全国碳排放权交易市场仅在发电企业开展，按计划将逐步覆盖其他重点排放行业，但仍有可再生能源、林业碳汇等行业无法通过市场机制获得减排经济收益。启动自愿碳市场，有利于统筹全国碳资源，激励更广泛的行业、企业参与温室气体减排行动。2021年7月，作为强制碳市场的全国碳排放权交易市场启动上线交易，年覆盖二氧化碳排放量约51亿吨，占全国二氧化碳排放总量的40%以上。然而，目前全国碳排放权交易市场仅在发电企业开展，按计划将逐步覆盖其他重点排放行业，但仍有可再生能源、林业碳汇等行业无法通过市场机制获得减排经济收益。启动自愿碳市场，有利于统筹全国碳资源，激励更广泛的行业、企业参与温室气体减排行动。2021年7月，作为强制碳市场的全国碳排放权交易市场启动上线交易，年覆盖二氧化碳排放量约51亿吨，占全国二氧化碳排放总量的40%以上。然而，目前全国碳排放权交易市场仅在发电企业开展，按计划将逐步覆盖其他重点排放行业，但仍有可再生能源、林业碳汇等行业无法通过市场机制获得减排经济收益。启动自愿碳市场，有利于统筹全国碳资源，激励更广泛的行业、企业参与温室气体减排行动。",
-          dispose: "低交如九年。",
-          date: "2020-02-02",
-        },
+        // {
+        //   patientId: 1,
+        //   eye: "sss",
+        //   name: "艾弗森",
+        //   mainAppeal: "候除理说本些理七。",
+        //   pastHistory: "及改流目飞。",
+        //   presentIllness: "大则段马。",
+        //   allergy: "天日然。",
+        //   specialOs: "转步类以需感先在。",
+        //   specialOd: "总员题据识式认。",
+        //   visitNumber: "业成角花。",
+        //   physicalExam:
+        //     "2021年7月，作为强制碳市场的全国碳排放权交易市场启动上线交易，年覆盖二氧化碳排放量约51亿吨，占全国二氧化碳排放总量的40%以上。然而，目前全国碳排放权交易市场仅在发电企业开展，按计划将逐步覆盖其他重点排放行业，但仍有可再生能源、林业碳汇等行业无法通过市场机制获得减排经济收益。启动自愿碳市场，有利于统筹全国碳资源，激励更广泛的行业、企业参与温室气体减排行动。2021年7月，作为强制碳市场的全国碳排放权交易市场启动上线交易，年覆盖二氧化碳排放量约51亿吨，占全国二氧化碳排放总量的40%以上。然而，目前全国碳排放权交易市场仅在发电企业开展，按计划将逐步覆盖其他重点排放行业，但仍有可再生能源、林业碳汇等行业无法通过市场机制获得减排经济收益。启动自愿碳市场，有利于统筹全国碳资源，激励更广泛的行业、企业参与温室气体减排行动。2021年7月，作为强制碳市场的全国碳排放权交易市场启动上线交易，年覆盖二氧化碳排放量约51亿吨，占全国二氧化碳排放总量的40%以上。然而，目前全国碳排放权交易市场仅在发电企业开展，按计划将逐步覆盖其他重点排放行业，但仍有可再生能源、林业碳汇等行业无法通过市场机制获得减排经济收益。启动自愿碳市场，有利于统筹全国碳资源，激励更广泛的行业、企业参与温室气体减排行动。",
+        //   dispose: "低交如九年。",
+        //   date: "2021-02-02",
+        // },
+        // {
+        //   patientId: 2,
+        //   eye: "sss",
+        //   name: "艾弗森",
+        //   mainAppeal: "候除理说本些理七。",
+        //   pastHistory: "及改流目飞。",
+        //   presentIllness: "大则段马。",
+        //   allergy: "天日然。",
+        //   specialOs: "转步类以需感先在。",
+        //   specialOd: "总员题据识式认。",
+        //   visitNumber: "业成角花。",
+        //   physicalExam:
+        //     "2021年7月，作为强制碳市场的全国碳排放权交易市场启动上线交易，年覆盖二氧化碳排放量约51亿吨，占全国二氧化碳排放总量的40%以上。然而，目前全国碳排放权交易市场仅在发电企业开展，按计划将逐步覆盖其他重点排放行业，但仍有可再生能源、林业碳汇等行业无法通过市场机制获得减排经济收益。启动自愿碳市场，有利于统筹全国碳资源，激励更广泛的行业、企业参与温室气体减排行动。2021年7月，作为强制碳市场的全国碳排放权交易市场启动上线交易，年覆盖二氧化碳排放量约51亿吨，占全国二氧化碳排放总量的40%以上。然而，目前全国碳排放权交易市场仅在发电企业开展，按计划将逐步覆盖其他重点排放行业，但仍有可再生能源、林业碳汇等行业无法通过市场机制获得减排经济收益。启动自愿碳市场，有利于统筹全国碳资源，激励更广泛的行业、企业参与温室气体减排行动。2021年7月，作为强制碳市场的全国碳排放权交易市场启动上线交易，年覆盖二氧化碳排放量约51亿吨，占全国二氧化碳排放总量的40%以上。然而，目前全国碳排放权交易市场仅在发电企业开展，按计划将逐步覆盖其他重点排放行业，但仍有可再生能源、林业碳汇等行业无法通过市场机制获得减排经济收益。启动自愿碳市场，有利于统筹全国碳资源，激励更广泛的行业、企业参与温室气体减排行动。",
+        //   dispose: "低交如九年。",
+        //   date: "2020-02-02",
+        // },
       ],
       pdfDataList: [
         {
@@ -245,18 +250,21 @@ export default {
     };
   },
   created() {
-    this.patientId = this.$route.params.id;
-    this.patientName = this.$route.params.name;
+    // this.patientId = this.$route.query.id;
+    this.patientName = this.$route.query.name;
     this.getHistoryCase();
     this.getLabData();
   },
   methods: {
-    handleClick(tab, event){console.log(tab, event);},
-    handleCheckReport(patientId, visitNumber) {
+    handleClick(tab, event) {
+      console.log(tab, event);
+    },
+    handleCheckReport(visitNumber) {
       let obj = {
-        patientId: patientId,
+        patientId: this.$route.query.id,
         visitNumber: visitNumber,
       };
+      console.log(obj)
       this.dialogCheckReportVisible = true;
       api
         .getCaseTimelineReport(obj)
@@ -269,7 +277,7 @@ export default {
         .finally(() => {});
     },
     getLabData() {
-      api.getCheckResult(this.patientId).then((res) => {
+      api.getCheckResult(this.$route.query.id).then((res) => {
         if (res.data.code == 200) {
           let data = res.data.data;
           data.forEach((item, index) => {
@@ -283,19 +291,13 @@ export default {
       this.$router.go(-1);
     },
     getHistoryCase() {
-      console.log(this.patientId)
+      // this.patientId
       let obj = {
-        patientId: this.patientId,
+        patientId: "1809970417345019907",
       };
       api.getCaseTimeline(obj).then((res) => {
         console.log(res);
         if (res.data.code == 200) {
-          if (res.data.data.records) {
-            this.$message({
-              message: "该患者不存在病历数据！",
-              type: "warning",
-            });
-          }
           let cases = res.data.data.records;
           cases.forEach((item, index) => {
             cases[index].eyeSummary =

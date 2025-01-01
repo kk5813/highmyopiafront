@@ -226,8 +226,8 @@ export default {
     },
     toCaseDetail(row) {
       this.$router.push({
-        name: "PostCaseDetail",
-        params: { id: row.patientId, name: row.patientName },
+        path: "/postcasedetail",
+        query: { id: row.patientId, name: row.patientName },
       });
     },
     //          患者基本信息

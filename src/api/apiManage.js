@@ -263,4 +263,26 @@ export default {
       params: data
     })
   },
+
+  getAiDisease() {
+    return request({
+      url: '/disease/get_disease',
+      method: 'get'
+    })
+  },
+
+  getAiDiagnose(data) {
+    return request({
+      url: '/disease/diagnose',
+      method: 'post',
+      data
+    })
+  },
+
+  getPatientTodayReport(patientId) {
+    return request({
+      url: '/today/onlySearch/' + patientId,
+      method: 'get'
+    })
+  },
 }
