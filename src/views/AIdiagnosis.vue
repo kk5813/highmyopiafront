@@ -60,6 +60,7 @@
         </el-row>
 
         <!-- 原图图片展示行 -->
+        <el-empty v-if="!showOriginImage" description="暂无数据" style="width:100vw;margin-top:20px;"></el-empty>
         <el-row
           type="flex"
           justify="center"
@@ -68,7 +69,7 @@
           v-show="showOriginImage"
         >
           <el-col :span="24">
-            <div style="width: 100%; color: #606266">
+            <div style="width: 90vw; color: #606266">
               <h3>患者原始图像</h3>
             </div>
             <div class="container">
@@ -84,6 +85,8 @@
           </el-col>
         </el-row>
 
+        <el-divider v-if="showAiImage"></el-divider>
+
         <!-- AI处理图片行列 -->
         <el-row
           type="flex"
@@ -93,8 +96,8 @@
           v-loading="loadAiImage"
         >
           <el-col :span="24">
-            <div style="width: 100%; color: #606266">
-              <h3>AI生成图像</h3>
+            <div style="width: 90vw; color: #606266">
+              <h3 style="width: 90vw;display:block;">AI生成图像</h3>
             </div>
             <div class="container">
               <div
@@ -106,7 +109,11 @@
                 <h3>{{ item.content }}</h3>
               </div>
             </div>
-            <div style="width: 100%">
+            <el-divider v-if="showAiImage"></el-divider>
+            <div style="width: 100%;margin-top:20px;">
+              <el-button type="text" @click="AIadvice"
+              >点击查看AI诊断结果</el-button
+            >
               <el-button type="primary" @click="addFollowup()"
                 >添加随访<i class="el-icon-upload el-icon--right"></i
               ></el-button>
@@ -261,6 +268,7 @@ export default {
           label: "高度近视",
         },
       ],
+      aiDiagResult: '白内障',
     };
   },
   created() {
@@ -323,6 +331,7 @@ export default {
         .getAiDiagnose(allObj)
         .then((res) => {
           if (res.data.code == 200) {
+            console.log(res)
           }
         })
         .catch((error) => {})
@@ -337,19 +346,27 @@ export default {
         target = event.target.parentNode;
       }
       target.blur();
-      this.showOriginImage = true;
-      this.loadOriginImage = true;
       api
         .getPatientTodayReport(this.search)
         .then((res) => {
           console.log(res)
           if (res.data.code == 200) {
+            this.showOriginImage = true;
+            this.loadOriginImage = true;
+            this.imgList = res.data.data
           }
         })
         .catch((error) => {this.$message.error("查找患者ID失败");})
         .finally(() => {
           this.loadOriginImage = false;
         });
+    },
+
+    AIadvice() {
+      this.$alert(this.aiDiagResult, "AI诊断结果", {
+        confirmButtonText: "确定",
+        
+      });
     },
   },
   mounted() {
@@ -482,5 +499,9 @@ body {
   .panel:nth-of-type(5) {
     display: none;
   }
+}
+
+.el-divider {
+    background-color: #409EFF;
 }
 </style>
