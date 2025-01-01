@@ -212,19 +212,20 @@
             <el-radio-group
               style="margin-left: -200px"
               v-model="infoForm.sexName"
+              disabled 
             >
               <el-radio label="男">男</el-radio>
               <el-radio label="女">女</el-radio>
             </el-radio-group>
           </el-form-item>
           <el-form-item label="出生日期" :label-width="formLabelWidth">
-            <el-input v-model="infoForm.birthday" autocomplete="off"></el-input>
+            <el-input v-model="infoForm.birthday" autocomplete="off" disabled></el-input>
           </el-form-item>
           <el-form-item label="患者电话" :label-width="formLabelWidth">
             <el-input v-model="infoForm.phone" autocomplete="off"></el-input>
           </el-form-item>
           <el-form-item label="身份证号" :label-width="formLabelWidth">
-            <el-input v-model="infoForm.idNumber" autocomplete="off"></el-input>
+            <el-input v-model="infoForm.idNumber" autocomplete="off" disabled></el-input>
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -389,11 +390,10 @@ export default {
       });
     },
     handlePatientInfo(row) {
-      console.log(row.patientId)
       api.getPatientById(row.patientId).then((res) => {
+        console.log(res)
         if (res.data.code == 200) {
           this.infoForm = res.data.data;
-          console.log(res)
         }
       });
       this.dialogFormVisible = true;

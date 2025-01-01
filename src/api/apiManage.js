@@ -255,4 +255,12 @@ export default {
       params: data
     })
   },
+
+  getCaseTimelineReport(data) {
+    return request({
+      url: '/check_reports/reportFiles',
+      method: 'get',
+      params: data
+    })
+  },
 }

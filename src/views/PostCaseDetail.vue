@@ -56,120 +56,51 @@
                   </el-descriptions>
                 </div>
                 <el-divider></el-divider>
-                <div class="cardFooter"></div>
+                <div class="cardFooter">
+                  <el-button
+                    style="display: flex; margin-left: 100px"
+                    type="primary"
+                    size="small"
+                    @click="handleCheckReport(caseData.patiendId,caseData.visitNumber)"
+                    round
+                    >查看检查报告</el-button
+                  >
+                </div>
               </el-card>
             </el-timeline-item>
           </el-timeline>
 
           <el-dialog
-            title="修改病历"
-            :visible.sync="dialogEditFormVisible"
+            title="检查报告资料"
+            :visible.sync="dialogCheckReportVisible"
             width="40%"
             :append-to-body="true"
           >
-            <el-form :model="editCase">
-              <el-form-item label="主述" :label-width="formLabelWidth">
-                <el-input
-                  v-model="editCase.mainAppeal"
-                  type="textarea"
-                  autocomplete="off"
-                  style="width: 400px"
-                  :rows="2"
-                ></el-input>
-              </el-form-item>
-              <el-form-item label="既往史" :label-width="formLabelWidth">
-                <el-input
-                  v-model="editCase.pastHistory"
-                  type="textarea"
-                  autocomplete="off"
-                  style="width: 400px"
-                  :rows="2"
-                ></el-input>
-              </el-form-item>
-              <el-form-item label="现病史" :label-width="formLabelWidth">
-                <el-input
-                  v-model="editCase.presentIllness"
-                  type="textarea"
-                  autocomplete="off"
-                  style="width: 400px"
-                  :rows="2"
-                ></el-input>
-              </el-form-item>
-              <el-form-item label="过敏史" :label-width="formLabelWidth">
-                <el-input
-                  v-model="editCase.allergy"
-                  type="textarea"
-                  autocomplete="off"
-                  style="width: 400px"
-                  :rows="2"
-                ></el-input>
-              </el-form-item>
-              <el-form-item label="左眼专科检查" :label-width="formLabelWidth">
-                <el-input
-                  v-model="editCase.specialOs"
-                  autocomplete="off"
-                  type="textarea"
-                  style="width: 400px"
-                  :rows="2"
-                ></el-input>
-              </el-form-item>
-              <el-form-item label="右眼专科检查" :label-width="formLabelWidth">
-                <el-input
-                  v-model="editCase.specialOd"
-                  autocomplete="off"
-                  type="textarea"
-                  style="width: 400px"
-                  :rows="2"
-                ></el-input>
-              </el-form-item>
-              <el-form-item label="体格检查" :label-width="formLabelWidth">
-                <el-input
-                  v-model="editCase.physicalExam"
-                  autocomplete="off"
-                  type="textarea"
-                  style="width: 400px"
-                  :rows="2"
-                ></el-input>
-              </el-form-item>
-              <el-form-item label="体格检查" :label-width="formLabelWidth">
-                <el-input
-                  v-model="editCase.dispose"
-                  autocomplete="off"
-                  type="textarea"
-                  style="width: 400px"
-                  :rows="2"
-                ></el-input>
-              </el-form-item>
-            </el-form>
-            <div slot="footer" class="dialog-footer">
-              <el-button type="primary" @click="submitEditUser()"
-                >确 定</el-button
-              >
-            </div>
+            <el-table :data="pdfDataList" style="width: 100%" max-height="500">
+              <el-table-column
+                prop="checkReports.itemName"
+                label="名称"
+                width="180"
+              ></el-table-column>
+              <el-table-column
+                prop="checkReports.checkTime"
+                label="检查时间"
+                width="180"
+              ></el-table-column>
+              <el-table-column prop="url" label="报告资料(点击图片查看)" width="300">
+                <template #default="scope">
+                  <el-image
+                    style="width: 100px; height: 100px"
+                    src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
+                    :preview-src-list="scope.row.url"
+                  >
+                  </el-image>
+                </template>
+              </el-table-column>
+              
+            </el-table>
           </el-dialog>
-          <!-- <el-button
-            style="display: flex; margin-left: 100px"
-            type="primary"
-            @click="editPatientCase()"
-            round
-            >确认修改</el-button
-          > -->
         </el-tab-pane>
-        <!-- <el-tab-pane label="IOL Master" name="third"> -->
-        <!-- <el-form :model="caseData">
-                        <el-form-item label="左眼眼轴" :label-width="formLabelWidth">
-                            <el-row :gutter="20">
-                                <el-col :span="8">
-                                    <el-input v-model="caseData.alos" autocomplete="off" style="width: 100px;"></el-input>
-                                </el-col >
-                                <el-col class="line" :span="7">右眼眼轴</el-col>
-                                <el-col :span="8">
-                                    <el-input v-model="caseData.alod" autocomplete="off" style="width: 100px;"></el-input>
-                                </el-col>
-                            </el-row>
-                        </el-form-item>
-                    </el-form> -->
-        <!-- </el-tab-pane> -->
         <el-tab-pane label="检验结果" name="labTest">
           <el-descriptions
             v-for="(item, index) in labData"
@@ -208,7 +139,7 @@
             }}</el-descriptions-item>
           </el-descriptions>
         </el-tab-pane>
-        <el-tab-pane label="检查资料" name="fourth">
+        <!-- <el-tab-pane label="检查资料" name="fourth">
           <el-table :data="pdfDataList" style="width: 60%">
             <el-table-column
               prop="name"
@@ -226,7 +157,7 @@
               </template>
             </el-table-column>
           </el-table>
-        </el-tab-pane>
+        </el-tab-pane> -->
       </el-tabs>
     </el-main>
     <el-footer
@@ -251,23 +182,7 @@ export default {
       id: "",
       patientId: "",
       patientName: "",
-      dialogEditFormVisible: false,
-      editCase: {
-        patientId: 1,
-        eye: "sss",
-        name: "艾弗森",
-        mainAppeal: "候除理说本些理七。",
-        pastHistory: "及改流目飞。",
-        presentIllness: "大则段马。",
-        allergy: "天日然。",
-        specialOs: "转步类以需感先在。",
-        specialOd: "总员题据识式认。",
-        visitNumber: "业成角花。",
-        physicalExam:
-          "2021年7月，作为强制碳市场的全国碳排放权交易市场启动上线交易，年覆盖二氧化碳排放量约51亿吨，占全国二氧化碳排放总量的40%以上。然而，目前全国碳排放权交易市场仅在发电企业开展，按计划将逐步覆盖其他重点排放行业，但仍有可再生能源、林业碳汇等行业无法通过市场机制获得减排经济收益。启动自愿碳市场，有利于统筹全国碳资源，激励更广泛的行业、企业参与温室气体减排行动。2021年7月，作为强制碳市场的全国碳排放权交易市场启动上线交易，年覆盖二氧化碳排放量约51亿吨，占全国二氧化碳排放总量的40%以上。然而，目前全国碳排放权交易市场仅在发电企业开展，按计划将逐步覆盖其他重点排放行业，但仍有可再生能源、林业碳汇等行业无法通过市场机制获得减排经济收益。启动自愿碳市场，有利于统筹全国碳资源，激励更广泛的行业、企业参与温室气体减排行动。2021年7月，作为强制碳市场的全国碳排放权交易市场启动上线交易，年覆盖二氧化碳排放量约51亿吨，占全国二氧化碳排放总量的40%以上。然而，目前全国碳排放权交易市场仅在发电企业开展，按计划将逐步覆盖其他重点排放行业，但仍有可再生能源、林业碳汇等行业无法通过市场机制获得减排经济收益。启动自愿碳市场，有利于统筹全国碳资源，激励更广泛的行业、企业参与温室气体减排行动。",
-        dispose: "低交如九年。",
-        date: "2021-02-02",
-      },
+      dialogCheckReportVisible: false,
       caseDataList: [
         {
           patientId: 1,
@@ -304,21 +219,30 @@ export default {
       ],
       pdfDataList: [
         {
-          name: "选项1",
+          checkReports: {
+            itemName: 'slo',
+            checkTime: '2020-02-02'
+          },
           url: [
             "https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg",
             "https://fuss10.elemecdn.com/1/8e/aeffeb4de74e2fde4bd74fc7b4486jpeg.jpeg",
           ],
         },
         {
-          name: "选项2",
+          checkReports: {
+            itemName: 'slo',
+            checkTime: '2020-02-02'
+          },
           url: [
             "https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg",
             "https://fuss10.elemecdn.com/1/8e/aeffeb4de74e2fde4bd74fc7b4486jpeg.jpeg",
           ],
         },
         {
-          name: "选项3",
+          checkReports: {
+            itemName: 'slo',
+            checkTime: '2020-02-02'
+          },
           url: [
             "https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg",
             "https://fuss10.elemecdn.com/1/8e/aeffeb4de74e2fde4bd74fc7b4486jpeg.jpeg",
@@ -326,20 +250,8 @@ export default {
         },
       ],
       value: "",
-      infoForm: {
-        id: "1796786711460069400",
-        patientName: "杨奇韵",
-        patientId: "1796786711460069400",
-        sex: "1",
-        birthday: "1919-01-01",
-        phone: "08820",
-        idNumber: "298452984941879",
-      },
       formLabelWidth: "120px",
       iolmaster: "",
-      opt: [],
-      oct: [],
-      optimg: "",
       labData: [
         {
           patientName: "杨奇韵",
@@ -378,30 +290,32 @@ export default {
           auditDate: "2024-08-08 10:54:18",
         },
       ],
-      diagnosisData: {
-        diagnosis: "",
-        recommend: "",
-        checktime: "",
-        plan: "",
-      },
-      pdfUrl: "/img/PDF/IOL-Haigis_408.pdf",
     };
   },
   created() {
     this.patientId = this.$route.params.id;
     this.patientName = this.$route.params.patientName;
-    api.getPatientCheckReport("1858391994866434050").then((res) => {
-      console.log(res);
-      // if (res.data.code == 200) {
-      //   this.infoForm = res.data.data.records;
-      //   this.loading = false;
-      //   this.totalSize = res.data.data.total;
-      // }
-    });
     this.getHistoryCase();
     this.getLabData();
   },
   methods: {
+    handleCheckReport(patientId,visitNumber) {
+      let obj = {
+        patientId,
+        visitNumber
+      }
+      this.dialogCheckReportVisible = true;
+      api
+        .getCaseTimelineReport(obj)
+        .then((res) => {
+          if (res.data.code == 200) {
+            console.log(res)
+          }
+        })
+        .catch((error) => {})
+        .finally(() => {
+        });
+    },
     getLabData() {
       api.getCheckResult("1796786711460069377").then((res) => {
         if (res.data.code == 200) {
@@ -436,14 +350,18 @@ export default {
     },
     getHistoryCase() {
       let obj = {
-        dataEnd: "",
-        dataStart: "",
-        patientName: "",
+        visitNumber: "",
         patientId: this.patientId,
       };
       api.getCaseTimeline(obj).then((res) => {
         console.log(res);
         if (res.data.code == 200) {
+          if (res.data.data.records) {
+            this.$message({
+              message: "该患者不存在病历数据！",
+              type: "warning",
+            });
+          }
           let cases = res.data.data.records;
           cases.forEach((item, index) => {
             cases[index].eyeSummary =
@@ -577,7 +495,7 @@ export default {
   flex: 2;
 }
 .content {
-  height: 260px;
+  /* height: 260px; */
   overflow: auto;
 }
 </style>
