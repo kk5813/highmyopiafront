@@ -89,7 +89,7 @@
                 <template #default="scope">
                   <el-image
                     style="width: 100px; height: 100px"
-                    src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
+                    :src="scope.row.url[0]"
                     :preview-src-list="scope.row.url"
                   >
                   </el-image>
@@ -143,8 +143,9 @@
               >
                 <template #default="scope">
                   <el-image
+                    v-if="scope.row.url[0]"
                     style="width: 100px; height: 100px"
-                    src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
+                    :src="scope.row.url[0]"
                     :preview-src-list="scope.row.url"
                   >
                   </el-image>
@@ -166,9 +167,6 @@
             </div> -->
 
             <div style="width: 100%; margin-top: 20px; margin-left: -80px">
-              <el-button type="text" @click="AIadvice"
-                >点击查看AI诊断结果</el-button
-              >
               <el-button type="primary" @click="addFollowup()"
                 >添加随访<i class="el-icon-upload el-icon--right"></i
               ></el-button>
@@ -373,7 +371,8 @@ export default {
             aiResult.forEach((item,index) => {
               urlList = item.url.split(',')
               urlList.forEach((item,index) => {
-                urlList[index] = 'http://localhost:8081/images/' + item
+                if(item)
+                  urlList[index] = 'http://localhost:8081/images/' + item
               })
               aiResult[index].url = urlList
             })
@@ -400,6 +399,7 @@ export default {
           let originData;
           let originImgList = []
           if (res.data.code == 200) {
+            this.imgList = []
             this.showOriginImage = true;
             this.loadOriginImage = true;
             originData = res.data.data;

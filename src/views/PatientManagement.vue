@@ -276,7 +276,7 @@ export default {
         .getVisitList(obj)
         .then((res) => {
           if (res.data.code == 200) {
-            console.log(res);
+            console.log(typeof res.data.data.total);
             this.tableData = res.data.data.records;
             this.totalSize = res.data.data.total;
           }
