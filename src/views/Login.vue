@@ -112,7 +112,9 @@ export default {
             api.login(this.ruleForm).then((res) => {
               if (res.data.code == 200) {
                 const userInfo = res.data.data;
+                console.log(res)
                 // setSession(res.headers.authorization)
+                sessionStorage.setItem('userId',userInfo.userId)
                 sessionStorage.setItem('token',res.headers.authorization)
                 sessionStorage.setItem('userName',userInfo.userName)
                 // _this.$store.commit("SET_USERINFO", userInfo);

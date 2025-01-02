@@ -17,7 +17,7 @@
         <el-table
           :data="tableData"
           border
-          style="background: #e9eef3; width: 100%; border-radius: 20px"
+          style="width: 100%; border-radius: 20px"
           v-loading="loading"
         >
           <!-- .slice((currentPage - 1) * pageSize, currentPage * pageSize) -->

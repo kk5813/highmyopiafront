@@ -19,7 +19,7 @@
           <el-table
             :data="tableData"
             border
-            style="background: #e9eef3; width: 100%; border-radius: 20px"
+            style="width: 100%; border-radius: 20px"
             v-loading="loading"
           >
             <el-table-column label="就诊号" prop="visitNumber" align="center">
@@ -219,7 +219,10 @@ export default {
               : idResp.data.data.length;
           })
         )
-        .catch((error) => {})
+        .catch((error) => {
+          _this.tableData = diagResp.data.data.records
+          _this.totalSize = diagResp.data.data.total
+        })
         .finally(() => {
           this.loading = false;
         });

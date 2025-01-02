@@ -70,19 +70,13 @@
         >
           <el-col :span="12">
             <el-table
-              :data="pdfDataList"
+              :data="imgList"
               max-height="500"
               style="width: 73%; border-radius: 20px"
             >
               <el-table-column
-                prop="checkReports.itemName"
+                prop="description"
                 label="原始图像"
-                width="200"
-                align="center"
-              ></el-table-column>
-              <el-table-column
-                prop="checkReports.checkTime"
-                label="检查时间"
                 width="200"
                 align="center"
               ></el-table-column>
@@ -131,18 +125,12 @@
         >
           <el-col :span="12">
             <el-table
-              :data="pdfDataList"
+              :data="AiImgList"
               max-height="500"
               style="padding: 0; width: 73%; border-radius: 20px"
             >
               <el-table-column
-                prop="checkReports.itemName"
-                label="AI处理图像"
-                width="200"
-                align="center"
-              ></el-table-column>
-              <el-table-column
-                prop="checkReports.itemName"
+                prop="resultInfo"
                 label="描述"
                 width="200"
                 align="center"
@@ -289,60 +277,8 @@ export default {
       loadAiImage: false,
       showOriginImage: false,
       showAiImage: false,
-      imgList: [
-        {
-          content: "oct",
-          imgUrl:
-            "https://fuss10.elemecdn.com/a/3f/3302e58f9a181d2509f3dc0fa68b0jpeg.jpeg",
-        },
-        {
-          content: "oct",
-          imgUrl:
-            "https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg",
-        },
-        {
-          content: "oct",
-          imgUrl:
-            "https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg",
-        },
-        {
-          content: "oct",
-          imgUrl:
-            "https://fuss10.elemecdn.com/a/3f/3302e58f9a181d2509f3dc0fa68b0jpeg.jpeg",
-        },
-        {
-          content: "oct",
-          imgUrl:
-            "https://fuss10.elemecdn.com/a/3f/3302e58f9a181d2509f3dc0fa68b0jpeg.jpeg",
-        },
-        {
-          content: "oct",
-          imgUrl:
-            "https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg",
-        },
-        {
-          content: "oct",
-          imgUrl:
-            "https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg",
-        },
-        {
-          content: "oct",
-          imgUrl:
-            "https://fuss10.elemecdn.com/a/3f/3302e58f9a181d2509f3dc0fa68b0jpeg.jpeg",
-        },
-      ],
-      AiImgList: [
-        {
-          content: "oct",
-          imgUrl:
-            "https://fuss10.elemecdn.com/0/6f/e35ff375812e6b0020b6b4e8f9583jpeg.jpeg",
-        },
-        {
-          content: "oct",
-          imgUrl:
-            "https://shadow.elemecdn.com/app/element/hamburger.9cf7b091-55e9-11e9-a976-7f4d0b07eef6.png",
-        },
-      ],
+      imgList: [],
+      AiImgList: [],
       search: "",
       dialogAddFormVisible: false,
       addFollowForm: {
@@ -421,20 +357,31 @@ export default {
     handleAiImg() {
       this.showAiImage = true;
       this.loadAiImage = true;
+      const _this = this
       let allObj = {
         diseaseId: this.selectedModel,
-        patientId: "1",
+        userId: sessionStorage.getItem('userId'),
+        patientId: this.search,
       };
       api
         .getAiDiagnose(allObj)
         .then((res) => {
+          let aiResult = []
+          let urlList = []
           if (res.data.code == 200) {
             console.log(res);
+            aiResult = res.data.data
+            aiResult.forEach((item,index) => {
+              urlList = item.url.split(',')
+              urlList.forEach((item,index) => {
+                urlList[index] = 'http://localhost:8081/' + item
+              })
+              aiResult[index].url = urlList
+            })
+            _this.AiImgList = aiResult
           }
         })
         .catch((error) => {
-          this.showAiImage = true;
-          this.loadAiImage = true;
         })
         .finally(() => {
           this.loadAiImage = false;
@@ -450,23 +397,25 @@ export default {
       api
         .getPatientTodayReport(this.search)
         .then((res) => {
+          let originData = []
+          let originImgList = []
           console.log(res);
-          if (this.search === "123456") {
+          if (res.data.code == 200) {
             this.showOriginImage = true;
             this.loadOriginImage = true;
+            originData = res.data.data;
+            originData.forEach((item,index) => {
+              let imgsUrl = item.split(',')
+              imgsUrl.forEach((item,index) => {
+                imgsUrl[index] = 'http://localhost:8081/' + item
+              })
+              originImgList.push({description: index,url: imgsUrl})
+            })
+            this.imgList = originImgList
           }
-          // if (res.data.code == 200) {
-          //   this.showOriginImage = true;
-          //   this.loadOriginImage = true;
-          //   this.imgList = res.data.data;
-          // }
         })
         .catch((error) => {
-          if (this.search === "123456") {
-            this.showOriginImage = true;
-            this.loadOriginImage = true;
-          }
-          // this.$message.error("查找患者ID失败");
+          this.$message.error("查找患者ID失败");
         })
         .finally(() => {
           this.loadOriginImage = false;
