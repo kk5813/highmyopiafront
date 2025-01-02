@@ -348,7 +348,6 @@ export default {
         .finally(() => {});
     },
     handleAiImg() {
-      this.loading = true;
       this.showAiImage = true;
       this.loadAiImage = true;
       const _this = this;
@@ -379,7 +378,6 @@ export default {
         .catch((error) => {})
         .finally(() => {
           this.loadAiImage = false;
-          this.loading = false;
         });
     },
     handleOriginImg() {
@@ -396,6 +394,9 @@ export default {
           let originImgList = [];
           if (res.data.code == 200) {
             this.imgList = [];
+            this.showAiImage = false;
+            this.loadAiImage = false;
+            this.selectedModel = ""
             this.showOriginImage = true;
             this.loadOriginImage = true;
             originData = res.data.data;
