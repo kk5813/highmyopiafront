@@ -143,14 +143,6 @@ export default {
     })
   },
 
-  maintenanceMedicalRecord(data) {
-    return request({
-      url: '/medicalRecord/maintenance',
-      method: 'get',
-      data
-    })
-  },
-
   getIllCount(data) {
     return request({
       url: '/today/CategoryCount',

@@ -350,8 +350,8 @@ export default {
               checkTime: "2024-02-02",
             },
             url: [
-              "http://localhost:8081/images/slo1.png",
-              "http://localhost:8081/images/slo2.png",
+              "http://43.136.178.202:8088/images/slo1.png",
+              "http://43.136.178.202:8088/images/slo2.png",
             ],
           },
           {
@@ -360,7 +360,7 @@ export default {
               checkTime: "2024-02-02",
             },
             url: [
-              "http://localhost:8081/images/oct.png",
+              "http://43.136.178.202:8088/images/oct.png",
             ],
           },
           {
@@ -369,7 +369,7 @@ export default {
               checkTime: "2024-02-02",
             },
             url: [
-              "http://localhost:8081/images/iol.png",
+              "http://43.136.178.202:8088/images/iol.png",
             ],
           },
         ] 
@@ -381,8 +381,8 @@ export default {
               checkTime: "2023-02-02",
             },
             url: [
-              "http://localhost:8081/images/slo1.png",
-              "http://localhost:8081/images/slo2.png",
+              "http://43.136.178.202:8088/images/slo1.png",
+              "http://43.136.178.202:8088/images/slo2.png",
             ],
           },
           {
@@ -391,7 +391,7 @@ export default {
               checkTime: "2023-02-02",
             },
             url: [
-              "http://localhost:8081/images/oct.png",
+              "http://43.136.178.202:8088/images/oct.png",
             ],
           }
         ]
@@ -403,8 +403,8 @@ export default {
               checkTime: "2022-02-02",
             },
             url: [
-              "http://localhost:8081/images/slo1.png",
-              "http://localhost:8081/images/slo2.png",
+              "http://43.136.178.202:8088/images/slo1.png",
+              "http://43.136.178.202:8088/images/slo2.png",
             ],
           },
           {
@@ -413,7 +413,7 @@ export default {
               checkTime: "2022-02-02",
             },
             url: [
-              "http://localhost:8081/images/oct.png",
+              "http://43.136.178.202:8088/images/oct.png",
             ],
           },
           {
@@ -422,7 +422,7 @@ export default {
               checkTime: "2022-02-02",
             },
             url: [
-              "http://localhost:8081/images/oct.png"
+              "http://43.136.178.202:8088/images/oct.png"
             ],
           }
         ]

@@ -368,7 +368,7 @@ export default {
               urlList = item.url.split(",");
               urlList.forEach((item, index) => {
                 if (item)
-                  urlList[index] = "http://localhost:8081/images/" + item;
+                  urlList[index] = "http://43.136.178.202:8088/images/" + item;
               });
               aiResult[index].url = urlList;
             });
@@ -405,14 +405,14 @@ export default {
             //   console.log()
             //   let imgsUrl = item.split(',')
             //   imgsUrl.forEach((item,index) => {
-            //     imgsUrl[index] = 'http://localhost:8081/images/' + item
+            //     imgsUrl[index] = 'http://43.136.178.202:8088/images/' + item
             //   })
             //   originImgList.push({description: index,url: imgsUrl})
             // })
             this.imgList.push({
               description: Object.keys(originData)[0],
               url: [
-                "http://localhost:8081/images/" + Object.values(originData)[0],
+                "http://43.136.178.202:8088/images/" + Object.values(originData)[0],
               ],
             });
           }
