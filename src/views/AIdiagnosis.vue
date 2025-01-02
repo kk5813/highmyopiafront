@@ -4,7 +4,7 @@
       <el-header>
         <Header active-index="/AIdiagnosis"></Header>
       </el-header>
-      <el-main>
+      <el-main >
         <!-- 搜索框行 -->
         <el-row>
           <el-col
@@ -233,6 +233,7 @@ export default {
   inject: ["reload"],
   data() {
     return {
+      loading: false,
       pdfDataList: [
         {
           checkReports: {
@@ -355,6 +356,7 @@ export default {
         .finally(() => {});
     },
     handleAiImg() {
+      this.loading = true
       this.showAiImage = true;
       this.loadAiImage = true;
       const _this = this
@@ -374,7 +376,7 @@ export default {
             aiResult.forEach((item,index) => {
               urlList = item.url.split(',')
               urlList.forEach((item,index) => {
-                urlList[index] = 'http://localhost:8081/' + item
+                urlList[index] = 'http://localhost:8081/images/' + item
               })
               aiResult[index].url = urlList
             })
@@ -385,6 +387,7 @@ export default {
         })
         .finally(() => {
           this.loadAiImage = false;
+          this.loading = false
         });
     },
     handleOriginImg() {
@@ -403,11 +406,12 @@ export default {
           if (res.data.code == 200) {
             this.showOriginImage = true;
             this.loadOriginImage = true;
+            this.loading = true
             originData = res.data.data;
             originData.forEach((item,index) => {
               let imgsUrl = item.split(',')
               imgsUrl.forEach((item,index) => {
-                imgsUrl[index] = 'http://localhost:8081/' + item
+                imgsUrl[index] = 'http://localhost:8081/images/' + item
               })
               originImgList.push({description: index,url: imgsUrl})
             })
@@ -418,6 +422,7 @@ export default {
           this.$message.error("查找患者ID失败");
         })
         .finally(() => {
+          this.loading = false
           this.loadOriginImage = false;
         });
     },

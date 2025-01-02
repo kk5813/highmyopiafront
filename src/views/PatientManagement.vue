@@ -211,10 +211,10 @@ export default {
         .then(
           this.$axios.spread(function (diagResp, idResp) {
             console.log(diagResp, idResp);
-            _this.tableData = diagResp.data.data.total
+            _this.tableData = !idResp
               ? diagResp.data.data.records
               : idResp.data.data;
-            _this.totalSize = diagResp.data.data.total
+            _this.totalSize = !idResp
               ? diagResp.data.data.total
               : idResp.data.data.length;
           })

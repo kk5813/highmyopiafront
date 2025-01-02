@@ -282,38 +282,7 @@ export default {
           diagTime: "2022-02-02",
         },
       ],
-      pdfDataList: [
-        {
-          checkReports: {
-            itemName: "眼底扫描激光图",
-            checkTime: "2024-02-02",
-          },
-          url: [
-            "https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg",
-            "https://fuss10.elemecdn.com/1/8e/aeffeb4de74e2fde4bd74fc7b4486jpeg.jpeg",
-          ],
-        },
-        {
-          checkReports: {
-            itemName: "光学相干断层成像（OCT）",
-            checkTime: "2024-02-02",
-          },
-          url: [
-            "https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg",
-            "https://fuss10.elemecdn.com/1/8e/aeffeb4de74e2fde4bd74fc7b4486jpeg.jpeg",
-          ],
-        },
-        {
-          checkReports: {
-            itemName: "IOL",
-            checkTime: "2024-02-02",
-          },
-          url: [
-            "https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg",
-            "https://fuss10.elemecdn.com/1/8e/aeffeb4de74e2fde4bd74fc7b4486jpeg.jpeg",
-          ],
-        },
-      ],
+      pdfDataList: [],
       value: "",
       formLabelWidth: "120px",
       iolmaster: "",
@@ -381,7 +350,7 @@ export default {
               checkTime: "2024-02-02",
             },
             url: [
-              "https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg",
+              "http://localhost:8081/images/a.png",
               "https://fuss10.elemecdn.com/1/8e/aeffeb4de74e2fde4bd74fc7b4486jpeg.jpeg",
             ],
           },
