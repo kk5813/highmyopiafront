@@ -4,7 +4,7 @@
       <el-header>
         <Header active-index="/AIdiagnosis"></Header>
       </el-header>
-      <el-main >
+      <el-main>
         <!-- 搜索框行 -->
         <el-row>
           <el-col
@@ -41,16 +41,13 @@
               v-on:change="handleAiImg()"
               :disabled="showOriginImage == false"
             >
-              <el-tooltip
-                class="item"
-                effect="dark"
-                content="item.description"
-                placement="right"
+              <el-option
                 v-for="item in modelOptions"
                 :key="item.value"
+                :label="item.label"
+                :value="item.value"
               >
-                <el-option :label="item.label" :value="item.value"> </el-option>
-              </el-tooltip>
+              </el-option>
             </el-select>
           </el-col>
         </el-row>
@@ -351,39 +348,38 @@ export default {
         .finally(() => {});
     },
     handleAiImg() {
-      this.loading = true
+      this.loading = true;
       this.showAiImage = true;
       this.loadAiImage = true;
-      const _this = this
+      const _this = this;
       let allObj = {
         diseaseId: this.selectedModel,
-        userId: sessionStorage.getItem('userId'),
+        userId: sessionStorage.getItem("userId"),
         patientId: this.search,
       };
       api
         .getAiDiagnose(allObj)
         .then((res) => {
-          let aiResult = []
-          let urlList = []
+          let aiResult = [];
+          let urlList = [];
           if (res.data.code == 200) {
             console.log(res);
-            aiResult = res.data.data
-            aiResult.forEach((item,index) => {
-              urlList = item.url.split(',')
-              urlList.forEach((item,index) => {
-                if(item)
-                  urlList[index] = 'http://localhost:8081/images/' + item
-              })
-              aiResult[index].url = urlList
-            })
-            _this.AiImgList = aiResult
+            aiResult = res.data.data;
+            aiResult.forEach((item, index) => {
+              urlList = item.url.split(",");
+              urlList.forEach((item, index) => {
+                if (item)
+                  urlList[index] = "http://localhost:8081/images/" + item;
+              });
+              aiResult[index].url = urlList;
+            });
+            _this.AiImgList = aiResult;
           }
         })
-        .catch((error) => {
-        })
+        .catch((error) => {})
         .finally(() => {
           this.loadAiImage = false;
-          this.loading = false
+          this.loading = false;
         });
     },
     handleOriginImg() {
@@ -397,9 +393,9 @@ export default {
         .getPatientTodayReport(this.search)
         .then((res) => {
           let originData;
-          let originImgList = []
+          let originImgList = [];
           if (res.data.code == 200) {
-            this.imgList = []
+            this.imgList = [];
             this.showOriginImage = true;
             this.loadOriginImage = true;
             originData = res.data.data;
@@ -412,7 +408,12 @@ export default {
             //   })
             //   originImgList.push({description: index,url: imgsUrl})
             // })
-            this.imgList.push({description: Object.keys(originData)[0],url:['http://localhost:8081/images/' + Object.values(originData)[0]]})
+            this.imgList.push({
+              description: Object.keys(originData)[0],
+              url: [
+                "http://localhost:8081/images/" + Object.values(originData)[0],
+              ],
+            });
           }
         })
         .catch((error) => {
