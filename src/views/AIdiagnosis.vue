@@ -128,7 +128,7 @@
             >
               <el-table-column
                 prop="resultInfo"
-                label="描述"
+                label="AI诊断结果"
                 width="200"
                 align="center"
               ></el-table-column>
