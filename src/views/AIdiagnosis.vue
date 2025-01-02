@@ -233,7 +233,6 @@ export default {
   inject: ["reload"],
   data() {
     return {
-      loading: false,
       pdfDataList: [
         {
           checkReports: {
@@ -315,7 +314,6 @@ export default {
       api
         .getAiDisease()
         .then((res) => {
-          console.log(res);
           if (res.data.code === 200) {
             let deseaseData = res.data.data;
             let opData = [];
@@ -326,7 +324,6 @@ export default {
                 description: item.description,
               });
             });
-            console.log(opData);
             _this.modelOptions = opData;
           }
         })
@@ -400,29 +397,28 @@ export default {
       api
         .getPatientTodayReport(this.search)
         .then((res) => {
-          let originData = []
+          let originData;
           let originImgList = []
-          console.log(res);
           if (res.data.code == 200) {
             this.showOriginImage = true;
             this.loadOriginImage = true;
-            this.loading = true
             originData = res.data.data;
-            originData.forEach((item,index) => {
-              let imgsUrl = item.split(',')
-              imgsUrl.forEach((item,index) => {
-                imgsUrl[index] = 'http://localhost:8081/images/' + item
-              })
-              originImgList.push({description: index,url: imgsUrl})
-            })
-            this.imgList = originImgList
+            // console.log(originData.keys())
+            // originData.forEach((item,index) => {
+            //   console.log()
+            //   let imgsUrl = item.split(',')
+            //   imgsUrl.forEach((item,index) => {
+            //     imgsUrl[index] = 'http://localhost:8081/images/' + item
+            //   })
+            //   originImgList.push({description: index,url: imgsUrl})
+            // })
+            this.imgList.push({description: Object.keys(originData)[0],url:['http://localhost:8081/images/' + Object.values(originData)[0]]})
           }
         })
         .catch((error) => {
           this.$message.error("查找患者ID失败");
         })
         .finally(() => {
-          this.loading = false
           this.loadOriginImage = false;
         });
     },

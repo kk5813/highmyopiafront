@@ -18,7 +18,7 @@ const service = axios.create({
       }
     }
   }],
-  timeout: 6 * 1000 // request timeout
+  timeout: 7 * 1000 // request timeout
 })
 
 
