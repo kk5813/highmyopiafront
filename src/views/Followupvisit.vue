@@ -40,7 +40,7 @@
                 popper-class="popoverStyle"
               >
                 <div slot="reference" class="div-popover">
-                  计划随访时间<i class="el-icon-arrow-down" />
+                  计划随访时间<i class="el-icon-arrow-down" style="cursor: pointer;"/>
                 </div>
                 <el-checkbox-group
                   :max="1"

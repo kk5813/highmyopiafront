@@ -49,18 +49,18 @@
                 v-for="item in modelOptions"
                 :key="item.value"
               >
-                <el-option
-                  :label="item.label"
-                  :value="item.value"
-                >
-                </el-option>
+                <el-option :label="item.label" :value="item.value"> </el-option>
               </el-tooltip>
             </el-select>
           </el-col>
         </el-row>
 
         <!-- 原图图片展示行 -->
-        <el-empty v-if="!showOriginImage" description="暂无数据" style="width:100vw;margin-top:20px;"></el-empty>
+        <el-empty
+          v-if="!showOriginImage"
+          description="暂无数据"
+          style="width: 100vw; margin-top: 20px"
+        ></el-empty>
         <el-row
           type="flex"
           justify="center"
@@ -68,8 +68,42 @@
           v-loading="loadOriginImage"
           v-show="showOriginImage"
         >
-          <el-col :span="24">
-            <div style="width: 90vw; color: #606266">
+          <el-col :span="12">
+            <el-table
+              :data="pdfDataList"
+              max-height="500"
+              style="width: 73%; border-radius: 20px"
+            >
+              <el-table-column
+                prop="checkReports.itemName"
+                label="原始图像"
+                width="200"
+                align="center"
+              ></el-table-column>
+              <el-table-column
+                prop="checkReports.checkTime"
+                label="检查时间"
+                width="200"
+                align="center"
+              ></el-table-column>
+              <el-table-column
+                prop="url"
+                label="图像(点击图片查看)"
+                width="200"
+                align="center"
+              >
+                <template #default="scope">
+                  <el-image
+                    style="width: 100px; height: 100px"
+                    src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
+                    :preview-src-list="scope.row.url"
+                  >
+                  </el-image>
+                </template>
+              </el-table-column>
+            </el-table>
+
+            <!-- <div style="width: 90vw; color: #606266">
               <h3>患者原始图像</h3>
             </div>
             <div class="container">
@@ -81,7 +115,7 @@
               >
                 <h3>{{ item.content }}</h3>
               </div>
-            </div>
+            </div> -->
           </el-col>
         </el-row>
 
@@ -95,8 +129,41 @@
           v-show="showAiImage"
           v-loading="loadAiImage"
         >
-          <el-col :span="24">
-            <div style="width: 90vw; color: #606266">
+          <el-col :span="12">
+            <el-table
+              :data="pdfDataList"
+              max-height="500"
+              style="padding: 0; width: 73%; border-radius: 20px"
+            >
+              <el-table-column
+                prop="checkReports.itemName"
+                label="AI处理图像"
+                width="200"
+                align="center"
+              ></el-table-column>
+              <el-table-column
+                prop="checkReports.itemName"
+                label="描述"
+                width="200"
+                align="center"
+              ></el-table-column>
+              <el-table-column
+                prop="url"
+                label="图像(点击图片查看)"
+                width="200"
+                align="center"
+              >
+                <template #default="scope">
+                  <el-image
+                    style="width: 100px; height: 100px"
+                    src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
+                    :preview-src-list="scope.row.url"
+                  >
+                  </el-image>
+                </template>
+              </el-table-column>
+            </el-table>
+            <!-- <div style="width: 90vw; color: #606266">
               <h3 style="width: 90vw;display:block;">AI生成图像</h3>
             </div>
             <div class="container">
@@ -108,12 +175,12 @@
               >
                 <h3>{{ item.content }}</h3>
               </div>
-            </div>
-            <el-divider v-if="showAiImage"></el-divider>
-            <div style="width: 100%;margin-top:20px;">
+            </div> -->
+
+            <div style="width: 100%; margin-top: 20px; margin-left: -80px">
               <el-button type="text" @click="AIadvice"
-              >点击查看AI诊断结果</el-button
-            >
+                >点击查看AI诊断结果</el-button
+              >
               <el-button type="primary" @click="addFollowup()"
                 >添加随访<i class="el-icon-upload el-icon--right"></i
               ></el-button>
@@ -128,30 +195,29 @@
           width="30%"
         >
           <el-form :model="addFollowForm">
-          <el-form-item label="患者ID" :label-width="formLabelWidth">
-            <el-input
-              v-model="addFollowForm.patientId"
-              autocomplete="off"
-            >{{this.search}}</el-input>
-          </el-form-item>
-          <el-form-item label="计划随访日期" :label-width="formLabelWidth">
-            <el-date-picker
-              style="float: left"
-              v-model="addFollowForm.planVisitDate"
-              align="left"
-              type="date"
-              placeholder="选择日期"
-              value-format="yyyy-MM-dd"
-              :picker-options="pickerOptions"
-            >
-            </el-date-picker>
-          </el-form-item>
-          <el-form-item label="随访计划" :label-width="formLabelWidth">
-            <el-input
-              v-model="addFollowForm.visitPlan"
-              autocomplete="off"
-            ></el-input>
-          </el-form-item>
+            <el-form-item label="患者ID" :label-width="formLabelWidth">
+              <el-input v-model="addFollowForm.patientId" autocomplete="off">{{
+                this.search
+              }}</el-input>
+            </el-form-item>
+            <el-form-item label="计划随访日期" :label-width="formLabelWidth">
+              <el-date-picker
+                style="float: left"
+                v-model="addFollowForm.planVisitDate"
+                align="left"
+                type="date"
+                placeholder="选择日期"
+                value-format="yyyy-MM-dd"
+                :picker-options="pickerOptions"
+              >
+              </el-date-picker>
+            </el-form-item>
+            <el-form-item label="随访计划" :label-width="formLabelWidth">
+              <el-input
+                v-model="addFollowForm.visitPlan"
+                autocomplete="off"
+              ></el-input>
+            </el-form-item>
           </el-form>
           <div slot="footer" class="dialog-footer">
             <el-button @click="dialogAddFormVisible = false">取 消</el-button>
@@ -179,6 +245,38 @@ export default {
   inject: ["reload"],
   data() {
     return {
+      pdfDataList: [
+        {
+          checkReports: {
+            itemName: "眼底扫描激光图",
+            checkTime: "2024-02-02",
+          },
+          url: [
+            "https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg",
+            "https://fuss10.elemecdn.com/1/8e/aeffeb4de74e2fde4bd74fc7b4486jpeg.jpeg",
+          ],
+        },
+        {
+          checkReports: {
+            itemName: "光学相干断层成像（OCT）",
+            checkTime: "2024-02-02",
+          },
+          url: [
+            "https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg",
+            "https://fuss10.elemecdn.com/1/8e/aeffeb4de74e2fde4bd74fc7b4486jpeg.jpeg",
+          ],
+        },
+        {
+          checkReports: {
+            itemName: "IOL",
+            checkTime: "2024-02-02",
+          },
+          url: [
+            "https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg",
+            "https://fuss10.elemecdn.com/1/8e/aeffeb4de74e2fde4bd74fc7b4486jpeg.jpeg",
+          ],
+        },
+      ],
       selectedModel: "",
       pickerOptions: {
         //          日期限制，只能选择今日以后的时间
@@ -268,7 +366,7 @@ export default {
           label: "高度近视",
         },
       ],
-      aiDiagResult: '白内障',
+      aiDiagResult: "白内障",
     };
   },
   created() {
@@ -291,7 +389,7 @@ export default {
                 description: item.description,
               });
             });
-            console.log(opData)
+            console.log(opData);
             _this.modelOptions = opData;
           }
         })
@@ -325,16 +423,19 @@ export default {
       this.loadAiImage = true;
       let allObj = {
         diseaseId: this.selectedModel,
-        patientId: '1'
+        patientId: "1",
       };
       api
         .getAiDiagnose(allObj)
         .then((res) => {
           if (res.data.code == 200) {
-            console.log(res)
+            console.log(res);
           }
         })
-        .catch((error) => {})
+        .catch((error) => {
+          this.showAiImage = true;
+          this.loadAiImage = true;
+        })
         .finally(() => {
           this.loadAiImage = false;
         });
@@ -349,14 +450,24 @@ export default {
       api
         .getPatientTodayReport(this.search)
         .then((res) => {
-          console.log(res)
-          if (res.data.code == 200) {
+          console.log(res);
+          if (this.search === "123456") {
             this.showOriginImage = true;
             this.loadOriginImage = true;
-            this.imgList = res.data.data
           }
+          // if (res.data.code == 200) {
+          //   this.showOriginImage = true;
+          //   this.loadOriginImage = true;
+          //   this.imgList = res.data.data;
+          // }
         })
-        .catch((error) => {this.$message.error("查找患者ID失败");})
+        .catch((error) => {
+          if (this.search === "123456") {
+            this.showOriginImage = true;
+            this.loadOriginImage = true;
+          }
+          // this.$message.error("查找患者ID失败");
+        })
         .finally(() => {
           this.loadOriginImage = false;
         });
@@ -365,7 +476,6 @@ export default {
     AIadvice() {
       this.$alert(this.aiDiagResult, "AI诊断结果", {
         confirmButtonText: "确定",
-        
       });
     },
   },
@@ -502,6 +612,6 @@ body {
 }
 
 .el-divider {
-    background-color: #409EFF;
+  background-color: #409eff;
 }
 </style>
