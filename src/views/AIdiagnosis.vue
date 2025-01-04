@@ -359,9 +359,10 @@ export default {
       api
         .getAiDiagnose(allObj)
         .then((res) => {
+          console.log(res)
           let aiResult = [];
           let urlList = [];
-          if (res.data.code == 200) {
+          if (res.data.code === 200) {
             console.log(res);
             aiResult = res.data.data;
             aiResult.forEach((item, index) => {
