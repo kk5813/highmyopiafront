@@ -20,12 +20,46 @@
           style="width: 100%; border-radius: 20px"
           v-loading="loading"
         >
-          <!-- .slice((currentPage - 1) * pageSize, currentPage * pageSize) -->
           <el-table-column label="患者ID" prop="patientId" align="center">
           </el-table-column>
-          <el-table-column label="患者姓名" prop="patientName" align="center">
+          <el-table-column
+            width="100px;"
+            label="患者姓名"
+            prop="patientName"
+            align="center"
+          >
           </el-table-column>
-          <el-table-column label="手机号" prop="telephone" align="center">
+          <el-table-column
+            width="50px"
+            label="性别"
+            prop="gender"
+            align="center"
+          >
+          </el-table-column>
+          <el-table-column
+            width="150px;"
+            label="出生日期"
+            prop="idNumber"
+            align="center"
+          >
+            <template slot-scope="scope" v-if="scope.row.idNumber">
+              {{
+                scope.row.idNumber.substring(6, 10) +
+                "-" +
+                scope.row.idNumber.substring(10, 12) +
+                "-" +
+                scope.row.idNumber.substring(12, 14)
+              }}
+            </template>
+          </el-table-column>
+          <el-table-column label="身份证号" prop="idNumber" align="center">
+          </el-table-column>
+          <el-table-column
+            width="150px"
+            label="手机号"
+            prop="telephone"
+            align="center"
+          >
           </el-table-column>
           <el-table-column
             label="计划随访时间"
@@ -33,66 +67,70 @@
             align="center"
           >
             <template slot="header" slot-scope="scope">
-              <el-popover
-                ref="popover"
-                placement="bottom"
-                trigger="click"
-                popper-class="popoverStyle"
-              >
-                <div slot="reference" class="div-popover">
-                  计划随访时间<i class="el-icon-arrow-down" style="cursor: pointer;"/>
-                </div>
-                <el-checkbox-group
-                  :max="1"
-                  v-model="checkList"
-                  style="width: 80px"
-                >
-                  <el-checkbox
-                    label="全部未随访"
-                    class="el-checkbox__statusFirst"
-                    >全部未随访</el-checkbox
+              <el-dropdown @command="handleCommand">
+                <span>
+                  计划随访时间({{ currentClass
+                  }})<i class="el-icon-arrow-down el-icon--right"></i>
+                </span>
+                <el-dropdown-menu slot="dropdown">
+                  <el-dropdown-item icon="el-icon-date" command="全部"
+                    >全部</el-dropdown-item
                   >
-                  <el-checkbox
-                    label="今日未随访"
-                    class="el-checkbox__statusOthers"
-                    >今日未随访</el-checkbox
+                  <el-dropdown-item icon="el-icon-plus" command="后续待随访"
+                    >后续待随访</el-dropdown-item
                   >
-                  <el-checkbox
-                    label="超期未随访"
-                    class="el-checkbox__statusOthers"
-                    >超期未随访</el-checkbox
+                  <el-dropdown-item icon="el-icon-check" command="今日未随访"
+                    >今日未随访</el-dropdown-item
                   >
-                </el-checkbox-group>
-                <el-row :gutter="1">
-                  <el-col :span="12">
-                    <el-link
-                      :underline="false"
-                      type="primary"
-                      :disabled="checkList.length == 0"
-                      @click="filterChange"
-                      >筛选</el-link
-                    >
-                  </el-col>
-                </el-row>
-              </el-popover>
+                  <el-dropdown-item icon="el-icon-close" command="超期未随访"
+                    >超期未随访</el-dropdown-item
+                  >
+                </el-dropdown-menu>
+              </el-dropdown>
             </template>
           </el-table-column>
-          <el-table-column width="400 px" align="right">
-            <template slot="header" slot-scope="scope">
-              <el-button
-                size="medium"
-                type="success"
-                style="margin-right: 10px"
-                @click="addFollowup(scope.$index, scope.row)"
-                >新增随访</el-button
+          <el-table-column
+            prop="visitResult"
+            label="随访情况"
+            width="100"
+            align="center"
+          >
+            <template slot-scope="scope">
+              <el-tag
+                :type="scope.row.visitResult === 0 ? 'danger' : 'success'"
+                disable-transitions
+                >{{ scope.row.visitResult === 0 ? "未随访" : "已随访" }}</el-tag
               >
+            </template>
+          </el-table-column>
+          <el-table-column align="center">
+            <template slot="header" slot-scope="scope">
+              <el-tooltip content="添加随访" placement="top">
+                <el-button
+                  icon="el-icon-plus"
+                  circle
+                  type="success"
+                  size="mini"
+                  style="margin-right: 10px"
+                  @click="addFollowup(scope.$index, scope.row)"
+                ></el-button>
+              </el-tooltip>
               <el-input
-                @keyup.enter.native="searchByIdInput()"
                 v-model="search"
                 size="medium"
-                placeholder="输入患者ID回车搜索"
+                placeholder="请输入患者ID"
+                clearable
                 style="width: 200px"
-              />
+              >
+                <template slot="append">
+                  <el-button
+                    icon="el-icon-search"
+                    type="primary"
+                    @click="searchByIdInput()"
+                    circle
+                  ></el-button>
+                </template>
+              </el-input>
             </template>
             <template slot-scope="scope" class="table-operate">
               <el-button
@@ -310,6 +348,8 @@ export default {
   inject: ["reload"],
   data() {
     return {
+      // 添加v-if处理分页组件修改当前页无响应的bug
+      pageshow: true,
       loading: false,
       currentPage: 1,
       pageSize: 10,
@@ -356,12 +396,19 @@ export default {
           return time.getTime() < Date.now();
         },
       },
+      currentClass: "全部",
     };
   },
   created() {
     this.getData();
   },
   methods: {
+    handleCommand(command) {
+      this.currentClass = command;
+      this.currentPage = 1;
+      this.pageSize = 10;
+      this.getData();
+    },
     searchByIdInput() {
       let idObj = {
         patientId: this.search,
@@ -398,7 +445,6 @@ export default {
       api
         .editFollowup(_this.followupForm)
         .then((res) => {
-          console.log(res);
           if (res.data.code === 200) {
             this.$message({
               message: "编辑成功",
@@ -417,7 +463,6 @@ export default {
     },
     handlePatientInfo(row) {
       api.getPatientById(row.patientId).then((res) => {
-        console.log(res);
         if (res.data.code == 200) {
           this.infoForm = res.data.data;
         }
@@ -449,6 +494,7 @@ export default {
     getData() {
       let yesterday = this.getYesterday(0);
       let today = this.getNowTime(0);
+      let tomorrow = this.getTomorrow(0);
       let yesterdayObj = {
         patientId: "",
         dateStart: "",
@@ -465,16 +511,37 @@ export default {
         pageNo: this.currentPage,
         pageSize: this.pageSize,
       };
-      let allObj = {
+      let tomorrowObj = {
         patientId: "",
-        dateStart: "",
+        dateStart: tomorrow,
         dateEnd: "",
         visitResult: 0,
         pageNo: this.currentPage,
         pageSize: this.pageSize,
       };
+      let allObj = {
+        patientId: "",
+        dateStart: "",
+        dateEnd: "",
+        visitResult: "",
+        pageNo: this.currentPage,
+        pageSize: this.pageSize,
+      };
       this.loading = true;
-      if (this.checkList[0] === "今日未随访") {
+      if (this.currentClass === "全部") {
+        api
+          .searchFollowup(allObj)
+          .then((res) => {
+            if (res.data.code == 200) {
+              this.tableData = res.data.data.records;
+              this.totalSize = res.data.data.total;
+            }
+          })
+          .catch((error) => {})
+          .finally(() => {
+            this.loading = false;
+          });
+      } else if (this.currentClass === "今日未随访") {
         api
           .searchFollowup(todayObj)
           .then((res) => {
@@ -487,7 +554,7 @@ export default {
           .finally(() => {
             this.loading = false;
           });
-      } else if (this.checkList[0] === "超期未随访") {
+      } else if (this.currentClass === "超期未随访") {
         api
           .searchFollowup(yesterdayObj)
           .then((res) => {
@@ -500,11 +567,10 @@ export default {
           .finally(() => {
             this.loading = false;
           });
-      } else {
+      } else if (this.currentClass === "后续待随访") {
         api
-          .searchFollowup(allObj)
+          .searchFollowup(tomorrowObj)
           .then((res) => {
-            console.log(res);
             if (res.data.code == 200) {
               this.tableData = res.data.data.records;
               this.totalSize = res.data.data.total;
@@ -526,12 +592,23 @@ export default {
     },
 
     handleSizeChange(size) {
+      this.pageshow = false; //让分页隐藏
       this.pageSize = size;
       this.getData();
+      this.$nextTick(() => {
+        //重新渲染分页
+        this.pageshow = true;
+      });
     },
     handleCurrentChange(page) {
+      this.pageshow = false; //让分页隐藏
       this.currentPage = page;
       this.getData();
+
+      this.$nextTick(() => {
+        //重新渲染分页
+        this.pageshow = true;
+      });
     },
 
     addFollowup(index, row) {
@@ -544,11 +621,9 @@ export default {
     },
     submitAddShortInfoForm() {
       this.dialogAddFormVisible = false;
-      console.log(this.addFollowForm);
       api
         .addFollowup(this.addFollowForm)
         .then((res) => {
-          console.log(res);
           if (res.data.code === 200) {
             this.$message({
               message: "添加成功",
@@ -627,7 +702,39 @@ export default {
       }
       return nowTime;
     },
-
+    getTomorrow(isAll) {
+      let nowDate = new Date();
+      let nowDay = nowDate.getDate();
+      // 实际获取昨天日期
+      let now = new Date(nowDate.setDate(nowDay + 1));
+      let year = now.getFullYear(); //获取完整的年份(4位,1970-????)
+      let month = now.getMonth() + 1; //获取当前月份(0-11,0代表1月)
+      let today = now.getDate(); //获取当前日(1-31)
+      let hour = now.getHours(); //获取当前小时数(0-23)
+      let minute = now.getMinutes(); //获取当前分钟数(0-59)
+      let second = now.getSeconds(); //获取当前秒数(0-59)
+      let nowTime = "";
+      //返回年月日时分秒
+      if (isAll) {
+        nowTime =
+          year +
+          "-" +
+          this.fillZero(month) +
+          "-" +
+          this.fillZero(today) +
+          " " +
+          this.fillZero(hour) +
+          ":" +
+          this.fillZero(minute) +
+          ":" +
+          this.fillZero(second);
+      } else {
+        //返回年月日
+        nowTime =
+          year + "-" + this.fillZero(month) + "-" + this.fillZero(today);
+      }
+      return nowTime;
+    },
     fillZero(str) {
       var realNum;
       if (str < 10) {
@@ -701,5 +808,19 @@ export default {
 }
 .el-popover.popoverStyle {
   min-width: 100px;
+}
+
+.el-dropdown-link {
+  cursor: pointer;
+  color: #409eff;
+}
+.el-icon-arrow-down {
+  font-size: 12px;
+}
+.demonstration {
+  display: block;
+  color: #8492a6;
+  font-size: 14px;
+  margin-bottom: 20px;
 }
 </style>

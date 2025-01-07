@@ -69,7 +69,6 @@ export default {
     })
   },
 
-
   // 患者信息管理  ==>  /patient
   getPatientById(patientId) {
     return request({
@@ -274,6 +273,13 @@ export default {
   getPatientTodayReport(patientId) {
     return request({
       url: '/today/onlySearch/' + patientId,
+      method: 'get'
+    })
+  },
+
+  downloadPatientInfo() {
+    return request({
+      url: '/patients/export',
       method: 'get'
     })
   },

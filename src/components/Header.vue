@@ -10,27 +10,21 @@
       active-text-color="#ffd04b"
     >
       <span>慢病管理系统</span>
-      <el-menu-item index="/Main"
-        ><i class="el-icon-user"></i>用户管理</el-menu-item
+      <el-menu-item index="/illStatistic">
+        <i class="el-icon-data-analysis"></i>病种统计
+      </el-menu-item>
+      <el-menu-item index="/AIdiagnosis">
+        <i class="el-icon-monitor"></i>智能诊断
+      </el-menu-item>
+      <el-menu-item index="/Followupvisit"
+        ><i class="el-icon-phone-outline"></i>随访管理</el-menu-item
       >
       <el-menu-item index="/patientmanagement"
         ><i class="el-icon-folder"></i>患者档案</el-menu-item
       >
-      <el-menu-item index="/Followupvisit"
-        ><i class="el-icon-phone-outline"></i>随访管理</el-menu-item
+      <el-menu-item index="/Main"
+        ><i class="el-icon-user"></i>用户管理</el-menu-item
       >
-      <!-- <el-menu-item index="/NotCompletedCase">
-                <i class="el-icon-document"></i>待完善病历
-            </el-menu-item>
-            <el-menu-item index="/CompletedCase">
-                <i class="el-icon-document-checked"></i>已完善病历
-            </el-menu-item> -->
-      <el-menu-item index="/AIdiagnosis">
-        <i class="el-icon-monitor"></i>智能诊断
-      </el-menu-item>
-      <el-menu-item index="/illStatistic">
-        <i class="el-icon-data-analysis"></i>病种统计
-      </el-menu-item>
       <div class="menu-right">
         <div
           style="

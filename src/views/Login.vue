@@ -112,13 +112,10 @@ export default {
             api.login(this.ruleForm).then((res) => {
               if (res.data.code == 200) {
                 const userInfo = res.data.data;
-                console.log(res)
-                // setSession(res.headers.authorization)
                 sessionStorage.setItem('userId',userInfo.userId)
                 sessionStorage.setItem('token',res.headers.authorization)
                 sessionStorage.setItem('userName',userInfo.userName)
-                // _this.$store.commit("SET_USERINFO", userInfo);
-                this.$router.push({ path: "main" });
+                this.$router.push({ path: "illStatistic" });
               } else _this.$message.error("用户不存在或密码错误！");
             });
           } else {

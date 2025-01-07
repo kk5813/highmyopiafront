@@ -93,20 +93,6 @@
                 </template>
               </el-table-column>
             </el-table>
-
-            <!-- <div style="width: 90vw; color: #606266">
-              <h3>患者原始图像</h3>
-            </div>
-            <div class="container">
-              <div
-                v-for="(item, index) in imgList"
-                :key="index"
-                class="panel active"
-                :style="{ 'background-image': 'url(' + item.imgUrl + ')' }"
-              >
-                <h3>{{ item.content }}</h3>
-              </div>
-            </div> -->
           </el-col>
         </el-row>
 
@@ -149,20 +135,6 @@
                 </template>
               </el-table-column>
             </el-table>
-            <!-- <div style="width: 90vw; color: #606266">
-              <h3 style="width: 90vw;display:block;">AI生成图像</h3>
-            </div>
-            <div class="container">
-              <div
-                v-for="(item, index) in AiImgList"
-                :key="index"
-                class="panel active"
-                :style="{ 'background-image': 'url(' + item.imgUrl + ')' }"
-              >
-                <h3>{{ item.content }}</h3>
-              </div>
-            </div> -->
-
             <div style="width: 100%; margin-top: 20px; margin-left: -80px">
               <el-button type="primary" @click="addFollowup()"
                 >添加随访<i class="el-icon-upload el-icon--right"></i
@@ -359,17 +331,15 @@ export default {
       api
         .getAiDiagnose(allObj)
         .then((res) => {
-          console.log(res)
           let aiResult = [];
           let urlList = [];
           if (res.data.code === 200) {
-            console.log(res);
             aiResult = res.data.data;
             aiResult.forEach((item, index) => {
               urlList = item.url.split(",");
               urlList.forEach((item, index) => {
                 if (item)
-                  urlList[index] = "http://43.136.178.202:8088/images/" + item;
+                  urlList[index] = "process.env.VUE_APP_API_BASE_URL/images/" + item;
               });
               aiResult[index].url = urlList;
             });
@@ -406,14 +376,14 @@ export default {
             //   console.log()
             //   let imgsUrl = item.split(',')
             //   imgsUrl.forEach((item,index) => {
-            //     imgsUrl[index] = 'http://43.136.178.202:8088/images/' + item
+            //     imgsUrl[index] = 'process.env.VUE_APP_API_BASE_URL/images/' + item
             //   })
             //   originImgList.push({description: index,url: imgsUrl})
             // })
             this.imgList.push({
               description: Object.keys(originData)[0],
               url: [
-                "http://43.136.178.202:8088/images/" + Object.values(originData)[0],
+                process.env.VUE_APP_API_BASE_URL + "/images/" + Object.values(originData)[0],
               ],
             });
           }

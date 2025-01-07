@@ -101,7 +101,7 @@ router.beforeEach((to,from,next) => {
   var token = sessionStorage.getItem('token');
   if (token) { // 有token说明已经登录
     if (path == '/login') { // 如果是登录页
-      next('/main');  // 进入到首页
+      next('/illStatistic');  // 进入到首页
     }
   } else { // 没有token说明没有登录
     if (whiteArr.includes(path)) { // 当前路由在白名单里

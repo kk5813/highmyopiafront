@@ -27,6 +27,3 @@ new Vue({
 
 
 
-
-// Object.defineProperty(Vue.prototype, '$moment', { value: canvas })
-

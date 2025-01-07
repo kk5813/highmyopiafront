@@ -25,8 +25,14 @@
               :key="caseData.patiendId"
               :timestamp="caseData.diagTime"
             >
+              <el-button
+                type="primary"
+                @click="handleCard(caseData.visitNumber)"
+                >展开/收起病历</el-button
+              >
               <el-card
-                :id="caseData.patiendId"
+                v-show="cardList[caseData.visitNumber]"
+                :id="caseData.visitNumber"
                 style="margin: 5px 5px 0px 0px; width: 800px"
               >
                 <div slot="header" class="header">
@@ -116,7 +122,7 @@
             </el-table>
           </el-dialog>
         </el-tab-pane>
-        <el-tab-pane @click="getLabData()" label="检验结果" name="labTest">
+        <el-tab-pane @click="getLabData()" label="检验结果" name="orderDetail">
           <el-empty
             v-if="!this.labData"
             description="暂无数据"
@@ -125,7 +131,7 @@
           <el-descriptions
             v-for="(item, index) in labData"
             :key="index"
-            style="width: 1000px; margin-top: 20px"
+            style="width: 1000px; margin-top: 10px"
             title=""
             :column="1"
             border
@@ -159,6 +165,108 @@
             }}</el-descriptions-item>
           </el-descriptions>
         </el-tab-pane>
+        <el-tab-pane @click="getLabData()" label="处方" name="labTest">
+          <el-table
+            :data="orderData"
+            border
+            style="width: 100%; border-radius: 20px"
+            v-loading="loading"
+          >
+            <el-table-column label="医嘱内容" prop="recipeName" align="center">
+            </el-table-column>
+            <el-table-column
+              width="200px"
+              label="规格"
+              prop="specif"
+              align="center"
+            ></el-table-column>
+            <el-table-column
+              width="50px"
+              label="剂量"
+              prop="totalDose"
+              align="center"
+            >
+            </el-table-column>
+            <el-table-column
+              width="100px"
+              label="剂量单位"
+              prop="dosageUnitName"
+              align="center"
+            >
+            </el-table-column>
+            <el-table-column
+              label="给药途径"
+              prop="adminRouteName"
+              align="center"
+            >
+            </el-table-column>
+            <el-table-column
+              width="100px"
+              label="眼别"
+              prop="eyeTypeName"
+              align="center"
+            >
+            </el-table-column>
+            <el-table-column
+              width="100px"
+              label="频率"
+              prop="frequencyName"
+              align="center"
+            >
+            </el-table-column>
+            <el-table-column
+              width="50px"
+              label="滴速"
+              prop="dripSpeedName"
+              align="center"
+            >
+            </el-table-column>
+            <el-table-column
+              width="50px"
+              label="天数"
+              prop="medicDays"
+              align="center"
+            >
+            </el-table-column>
+            <el-table-column
+              width="50px"
+              label="总量"
+              prop="usableDays"
+              align="center"
+            >
+            </el-table-column>
+            <el-table-column
+              width="50px"
+              label="单位"
+              prop="packingUnitName"
+              align="center"
+            >
+            </el-table-column>
+            <el-table-column
+              label="执行科室"
+              prop="execDeptName"
+              align="center"
+            ></el-table-column>
+            <el-table-column
+              label="附加执行科室"
+              prop="addExecDeptName"
+              align="center"
+            ></el-table-column>
+            <el-table-column
+              width="100px"
+              label="是否皮试"
+              prop="skinTest"
+              align="center"
+            ></el-table-column>
+            <el-table-column
+              label="开立医生"
+              prop="doctorName"
+              align="center"
+            ></el-table-column>
+            <el-table-column label="开立时间" prop="billingTime" align="center">
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
       </el-tabs>
     </el-main>
     <el-footer
@@ -178,7 +286,8 @@ export default {
   components: { Header, pdf, ElImageViewer },
   data() {
     return {
-      showViewer: false,
+      isOpen1: false,
+      loading: false,
       activeName: "second",
       id: "",
       patientId: "",
@@ -243,7 +352,7 @@ export default {
           allergy: "无特殊",
           specialOs: "双眼外观未见异常，屈光介质透明眼底呈近视改变",
           specialOd: "双眼外观未见异常，屈光介质透明眼底呈近视改变",
-          visitNumber: "MZ202302020111",
+          visitNumber: "MZ202302020444",
           physicalExam: "无",
           dispose: "随诊",
           diagName: "高度近视",
@@ -324,17 +433,300 @@ export default {
           auditDate: "2024-08-08 10:54:18",
         },
       ],
+      orderData: [
+        {
+          totalNumber: 1,
+          deptName: "青白科",
+          cancelRefundDate: null,
+          orderId: 1859115314996940800,
+          orderAttachId: null,
+          itemCode: 1789171081824669700,
+          eyeType: 1,
+          chmRecipeMethod: null,
+          skinEnterTime: null,
+          // 所用字段分界线
+          recipeName: "棉片T-松油醇棉片",
+          specif: "7*9cm*60片 T型",
+          totalDose: null,
+          dosageUnitName: null,
+          adminRouteName: null,
+          eyeTypeName: "双眼",
+          frequencyName: null,
+          dripSpeedName: null,
+          medicDays: 1,
+          usableDays: 120,
+          packingUnitName: "片",
+          execDeptName: "干眼治疗室",
+          addExecDeptName: null,
+          skinTest: null,
+          doctorName: "李晓峰",
+          billingTime: "2024-11-20 14:03:16",
+          // 所用字段分界线
+          frequency: null,
+          orderState: 3,
+          decocType: null,
+          oprLevel: null,
+          recipeNumber: "CF202411200001",
+          itemName: "眼部B超",
+          herbalAdjustName: null,
+          hospId: 1824,
+          price: null,
+          id: 1859115320042688500,
+          chmNote: null,
+          execPlace: "18246",
+          applyNumber: "JCSQ202411200001",
+          batchNumber: null,
+          packingUnit: 100,
+          modifyDate: "2024-11-20 14:04:23",
+          outsourceSign: 0,
+          deptId: 100484,
+          addExecDept: null,
+          herbalRequest: null,
+          everyNumber: 1,
+          modifer: 48937,
+          herbalUseName: null,
+          recipeKindName: "特检",
+          insureRange: 1,
+          orders: 4,
+          combiNumber: null,
+          tempId: 1859115272567361500,
+          herbalNumber: 0,
+          refundReasonsName: null,
+          refundDate: null,
+          printTimes: 0,
+          skinEnterId: null,
+          longRange: null,
+          skinEnterName: null,
+          dripSpeed: null,
+          cancelRefunderId: null,
+          orderTemplId: null,
+          combiSeq: null,
+          recipeKind: 7,
+          orderTemplName: null,
+          doctorId: 48937,
+          decocTypeName: null,
+          execDept: 103864,
+          herbalAdjust: null,
+          cancelRefunderName: null,
+          tOutpOrderId: 1859115314996940800,
+          refundReasonsCode: null,
+          createDate: "2024-11-20 14:03:16",
+          skinTestResult: null,
+          dosageUnit: null,
+          anesthesiaModeName: null,
+          herbalUse: null,
+          creator: 48937,
+          chronicDisease: 0,
+          singleDose: null,
+          refunder: null,
+          adminRoute: null,
+          anesthesiaMode: null,
+          herbalRequestName: null,
+          execCombiSeq: 1,
+          remarks: null,
+        },
+        {
+          totalNumber: 1,
+          deptName: "青白科",
+          cancelRefundDate: null,
+          orderId: 1859115314996940800,
+          orderAttachId: null,
+          itemCode: 1789171081824669700,
+          eyeType: 1,
+          chmRecipeMethod: null,
+          skinEnterTime: null,
+          // 所用字段分界线
+          recipeName: "眼用冲洗器(润房)",
+          specif: "100ml 100ml",
+          totalDose: null,
+          dosageUnitName: null,
+          adminRouteName: null,
+          eyeTypeName: null,
+          frequencyName: null,
+          dripSpeedName: null,
+          medicDays: 1,
+          usableDays: 1,
+          packingUnitName: "瓶",
+          execDeptName: "干眼治疗室",
+          addExecDeptName: null,
+          skinTest: null,
+          doctorName: "李晓峰",
+          billingTime: "2024-11-20 14:03:13",
+          // 所用字段分界线
+          frequency: null,
+          orderState: 3,
+          decocType: null,
+          oprLevel: null,
+          recipeNumber: "CF202411200001",
+          itemName: "眼部B超",
+          herbalAdjustName: null,
+          hospId: 1824,
+          price: null,
+          id: 1859115320042688500,
+          chmNote: null,
+          execPlace: "18246",
+          applyNumber: "JCSQ202411200001",
+          batchNumber: null,
+          packingUnit: 100,
+          modifyDate: "2024-11-20 14:04:23",
+          outsourceSign: 0,
+          deptId: 100484,
+          addExecDept: null,
+          herbalRequest: null,
+          everyNumber: 1,
+          modifer: 48937,
+          herbalUseName: null,
+          recipeKindName: "特检",
+          insureRange: 1,
+          orders: 4,
+          combiNumber: null,
+          tempId: 1859115272567361500,
+          herbalNumber: 0,
+          refundReasonsName: null,
+          refundDate: null,
+          printTimes: 0,
+          skinEnterId: null,
+          longRange: null,
+          skinEnterName: null,
+          dripSpeed: null,
+          cancelRefunderId: null,
+          orderTemplId: null,
+          combiSeq: null,
+          recipeKind: 7,
+          orderTemplName: null,
+          doctorId: 48937,
+          decocTypeName: null,
+          execDept: 103864,
+          herbalAdjust: null,
+          cancelRefunderName: null,
+          tOutpOrderId: 1859115314996940800,
+          refundReasonsCode: null,
+          createDate: "2024-11-20 14:03:16",
+          skinTestResult: null,
+          dosageUnit: null,
+          anesthesiaModeName: null,
+          herbalUse: null,
+          creator: 48937,
+          chronicDisease: 0,
+          singleDose: null,
+          refunder: null,
+          adminRoute: null,
+          anesthesiaMode: null,
+          herbalRequestName: null,
+          execCombiSeq: 1,
+          remarks: null,
+        },
+        {
+          totalNumber: 1,
+          deptName: "青白科",
+          cancelRefundDate: null,
+          orderId: 1859115314996940800,
+          orderAttachId: null,
+          itemCode: 1789171081824669700,
+          eyeType: 1,
+          chmRecipeMethod: null,
+          skinEnterTime: null,
+          // 所用字段分界线
+          recipeName: "环孢素滴眼液(Ⅱ)",
+          specif: "0.4ml:0.2mg(0.05%)",
+          totalDose: 1,
+          dosageUnitName: "滴",
+          adminRouteName: "滴眼",
+          eyeTypeName: "双眼",
+          frequencyName: "每日二次",
+          dripSpeedName: null,
+          medicDays: 1,
+          usableDays: 30,
+          packingUnitName: "支",
+          execDeptName: "中心药房",
+          addExecDeptName: null,
+          skinTest: null,
+          doctorName: "李晓峰",
+          billingTime: "2024-11-20 14:03:02",
+          // 所用字段分界线
+          frequency: null,
+          orderState: 3,
+          decocType: null,
+          oprLevel: null,
+          recipeNumber: "CF202411200001",
+          itemName: "眼部B超",
+          herbalAdjustName: null,
+          hospId: 1824,
+          price: null,
+          id: 1859115320042688500,
+          chmNote: null,
+          execPlace: "18246",
+          applyNumber: "JCSQ202411200001",
+          batchNumber: null,
+          packingUnit: 100,
+          modifyDate: "2024-11-20 14:04:23",
+          outsourceSign: 0,
+          deptId: 100484,
+          addExecDept: null,
+          herbalRequest: null,
+          everyNumber: 1,
+          modifer: 48937,
+          herbalUseName: null,
+          recipeKindName: "特检",
+          insureRange: 1,
+          orders: 4,
+          combiNumber: null,
+          tempId: 1859115272567361500,
+          herbalNumber: 0,
+          refundReasonsName: null,
+          refundDate: null,
+          printTimes: 0,
+          skinEnterId: null,
+          longRange: null,
+          skinEnterName: null,
+          dripSpeed: null,
+          cancelRefunderId: null,
+          orderTemplId: null,
+          combiSeq: null,
+          recipeKind: 7,
+          orderTemplName: null,
+          doctorId: 48937,
+          decocTypeName: null,
+          execDept: 103864,
+          herbalAdjust: null,
+          cancelRefunderName: null,
+          tOutpOrderId: 1859115314996940800,
+          refundReasonsCode: null,
+          createDate: "2024-11-20 14:03:16",
+          skinTestResult: null,
+          dosageUnit: null,
+          anesthesiaModeName: null,
+          herbalUse: null,
+          creator: 48937,
+          chronicDisease: 0,
+          singleDose: null,
+          refunder: null,
+          adminRoute: null,
+          anesthesiaMode: null,
+          herbalRequestName: null,
+          execCombiSeq: 1,
+          remarks: null,
+        },
+      ],
+      cardList: {},
     };
   },
   created() {
+    this.caseDataList.forEach((item, index) => {
+      this.$set(this.cardList, item.visitNumber, false);
+    });
     // this.patientId = this.$route.query.id;
     this.patientName = this.$route.query.name;
     // this.getHistoryCase();
     // this.getLabData();
   },
   methods: {
+    handleCard(index) {
+      this.$set(this.cardList, index, !this.cardList[index]);
+
+      // this.cardList[index] = !this.cardList[index]
+    },
     handleClick(tab, event) {
-      console.log(tab, event);
     },
     handleCheckReport(visitNumber) {
       // let obj = {
@@ -350,8 +742,8 @@ export default {
               checkTime: "2024-02-02",
             },
             url: [
-              "http://43.136.178.202:8088/images/slo1.png",
-              "http://43.136.178.202:8088/images/slo2.png",
+              process.env.VUE_APP_API_BASE_URL + "/images/slo1.png",
+              process.env.VUE_APP_API_BASE_URL + "/images/slo2.png",
             ],
           },
           {
@@ -359,21 +751,17 @@ export default {
               itemName: "光学相干断层成像（OCT）",
               checkTime: "2024-02-02",
             },
-            url: [
-              "http://43.136.178.202:8088/images/oct.png",
-            ],
+            url: [process.env.VUE_APP_API_BASE_URL + "/images/oct.png"],
           },
           {
             checkReports: {
               itemName: "IOL",
               checkTime: "2024-02-02",
             },
-            url: [
-              "http://43.136.178.202:8088/images/iol.png",
-            ],
+            url: [process.env.VUE_APP_API_BASE_URL + "/images/iol.png"],
           },
-        ] 
-        else if (visitNumber === "2023-02-02")
+        ];
+      else if (visitNumber === "2023-02-02")
         this.pdfDataList = [
           {
             checkReports: {
@@ -381,8 +769,8 @@ export default {
               checkTime: "2023-02-02",
             },
             url: [
-              "http://43.136.178.202:8088/images/slo1.png",
-              "http://43.136.178.202:8088/images/slo2.png",
+              process.env.VUE_APP_API_BASE_URL + "/images/slo1.png",
+              process.env.VUE_APP_API_BASE_URL + "/images/slo2.png",
             ],
           },
           {
@@ -390,12 +778,10 @@ export default {
               itemName: "光学相干断层成像（OCT）",
               checkTime: "2023-02-02",
             },
-            url: [
-              "http://43.136.178.202:8088/images/oct.png",
-            ],
-          }
-        ]
-        else 
+            url: [process.env.VUE_APP_API_BASE_URL + "/images/oct.png"],
+          },
+        ];
+      else
         this.pdfDataList = [
           {
             checkReports: {
@@ -403,8 +789,8 @@ export default {
               checkTime: "2022-02-02",
             },
             url: [
-              "http://43.136.178.202:8088/images/slo1.png",
-              "http://43.136.178.202:8088/images/slo2.png",
+              process.env.VUE_APP_API_BASE_URL + "/images/slo1.png",
+              process.env.VUE_APP_API_BASE_URL + "/images/slo2.png",
             ],
           },
           {
@@ -412,29 +798,16 @@ export default {
               itemName: "光学相干断层成像（OCT）",
               checkTime: "2022-02-02",
             },
-            url: [
-              "http://43.136.178.202:8088/images/oct.png",
-            ],
+            url: [process.env.VUE_APP_API_BASE_URL + "/images/oct.png"],
           },
           {
             checkReports: {
               itemName: "光学相干断层成像（OCT）",
               checkTime: "2022-02-02",
             },
-            url: [
-              "http://43.136.178.202:8088/images/oct.png"
-            ],
-          }
-        ]
-      // api
-      //   .getCaseTimelineReport(obj)
-      //   .then((res) => {
-      //     if (res.data.code == 200) {
-      //       // console.log(res);
-      //     }
-      //   })
-      //   .catch((error) => {})
-      //   .finally(() => {});
+            url: [process.env.VUE_APP_API_BASE_URL + "/images/oct.png"],
+          },
+        ];
     },
     getLabData() {
       api.getCheckResult(this.$route.query.id).then((res) => {
@@ -456,7 +829,6 @@ export default {
         patientId: "1809970417345019907",
       };
       api.getCaseTimeline(obj).then((res) => {
-        console.log(res);
         if (res.data.code == 200) {
           let cases = res.data.data.records;
           cases.forEach((item, index) => {

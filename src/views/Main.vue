@@ -47,7 +47,7 @@
             </el-table-column>
             <el-table-column label="修改时间" prop="updateTime" align="center">
             </el-table-column>
-            <el-table-column width="400 px" align="right">
+            <el-table-column width="400 px" align="center">
               <template slot="header" slot-scope="scope">
                 <el-button
                   size="medium"
@@ -59,12 +59,20 @@
                 >
                 <!-- v-on:input="dataSizeChange()" -->
                 <el-input
-                  @keyup.enter.native="searchByLoginName()"
                   v-model="search"
                   size="medium"
                   style="width: 250px"
-                  placeholder="输入用户登录账号并按下回车搜索"
-                />
+                  placeholder="请输入用户登录账号"
+                >
+                <template slot="append">
+                  <el-button
+                    icon="el-icon-search"
+                    type="primary"
+                    @click="searchByLoginName()"
+                    circle
+                  ></el-button>
+                </template>
+                </el-input>
               </template>
               <template slot-scope="scope">
                 <el-button
@@ -253,7 +261,6 @@ export default {
     //失效某用户
     handleDelete(index, row) {
       const _this = this;
-      console.log(row.userId);
       _this
         .$confirm("您是否要失效用户" + row.userLoginName, "提示", {
           confirmButtonText: "确定",
@@ -262,7 +269,6 @@ export default {
         })
         .then(() => {
           api.deleteUser(row.userId).then((res) => {
-            console.log(res);
             if (res.data.code === 200) {
               _this.$message({
                 type: "success",
@@ -390,11 +396,9 @@ export default {
     submitEditUser() {
       const _this = this;
       _this.dialogEditFormVisible = false;
-      console.log(_this.editForm);
       api
         .editUser(_this.editForm)
         .then((res) => {
-          console.log(res);
           if (res.data.code === 200) {
             this.$message({
               message: "编辑成功",

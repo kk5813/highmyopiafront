@@ -5,8 +5,7 @@ import router from "./router";
 import JSONBig from 'json-bigint'
 const JSONBigIntStr = JSONBig({ storeAsString: true });
 const service = axios.create({
-  // baseURL: 'http://8.140.145.137',
-  baseURL: 'http://43.136.178.202:8088/api/v1',
+  baseURL: process.env.VUE_APP_API_BASE_URL + '/api/v1',
   transformResponse: [function(data){
     try {
       // 如果转换成功则返回转换的数据结果
@@ -21,14 +20,7 @@ const service = axios.create({
   timeout: 7 * 10000 // request timeout
 })
 
-
-//      前置拦截
-// axios.interceptors.request.use(config => {
-//     return config
-// })
-
 service.interceptors.request.use(
-
   config => {
     if (sessionStorage.getItem("token")) {
       config.headers['authorization'] = sessionStorage.getItem("token")
@@ -37,7 +29,6 @@ service.interceptors.request.use(
   },
   error => {
     // do something with request error
-    console.log(error) // for debug
     return Promise.reject(error)
   }
 )
