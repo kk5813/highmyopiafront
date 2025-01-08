@@ -7,48 +7,18 @@
       <el-main>
         <!-- 搜索框行 -->
         <el-row>
-          <el-col
-            :span="6"
-            style="width: 200px; position: fixed; top: 70px; z-index: 999"
-          >
-            <el-input
-              style="width: 200px"
-              placeholder="请输入患者ID"
-              v-model="search"
-              clearable
-            >
-            </el-input>
-          </el-col>
-          <el-col
-            :span="2"
-            style="position: fixed; top: 70px; left: 210px; z-index: 999"
-          >
-            <el-button
-              type="primary"
-              @click="handleOriginImg()"
-              icon="el-icon-search"
-              >确 定</el-button
-            >
-          </el-col>
-          <el-col
-            :span="2"
-            style="position: fixed; top: 70px; z-index: 999; left: 400px"
-          >
-            <el-select
-              style="width: 200px"
-              v-model="selectedModel"
-              placeholder="请选择疑似病症"
-              v-on:change="handleAiImg()"
-              :disabled="showOriginImage == false"
-            >
-              <el-option
-                v-for="item in modelOptions"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
+          <el-col :span="6" style="position: fixed; top: 70px; z-index: 999">
+            <el-input placeholder="患者ID" v-model="search" clearable>
+              <template slot="prepend">请输入患者ID</template>
+              <template slot="append" style="background-color: blue"
+                ><el-button
+                  type="primary"
+                  @click="handleOriginImg()"
+                  icon="el-icon-search"
+                  >确 定</el-button
+                ></template
               >
-              </el-option>
-            </el-select>
+            </el-input>
           </el-col>
         </el-row>
 
@@ -61,86 +31,145 @@
         <el-row
           type="flex"
           justify="center"
-          style="margin-top: 50px"
-          v-loading="loadOriginImage"
-          v-show="showOriginImage"
+          style="margin-top: 50px; align-items: center"
         >
-          <el-col :span="12">
-            <el-table
-              :data="imgList"
-              max-height="500"
-              style="width: 73%; border-radius: 20px"
-            >
-              <el-table-column
-                prop="description"
-                label="原始图像"
-                width="200"
-                align="center"
-              ></el-table-column>
-              <el-table-column
-                prop="url"
-                label="图像(点击图片查看)"
-                width="200"
-                align="center"
-              >
-                <template #default="scope">
-                  <el-image
-                    style="width: 100px; height: 100px"
-                    :src="scope.row.url[0]"
-                    :preview-src-list="scope.row.url"
+          <!-- 原图表格 -->
+          <el-col
+            :span="12"
+            style="display: flex; justify-content: center"
+            v-loading="loadOriginImage"
+            v-if="showOriginImage"
+          >
+            <div style="width: 80%">
+              <div>
+                <el-select
+                  style="width: 200px; margin-bottom: 20px; font-size: 16px"
+                  v-model="selectedModel"
+                  placeholder="请选择疑似病症"
+                  v-on:change="handleAiImg()"
+                  :disabled="showOriginImage == false"
+                >
+                  <el-option
+                    v-for="item in modelOptions"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
                   >
-                  </el-image>
-                </template>
-              </el-table-column>
-            </el-table>
+                  </el-option>
+                </el-select>
+              </div>
+              <el-table
+                :max-height="tableHeight"
+                class="elTable" 
+                :data="imgList"
+                border
+                :cell-style="{
+                  borderColor: '#409eff',
+                  borderWidth: '2px',
+                }"
+                :header-cell-style="{
+                  fontSize: '20px',
+                  borderColor: '#409eff',
+                  borderWidth: '2px',
+                }"
+                style="width: 100%; border-radius: 10px; font-size: 20px"
+              >
+                <el-table-column
+                  min-width="20%"
+                  prop="description"
+                  label="原始图像"
+                  align="center"
+                  class-name="columnHead"
+                ></el-table-column>
+                <el-table-column
+                  min-width="80%"
+                  prop="url"
+                  label="图像(点击图片查看)"
+                  align="center"
+                >
+                  <template #default="scope">
+                    <el-image
+                      :src="scope.row.url[0]"
+                      :preview-src-list="scope.row.url"
+                    >
+                    </el-image>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </div>
+          </el-col>
+
+          <!-- 自定义分割线 -->
+          <div
+            v-if="showAiImage"
+            style="
+              height: 70vh;
+              width: 3px;
+              background-color: #409eff;
+              margin: 0 20px;
+              align-self: center;
+            "
+          ></div>
+
+          <!-- AI图片表格 -->
+          <el-col
+            :span="12"
+            style="display: flex; justify-content: center"
+            v-if="showAiImage"
+            v-loading="loadAiImage"
+          >
+            <div style="width: 80%; display: flex; flex-direction: column">
+              <el-table
+                :max-height="tableHeight"
+                class="elTable"
+                :data="AiImgList"
+                :cell-style="{ borderColor: '#409eff', borderWidth: '2px' }"
+                :header-cell-style="{
+                  fontSize: '20px',
+                  borderColor: '#409eff',
+                  borderWidth: '2px',
+                }"
+                style="width: 100%; border-radius: 10px; font-size: 20px"
+                border
+              >
+                <el-table-column
+                  min-width="20%"
+                  prop="resultInfo"
+                  label="AI诊断结果"
+                  align="center"
+                ></el-table-column>
+                <el-table-column
+                  min-width="80%"
+                  prop="url"
+                  label="图像(点击图片查看)"
+                  align="center"
+                >
+                  <template #default="scope">
+                    <el-image
+                      v-if="scope.row.url[0]"
+                      :src="scope.row.url[0]"
+                      :preview-src-list="scope.row.url"
+                    >
+                    </el-image>
+                    <h4 v-if="!scope.row.url[0]">该阶段无图像输出</h4>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </div>
           </el-col>
         </el-row>
 
-        <el-divider v-if="showAiImage"></el-divider>
-
-        <!-- AI处理图片行列 -->
         <el-row
           type="flex"
           justify="center"
-          style="margin-top: 50px"
-          v-show="showAiImage"
-          v-loading="loadAiImage"
+          style="margin-top: 50px; align-items: center"
+          v-if="showAiImage"
         >
-          <el-col :span="12">
-            <el-table
-              :data="AiImgList"
-              max-height="500"
-              style="padding: 0; width: 73%; border-radius: 20px"
-            >
-              <el-table-column
-                prop="resultInfo"
-                label="AI诊断结果"
-                width="200"
-                align="center"
-              ></el-table-column>
-              <el-table-column
-                prop="url"
-                label="图像(点击图片查看)"
-                width="200"
-                align="center"
-              >
-                <template #default="scope">
-                  <el-image
-                    v-if="scope.row.url[0]"
-                    style="width: 100px; height: 100px"
-                    :src="scope.row.url[0]"
-                    :preview-src-list="scope.row.url"
-                  >
-                  </el-image>
-                </template>
-              </el-table-column>
-            </el-table>
-            <div style="width: 100%; margin-top: 20px; margin-left: -80px">
-              <el-button type="primary" @click="addFollowup()"
-                >添加随访<i class="el-icon-upload el-icon--right"></i
-              ></el-button>
-            </div>
-          </el-col>
+          <div style="width: 100%; margin-top: 20px; margin-left: -80px">
+            <el-button type="primary" @click="addFollowup()"
+              >添加随访<i class="el-icon-upload el-icon--right"></i
+            ></el-button>
+          </div>
         </el-row>
 
         <!--                            新增随访          -->
@@ -200,6 +229,7 @@ export default {
   inject: ["reload"],
   data() {
     return {
+      tableHeight: 0,
       pdfDataList: [
         {
           checkReports: {
@@ -276,6 +306,12 @@ export default {
     this.getAiDisease();
   },
   methods: {
+    tableCellClassName({ row, column, rowIndex, columnIndex }) {
+      if (columnIndex === 0) {
+        return "left-border";
+      }
+      return "";
+    },
     getAiDisease() {
       const _this = this;
       api
@@ -328,18 +364,20 @@ export default {
         userId: sessionStorage.getItem("userId"),
         patientId: this.search,
       };
+      console.log(allObj);
       api
         .getAiDiagnose(allObj)
         .then((res) => {
           let aiResult = [];
           let urlList = [];
           if (res.data.code === 200) {
+            console.log(res);
             aiResult = res.data.data;
             aiResult.forEach((item, index) => {
               urlList = item.url.split(",");
               urlList.forEach((item, index) => {
                 if (item)
-                  urlList[index] = "process.env.VUE_APP_API_BASE_URL/images/" + item;
+                  urlList[index] = "http://43.136.178.202:8088/images/" + item;
               });
               aiResult[index].url = urlList;
             });
@@ -367,7 +405,7 @@ export default {
             this.imgList = [];
             this.showAiImage = false;
             this.loadAiImage = false;
-            this.selectedModel = ""
+            this.selectedModel = "";
             this.showOriginImage = true;
             this.loadOriginImage = true;
             originData = res.data.data;
@@ -383,7 +421,9 @@ export default {
             this.imgList.push({
               description: Object.keys(originData)[0],
               url: [
-                process.env.VUE_APP_API_BASE_URL + "/images/" + Object.values(originData)[0],
+                "http://43.136.178.202:8088" +
+                  "/images/" +
+                  Object.values(originData)[0],
               ],
             });
           }
@@ -403,19 +443,10 @@ export default {
     },
   },
   mounted() {
-    const panels = document.querySelectorAll(".panel");
-    panels.forEach((panel) => {
-      panel.addEventListener("click", () => {
-        removeActiveClasses();
-        panel.classList.add("active");
-      });
+    this.$nextTick(() => {
+      this.tableHeight = window.innerHeight - 120;
+      //后面的50：根据需求空出的高度，自行调整
     });
-
-    function removeActiveClasses() {
-      panels.forEach((panel) => {
-        panel.classList.remove("active");
-      });
-    }
   },
 };
 </script>
@@ -537,4 +568,13 @@ body {
 .el-divider {
   background-color: #409eff;
 }
+
+.elTable {
+  border: 2px solid #409eff;
+}
+
+.el-Table /deep/ .el-table--border {
+  border-radius: 10px
+}
+
 </style>
