@@ -280,7 +280,8 @@ export default {
   downloadPatientInfo() {
     return request({
       url: '/patients/export',
-      method: 'get'
+      method: 'get',
+      responseType: 'blob'
     })
   },
 }

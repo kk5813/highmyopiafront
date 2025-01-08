@@ -22,7 +22,7 @@
       <el-menu-item index="/patientmanagement"
         ><i class="el-icon-folder"></i>患者档案</el-menu-item
       >
-      <el-menu-item index="/Main"
+      <el-menu-item index="/Main" v-if="withPermission"
         ><i class="el-icon-user"></i>用户管理</el-menu-item
       >
       <div class="menu-right">
@@ -56,6 +56,7 @@ export default {
   },
   data() {
     return {
+      withPermission: false,
       first: true,
       userName: "admin",
     };
@@ -64,6 +65,14 @@ export default {
     if(sessionStorage.getItem('userName')){
       this.userName = sessionStorage.getItem('userName')
     }
+    api
+      .findUserById(sessionStorage.getItem("userId"))
+      .then((res) => {
+        if (res.data.data && res.data.data.userStatus === 0)
+          this.withPermission = true;
+      })
+      .catch((error) => {})
+      .finally(() => {});
   },
   methods: {
     userLogout() {

@@ -330,7 +330,7 @@ export default {
         .then((res) => {
           //res为接口所返回的文件流
           let blob = new Blob([res.data.data], {
-            type: "text/csv;",
+            type: "text/csv; charset=GBK;",
           });
           //新窗口打开
           let link = document.createElement("a");

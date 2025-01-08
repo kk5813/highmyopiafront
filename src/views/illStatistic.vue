@@ -4,8 +4,71 @@
       <el-header>
         <Header active-index="/illStatistic"></Header>
       </el-header>
-      <el-main>
-        <div ref="myChart1" v-loading="loading" style="height: 1000px;" />
+      <el-main v-loading="loading">
+        <el-row>
+          <el-col :span="24"
+            ><div>
+              统计时间段：
+              <el-date-picker
+                style="width: 300px; margin-bottom: 20px"
+                v-model="timeRange"
+                value-format="yyyy-MM-dd"
+                @change="timeChange()"
+                type="daterange"
+                range-separator="-"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+              >
+              </el-date-picker></div
+          ></el-col>
+        </el-row>
+
+        <el-empty v-if="!hasData" description="暂无数据"></el-empty>
+        <div v-if="hasData">
+          <el-row>
+            <el-col :span="24"
+              ><div ref="myChart2" style="height: 200px"></div
+            ></el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="12">
+              <el-card
+                shadow="hover"
+                v-for="(item, index) in currentDetailValueData"
+                :key="index"
+                style="float: left; margin: 5px 15px 10px 0px; width: 30%"
+              >
+                <div slot="header" class="header">
+                  <span>{{ item.name }}</span>
+                </div>
+                <div class="content">
+                  <el-descriptions :column="1" :content-style="contentStyle">
+                    <el-descriptions-item style="" label="数量">{{
+                      item.value
+                    }}</el-descriptions-item>
+                    <el-descriptions-item label="占比">
+                      <el-progress
+                        type="circle"
+                        :percentage="
+                          Number(
+                            (
+                              (item.value / forSum(currentDetailValueData)) *
+                              100
+                            ).toFixed(2)
+                          )
+                        "
+                      ></el-progress
+                    ></el-descriptions-item>
+                  </el-descriptions>
+                </div>
+                <el-divider></el-divider>
+              </el-card>
+            </el-col>
+            <el-col :span="12" style=""
+              ><div ref="myChart1" style="height: 600px"
+            /></el-col>
+          </el-row>
+        </div>
       </el-main>
       <el-footer
         >爱尔眼科慢病管理系统( 推荐使用IE9+,Firefox、Chrome 浏览器访问
@@ -24,27 +87,46 @@ export default {
   inject: ["reload"],
   data() {
     return {
+      contentStyle: {
+        fontWeight: "bold",
+        fontSize: "1.2rem",
+      },
+      hasData: false,
+      currentDetailValueData: [],
+      timeRange: [],
+      detailValueData: [],
+      stackData: [],
       loading: false,
-      abstractIllData: [
-      ],
-      detailIllData: [
-        
-      ],
+      abstractIllData: [],
+      detailIllData: [],
     };
   },
   created() {
     // this.setCharts();
   },
   methods: {
+    forSum(arr) {
+      let sum = 0;
+      arr.forEach((item) => (sum += item.value));
+      return sum;
+    },
+    timeChange() {
+      this.getCountData();
+    },
     getCountData() {
+      this.timeRange = this.timeRange ? this.timeRange : ["", ""];
       this.loading = true;
-      let obj = {};
+      this.hasData = false;
+      let obj = {
+        beginTime: this.timeRange[0],
+        endTime: this.timeRange[1],
+      };
       api
         .getIllCount(obj)
         .then((res) => {
           let abstractData = [];
           let detailData = [];
-          if (res.data.code == 200) {
+          if (res.data.data.length && res.data.code == 200) {
             let allData = res.data.data;
             allData.forEach((item, index) => {
               let groupName = item.groupName;
@@ -69,36 +151,146 @@ export default {
             });
             this.abstractIllData = abstractData;
             this.detailIllData = detailData;
-            this.setCharts();
+            this.currentDetailValueData = detailData[0].data;
+            this.hasData = true;
           }
         })
         .catch((error) => {})
         .finally(() => {
           this.loading = false;
+          if (this.hasData) {
+            this.$nextTick(() => {
+              this.setCharts();
+              this.setCharts2();
+            });
+          } else {
+            // 销毁实例
+            let chart1 = this.$echarts.init(this.$refs.myChart1);
+            let chart2 = this.$echarts.init(this.$refs.myChart2);
+            chart1.dispose();
+            chart2.dispose();
+          }
         });
+    },
+    // 生成横向总体分类柱状图
+    setCharts2() {
+      let myChart = this.$echarts.init(this.$refs.myChart2);
+      let ills = this.abstractIllData.map((item) => item.name);
+      let illsValue = this.abstractIllData.map((item) => item.value);
+      const colors = [
+        "#8b2671",
+        "#43b244",
+        "#EE6666",
+        "#126bae",
+        "#fed71a",
+        "#fc8c23",
+        "#f1939c",
+        "#5cb3cc"
+      ]; // 自定义颜色
+      const series = ills.map((item, index) => {
+        return {
+          name: item,
+          type: "bar",
+          stack: "total",
+          barWidth: "90%",
+          label: {
+            show: true,
+            color: "#fff",
+            fontWeight: "bold",
+            fontSize: 16,
+          },
+          itemStyle: {
+            color: colors[index % colors.length], // 循环使用颜色
+          },
+          data: [illsValue[index]],
+        };
+      });
+
+      let option = {
+        tooltip: {
+          position: function (point, params, dom, rect, size) {
+            // 鼠标坐标和提示框位置的参考坐标系是：以外层div的左上角那一点为原点，x轴向右，y轴向下
+            // 提示框位置
+            var x = 0; // x坐标位置
+            var y = 0; // y坐标位置 // 当前鼠标位置
+
+            var pointX = point[0];
+            var pointY = point[1]; // 外层div大小 // var viewWidth = size.viewSize[0]; // var viewHeight = size.viewSize[1]; // 提示框大小
+
+            var boxWidth = size.contentSize[0];
+            var boxHeight = size.contentSize[1]; // boxWidth > pointX 说明鼠标左边放不下提示框
+
+            if (boxWidth > pointX) {
+              x = pointX + 10;
+            } else {
+              // 左边放的下
+              x = pointX - boxWidth - 10;
+            } // boxHeight > pointY 说明鼠标上边放不下提示框
+
+            if (boxHeight > pointY) {
+              y = 5;
+            } else {
+              // 上边放得下
+              y = pointY - boxHeight;
+            }
+
+            return [x, y];
+          },
+        },
+        legend: {
+          selectedMode: false,
+          data: ills,
+        },
+        yAxis: {
+          type: "category",
+          data: ["数量"],
+        },
+        xAxis: {
+          type: "value",
+        },
+        animation: true,
+        series,
+      };
+
+      myChart.setOption(option);
+
+      // 响应式调整
+      window.addEventListener("resize", () => {
+        myChart.resize();
+      });
     },
     setCharts() {
       let abstractIllData = this.abstractIllData;
       let detailIllData = this.detailIllData;
       let newId = 0;
+      const _this = this;
+      const colors = [
+        "#8b2671",
+        "#43b244",
+        "#EE6666",
+        "#126bae",
+        "#fed71a",
+        "#fc8c23",
+        "#f1939c",
+        "#5cb3cc"
+      ];
       let myChart = this.$echarts.init(this.$refs.myChart1);
+
+      // 为饼状图的中心圆设置颜色
+      abstractIllData = abstractIllData.map((item, index) => {
+        return {
+          ...item,
+          itemStyle: {
+            color: colors[index % colors.length], // 使用与柱状图相同的颜色
+          },
+        };
+      });
+
       let option = {
         tooltip: {
           trigger: "item",
           formatter: "{a} <br/>{b}: {c} ({d}%)",
         },
-        // legend: {
-        //   data: [
-        //     "糖尿病性视网膜病变",
-        //     "视网膜静脉阻塞",
-        //     "高度近视",
-        //     "青光眼",
-        //     "角膜溃疡",
-        //     // "黄斑变性",
-        //     "白内障",
-        //     "干眼",
-        //   ],
-        // },
         series: [
           {
             name: "疾病组别",
@@ -115,7 +307,7 @@ export default {
             labelLine: {
               show: false,
             },
-            data: this.abstractIllData,
+            data: abstractIllData,
           },
           {
             name: "详细分类",
@@ -163,7 +355,10 @@ export default {
       };
       myChart.on("click", { seriesName: "疾病组别" }, function (event) {
         detailIllData.forEach((element, index) => {
-          if (element.type === event.name) newId = index;
+          if (element.type === event.name) {
+            newId = index;
+            _this.currentDetailValueData = element.data;
+          }
         });
         myChart.setOption({
           series: [
@@ -218,12 +413,19 @@ export default {
   /* display: flex(center, center, row); */
   height: calc(100vh - 60px - 50px);
   width: 100%;
-  margin-top: 50px;
+  margin-top: 65px;
   background-color: #e9eef3;
   color: #333;
   text-align: center;
   /* height: 1000px; */
   /* overflow: hidden; */
   overflow: auto;
+}
+
+.el-card /deep/ .el-card__header {
+  height: 30px;
+  background-color: #fcfcfd;
+  display: flex;
+  align-items: center;
 }
 </style>

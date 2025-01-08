@@ -713,6 +713,9 @@ export default {
   },
   created() {
     this.caseDataList.forEach((item, index) => {
+      if(index == 0)
+      this.$set(this.cardList, item.visitNumber, true);
+      else
       this.$set(this.cardList, item.visitNumber, false);
     });
     // this.patientId = this.$route.query.id;
