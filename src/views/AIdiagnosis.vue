@@ -42,6 +42,7 @@
           >
             <div style="width: 80%">
               <div>
+                
                 <el-select
                   style="width: 200px; margin-bottom: 20px; font-size: 16px"
                   v-model="selectedModel"
@@ -212,7 +213,7 @@
         </el-dialog>
       </el-main>
       <el-footer
-        >爱尔眼科慢病管理系统( 推荐使用IE9+,Firefox、Chrome 浏览器访问
+        >爱尔眼科慢病管理系统( 推荐使用Edge,Firefox、Chrome 浏览器访问
         )</el-footer
       >
     </el-container>
@@ -377,7 +378,7 @@ export default {
               urlList = item.url.split(",");
               urlList.forEach((item, index) => {
                 if (item)
-                  urlList[index] = "http://43.136.178.202:8088/images/" + item;
+                  urlList[index] = process.env.VUE_APP_API_BASE_URL + "/images/" + item;
               });
               aiResult[index].url = urlList;
             });
@@ -421,7 +422,7 @@ export default {
             this.imgList.push({
               description: Object.keys(originData)[0],
               url: [
-                "http://43.136.178.202:8088" +
+                process.env.VUE_APP_API_BASE_URL +
                   "/images/" +
                   Object.values(originData)[0],
               ],

@@ -200,7 +200,7 @@
         </div>
       </el-main>
       <el-footer
-        >爱尔眼科慢病管理系统( 推荐使用IE9+,Firefox、Chrome 浏览器访问
+        >爱尔眼科慢病管理系统( 推荐使用Edge,Firefox、Chrome 浏览器访问
         )</el-footer
       >
     </el-container>

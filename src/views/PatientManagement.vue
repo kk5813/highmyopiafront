@@ -51,7 +51,8 @@
               <template slot="header" slot-scope="scope">
                 <el-dropdown @command="handleCommand">
                   <span>
-                    诊断<i class="el-icon-arrow-down el-icon--right"></i>
+                    诊断({{ currentCommand
+                  }})<i class="el-icon-arrow-down el-icon--right"></i>
                   </span>
                   <el-dropdown-menu slot="dropdown">
                     <el-dropdown-item command="">全部</el-dropdown-item>
@@ -133,7 +134,10 @@
                   size="medium"
                   placeholder="请输入患者ID或诊断名称"
                 /> -->
-                <el-button @click="dialogSearchVisible = true" type="primary" size="mini"
+                <el-button
+                  @click="dialogSearchVisible = true"
+                  type="primary"
+                  size="mini"
                   >搜索</el-button
                 >
               </template>
@@ -176,29 +180,27 @@
               <template slot="prepend">患者ID</template>
             </el-input>
           </div>
-          <div style="margin-top: 15px;">
+          <div style="margin-top: 15px">
             <el-input v-model="searchForm.diagName">
               <template slot="prepend">诊断名</template>
             </el-input>
           </div>
-          <div style="margin-top: 15px;">
-              <el-date-picker
-                  style="width: 300px"
-                  v-model="searchForm.timeRange"
-                  value-format="yyyy-MM-dd"
-                  type="daterange"
-                  range-separator="-"
-                  start-placeholder="开始日期"
-                  end-placeholder="结束日期"
-                >
-                </el-date-picker>
-              <template slot="prepend">时间段</template>
+          <div style="margin-top: 15px">
+            <el-date-picker
+              style="width: 300px"
+              v-model="searchForm.timeRange"
+              value-format="yyyy-MM-dd"
+              type="daterange"
+              range-separator="-"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+            >
+            </el-date-picker>
+            <template slot="prepend">时间段</template>
           </div>
           <div slot="footer" class="dialog-footer">
             <el-button @click="dialogSearchVisible = false">取 消</el-button>
-            <el-button type="primary" @click="searchByInput()"
-              >确 定</el-button
-            >
+            <el-button type="primary" @click="searchByInput()">确 定</el-button>
           </div>
         </el-dialog>
         <!--                                            患者信息编辑-->
@@ -255,7 +257,7 @@
         </el-dialog>
       </el-main>
       <el-footer
-        >爱尔眼科慢病管理系统( 推荐使用IE9+,Firefox、Chrome 浏览器访问
+        >爱尔眼科慢病管理系统( 推荐使用Edge,Firefox、Chrome 浏览器访问
         )</el-footer
       >
     </el-container>
@@ -272,10 +274,11 @@ export default {
   inject: ["reload"],
   data() {
     return {
+      currentCommand: '全部',
       searchForm: {
-        patientId: '',
-        diagName: '',
-        timeRange: []
+        patientId: "",
+        diagName: "",
+        timeRange: [],
       },
       dialogSearchVisible: false,
       timeRange: ["", ""],
@@ -350,23 +353,27 @@ export default {
       this.currentClass = command;
       this.currentPage = 1;
       this.pageSize = 10;
+      this.currentCommand = command ? command : '全部'
       this.getData();
     },
     getData(patientId) {
       // 避免时间选择器清空后为null
       this.timeRange = this.timeRange ? this.timeRange : ["", ""];
       let queryObj = {
-        pageNumber: this.currentPage,
-        pageSize: this.pageSize,
-        diagName: this.currentClass,
-        startTime: this.timeRange[0],
-        endTime: this.timeRange[1],
-        patientID: patientId,
-      };
+          pageNumber: this.currentPage,
+          pageSize: this.pageSize,
+          diagName: this.currentClass,
+          startTime: this.timeRange[0],
+          endTime: this.timeRange[1],
+          patientID: patientId
+      }
+
+      console.log(queryObj);
       this.loading = true;
       api
         .getVisitList(queryObj)
         .then((res) => {
+          console.log(res);
           if (res.data.code == 200) {
             this.tableData = res.data.data.records;
             this.totalSize = res.data.data.total;
@@ -378,53 +385,13 @@ export default {
         });
     },
     searchByInput() {
-      // const _this = this;
-      // this.loading = true;
-      // let obj = {
-      //   pageNumber: page,
-      //   pageSize: pageSize,
-      //   diagName: this.search,
-      // };
-      // let reqArr = [
-      //   request("/visits/page", { method: "get", params: obj }),
-      //   request("/visits/find/" + this.search, { method: "get" }),
-      // ];
-      // let handledErrReqs = reqArr.map((item) =>
-      //   item.catch((error) => {
-      //     // 错误处理代码
-      //     // console.log("请求出错", error);
-      //   })
-      // );
-      // _this.$axios
-      //   .all(handledErrReqs)
-      //   .then(
-      //     this.$axios.spread(function (diagResp, idResp) {
-      //       console.log(diagResp, idResp);
-      //       _this.tableData = !idResp
-      //         ? diagResp.data.data.records
-      //         : idResp.data.data;
-      //       _this.totalSize = !idResp
-      //         ? diagResp.data.data.total
-      //         : idResp.data.data.length;
-      //     })
-      //   )
-      //   .catch((error) => {
-      //     _this.tableData = diagResp.data.data.records;
-      //     _this.totalSize = diagResp.data.data.total;
-      //   })
-      //   .finally(() => {
-      //     this.loading = false;
-      //   });
-      this.timeRange = this.searchForm.timeRange
-      this.currentClass = this.searchForm.diagName
-      this.currentPage = 1
-      this.pageSize = 10
-      this.getData(this.searchForm.patientId)
-      Object.assign(
-        this.$data.searchForm,
-        this.$options.data().searchForm
-      );
-      this.dialogSearchVisible = false
+      this.timeRange = this.searchForm.timeRange;
+      this.currentClass = this.searchForm.diagName;
+      this.currentPage = 1;
+      this.pageSize = 10;
+      this.getData(this.searchForm.patientId);
+      Object.assign(this.$data.searchForm, this.$options.data().searchForm);
+      this.dialogSearchVisible = false;
     },
     toCaseDetail(row) {
       this.$router.push({

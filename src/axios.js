@@ -5,8 +5,7 @@ import router from "./router";
 import JSONBig from 'json-bigint'
 const JSONBigIntStr = JSONBig({ storeAsString: true });
 const service = axios.create({
-  // process.env.VUE_APP_API_BASE_URL
-  baseURL: "http://43.136.178.202:8088" + '/api/v1',
+  baseURL: process.env.VUE_APP_API_BASE_URL + '/api/v1',
   transformResponse: [function(data){
     try {
       // 如果转换成功则返回转换的数据结果
