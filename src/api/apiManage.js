@@ -150,6 +150,14 @@ export default {
     })
   },
 
+  getDeptsName(data) {
+    return request({
+      url: '/dept/page',
+      method: 'get',
+      data
+    })
+  },
+
   getVisitList(data) {
     return request({
       url: '/visits/page/',
@@ -180,9 +188,17 @@ export default {
     })
   },
 
-  getPatientCheckReport(patientId) {
+  getPatientCheckReport(patientId,data) {
     return request({
       url: '/check_reports/find/' + patientId,
+      method: 'get',
+      params: data,
+    })
+  },
+
+  getRecipeById(patientId) {
+    return request({
+      url: '/recipe/find/' + patientId,
       method: 'get'
     })
   },
@@ -249,7 +265,7 @@ export default {
 
   getCaseTimelineReport(data) {
     return request({
-      url: '/check_reports/reportFiles',
+      url: '/check_reports/reportFiles/',
       method: 'get',
       params: data
     })

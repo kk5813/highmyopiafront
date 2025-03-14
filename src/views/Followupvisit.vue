@@ -69,8 +69,9 @@
             <template slot="header" slot-scope="scope">
               <el-dropdown @command="handleCommand">
                 <span>
-                  计划随访时间({{ currentClass
-                  }})<i class="el-icon-arrow-down el-icon--right"></i>
+                  计划随访时间({{ currentClass }})<i
+                    class="el-icon-arrow-down el-icon--right"
+                  ></i>
                 </span>
                 <el-dropdown-menu slot="dropdown">
                   <el-dropdown-item icon="el-icon-date" command="全部"
@@ -212,9 +213,13 @@
           </el-form-item>
           <el-form-item label="随访结果记录" :label-width="formLabelWidth">
             <el-input
+              type="textarea"
+              :autosize="{ minRows: 2, maxRows: 10 }"
+              placeholder="请输入内容"
               v-model="followupForm.visitContent"
-              autocomplete="off"
-            ></el-input>
+            >
+            </el-input>
+            <el-button style="float:right;" type="text" @click="loadTemplate()">加载模板</el-button>
           </el-form-item>
           <el-form-item label="随访情况补充" :label-width="formLabelWidth">
             <el-input
@@ -403,6 +408,9 @@ export default {
     this.getData();
   },
   methods: {
+    loadTemplate() {
+      this.followupForm.visitContent = this.$constants.followTemplate
+    },
     handleCommand(command) {
       this.currentClass = command;
       this.currentPage = 1;

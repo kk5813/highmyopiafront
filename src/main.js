@@ -9,9 +9,12 @@ import './axios'
 import md5 from 'js-md5'
 import canvas from './canvas'
 import * as echarts from 'echarts'
+import Constants from './constants';
+ 
+
 Vue.config.productionTip = false
 
-
+Vue.prototype.$constants = Constants;
 Vue.use(ElementUI)
 Vue.prototype.$axios = axios
 Vue.prototype.$md5 = md5

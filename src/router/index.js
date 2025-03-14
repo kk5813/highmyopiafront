@@ -11,7 +11,6 @@ import PostCaseDetail from "../views/PostCaseDetail";
 import CaseDetail from "../views/CaseDetail";
 import AIdiagnosis from "../views/AIdiagnosis";
 import illStatistic from "../views/illStatistic";
-import test from "../views/test";
 import {
   getSession
 } from '@/auth'
@@ -64,16 +63,6 @@ const routes = [
     name: 'PostCaseDetail',
     component: PostCaseDetail
   },
-  // {
-  //   path: '/casedetail/:id',
-  //   name: 'CaseDetail',
-  //   component: CaseDetail
-  // },
-  // {
-  //   path: '/test/',
-  //   name: 'test',
-  //   component: test
-  // },
   {
     path: '/AIdiagnosis',
     name: 'AIdiagnosis',
@@ -88,7 +77,7 @@ const routes = [
 ]
 
 const router = new VueRouter({
-  mode: 'history',
+  mode: 'hash',
   routes
 })
 

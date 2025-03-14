@@ -48,11 +48,12 @@
               </template>
             </el-table-column>
             <el-table-column label="诊断" prop="diagName" align="center">
-              <template slot="header" slot-scope="scope">
+              <!-- <template slot="header" slot-scope="scope">
                 <el-dropdown @command="handleCommand">
                   <span>
-                    诊断({{ currentCommand
-                  }})<i class="el-icon-arrow-down el-icon--right"></i>
+                    诊断({{ currentCommand }})<i
+                      class="el-icon-arrow-down el-icon--right"
+                    ></i>
                   </span>
                   <el-dropdown-menu slot="dropdown">
                     <el-dropdown-item command="">全部</el-dropdown-item>
@@ -72,7 +73,7 @@
                     <el-dropdown-item command="干眼">干眼</el-dropdown-item>
                   </el-dropdown-menu>
                 </el-dropdown>
-              </template>
+              </template> -->
             </el-table-column>
             <el-table-column
               width="100px"
@@ -88,11 +89,28 @@
               align="center"
             >
             </el-table-column>
-            <el-table-column
-              label="科室"
-              prop="deptName"
-              align="center"
-            ></el-table-column>
+            <el-table-column label="科室" prop="deptName" align="center">
+              <template slot="header" slot-scope="scope">
+                <el-dropdown @command="handleDept">
+                  <span>
+                    科室({{ currentCommand }})<i
+                      class="el-icon-arrow-down el-icon--right"
+                    ></i>
+                  </span>
+                  <el-dropdown-menu>
+                    <el-dropdown-item
+                      style="font-size: 12px"
+                      v-for="(item, index) in depts"
+                      :key="item.value"
+                      :command="item.deptName"
+                      :divided="true"
+                    >
+                      {{ item.deptName }}
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </el-dropdown>
+              </template>
+            </el-table-column>
             <el-table-column
               label="诊断时间"
               width="400px;"
@@ -274,12 +292,14 @@ export default {
   inject: ["reload"],
   data() {
     return {
-      currentCommand: '全部',
+      currentDiag: '',
+      currentCommand: "",
       searchForm: {
         patientId: "",
         diagName: "",
         timeRange: [],
       },
+      depts: [{ deptName: "眼底病科" }, { deptName: "青白科" }],
       dialogSearchVisible: false,
       timeRange: ["", ""],
       withPermission: false,
@@ -311,6 +331,7 @@ export default {
     };
   },
   created() {
+    this.getDepts();
     api
       .findUserById(sessionStorage.getItem("userId"))
       .then((res) => {
@@ -322,6 +343,13 @@ export default {
     // this.getPatientData()
   },
   methods: {
+    handleDept(command) {
+      this.currentClass = command;
+      this.currentPage = 1;
+      this.pageSize = 10;
+      this.currentCommand = command ? command : "";
+      this.getData();
+    },
     timeChange() {
       this.currentPage = 1;
       this.pageSize = 10;
@@ -349,31 +377,29 @@ export default {
         })
         .finally(() => {});
     },
-    handleCommand(command) {
-      this.currentClass = command;
-      this.currentPage = 1;
-      this.pageSize = 10;
-      this.currentCommand = command ? command : '全部'
-      this.getData();
-    },
+    // handleCommand(command) {
+    //   this.currentClass = command;
+    //   this.currentPage = 1;
+    //   this.pageSize = 10;
+    //   this.currentCommand = command ? command : "";
+    //   this.getData();
+    // },
     getData(patientId) {
       // 避免时间选择器清空后为null
       this.timeRange = this.timeRange ? this.timeRange : ["", ""];
       let queryObj = {
-          pageNumber: this.currentPage,
-          pageSize: this.pageSize,
-          diagName: this.currentClass,
-          startTime: this.timeRange[0],
-          endTime: this.timeRange[1],
-          patientID: patientId
-      }
-
-      console.log(queryObj);
+        pageNumber: this.currentPage,
+        pageSize: this.pageSize,
+        diagName: this.currentDiag,
+        deptName: this.currentClass,
+        startTime: this.timeRange[0],
+        endTime: this.timeRange[1],
+        patientID: patientId,
+      };
       this.loading = true;
       api
         .getVisitList(queryObj)
         .then((res) => {
-          console.log(res);
           if (res.data.code == 200) {
             this.tableData = res.data.data.records;
             this.totalSize = res.data.data.total;
@@ -386,11 +412,11 @@ export default {
     },
     searchByInput() {
       this.timeRange = this.searchForm.timeRange;
-      this.currentClass = this.searchForm.diagName;
+      this.currentDiag = this.searchForm.diagName;
       this.currentPage = 1;
       this.pageSize = 10;
       this.getData(this.searchForm.patientId);
-      Object.assign(this.$data.searchForm, this.$options.data().searchForm);
+      // Object.assign(this.$data.searchForm, this.$options.data().searchForm);
       this.dialogSearchVisible = false;
     },
     toCaseDetail(row) {
@@ -433,7 +459,7 @@ export default {
       let obj = {
         pageNumber: this.currentPage,
         pageSize: this.pageSize,
-        diagName: "",
+        deptName: this.currentCommand,
       };
       this.loading = true;
       api
@@ -448,6 +474,24 @@ export default {
         .finally(() => {
           this.loading = false;
         });
+    },
+    getDepts() {
+      let obj = {
+        pageNumber: 1,
+        pageSize: 20,
+      };
+      api
+        .getDeptsName(obj)
+        .then((res) => {
+          if (res.data.code == 200) {
+            let items = res.data.data.records;
+            this.depts = items.map(function (item) {
+              return { deptName: item.deptName };
+            });
+          }
+        })
+        .catch((error) => {})
+        .finally(() => {});
     },
     //          编辑患者基本信息
     submitEditPatient() {
