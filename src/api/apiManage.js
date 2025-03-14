@@ -286,6 +286,14 @@ export default {
     })
   },
 
+  getAiDiagnoseByVisitnumber(data) {
+    return request({
+      url: '/disease/onlySearchByVisitNumber',
+      method: 'post',
+      data
+    })
+  },
+
   getPatientTodayReport(patientId) {
     return request({
       url: '/today/onlySearch/' + patientId,

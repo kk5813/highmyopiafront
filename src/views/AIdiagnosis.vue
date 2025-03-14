@@ -558,7 +558,7 @@ export default {
         visitNumber: this.search,
       };
       api
-        .getAiDiagnose(allObj)
+        .getAiDiagnoseByVisitnumber(allObj)
         .then((res) => {
           let aiResults = [];
           let urlList = [];
