@@ -115,7 +115,6 @@ export default {
             api
               .login(this.ruleForm)
               .then((res) => {
-                console.log(res);
                 if (res.data.code == 200) {
                   const userInfo = res.data.data;
                   sessionStorage.setItem("userId", userInfo.userId);
