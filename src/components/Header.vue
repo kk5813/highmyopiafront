@@ -9,7 +9,7 @@
       text-color="#fff"
       active-text-color="#ffd04b"
     >
-      <span>慢病管理系统</span>
+      <span style="pointer-events: none">慢病管理系统</span>
       <el-menu-item index="/illStatistic">
         <i class="el-icon-data-analysis"></i>病种统计
       </el-menu-item>
@@ -22,7 +22,7 @@
       <el-menu-item index="/patientmanagement"
         ><i class="el-icon-folder"></i>患者档案</el-menu-item
       >
-      <el-menu-item index="/Main" v-if="withPermission"
+      <el-menu-item index="/Main" v-show="withPermission"
         ><i class="el-icon-user"></i>用户管理</el-menu-item
       >
       <div class="menu-right">
@@ -33,7 +33,7 @@
             width: 200px;
             color: white;
             font-size: 16px;
-            text-align:right;
+            text-align: right;
           "
         >
           <i class="el-icon-user-solid"></i>{{ userName }}
@@ -61,15 +61,26 @@ export default {
       userName: "admin",
     };
   },
-  created(){
-    if(sessionStorage.getItem('userName')){
-      this.userName = sessionStorage.getItem('userName')
+  created() {
+    if (sessionStorage.getItem("userName")) {
+      this.userName = sessionStorage.getItem("userName");
     }
+
+    // 优先从缓存读取权限
+    if (sessionStorage.getItem("withPermission")) {
+      this.withPermission = JSON.parse(
+        sessionStorage.getItem("withPermission")
+      );
+      return;
+    }
+
+    // 无缓存时请求接口
     api
       .findUserById(sessionStorage.getItem("userId"))
       .then((res) => {
         if (res.data.data && res.data.data.userStatus === 0)
           this.withPermission = true;
+        sessionStorage.setItem("withPermission", true); // 存入缓存
       })
       .catch((error) => {})
       .finally(() => {});
@@ -79,8 +90,8 @@ export default {
       api.logout().then((res) => {
         if (res.data.code == 200) {
           // removeSession();
-          sessionStorage.removeItem('token')
-          sessionStorage.removeItem('userName')
+          sessionStorage.removeItem("token");
+          sessionStorage.removeItem("userName");
           this.$message({
             message: "您已成功退出！",
             type: "success",
@@ -92,9 +103,7 @@ export default {
       });
     },
   },
-  mounted(){
-
-  },
+  mounted() {},
 };
 </script>
 
@@ -142,5 +151,8 @@ export default {
 }
 .el-icon-data-analysis {
   color: #fff;
+}
+.el-menu-item {
+  transition: opacity 0.3s ease;
 }
 </style>

@@ -42,7 +42,6 @@
             :plain="true"
             type="primary"
             @click="submitForm('ruleForm')"
-            
             >登录</el-button
           >
         </el-form-item>
@@ -54,7 +53,7 @@
 <script>
 import api from "@/api/apiManage";
 import { GVerify } from "@/assets/js/verifyCode";
-import {setSession,getSession} from '@/auth'
+import { setSession, getSession } from "@/auth";
 export default {
   // 离开login页面时删除canvas
   beforeRouteLeave(to, from, next) {
@@ -68,14 +67,19 @@ export default {
   data() {
     return {
       ruleForm: {
-        userLoginName: "zcc",
-        userPassword: "2287996531",
+        userLoginName: "",
+        userPassword: "",
         code: "",
       },
       rules: {
         userLoginName: [
           { required: true, message: "请输入用户名", trigger: "blur" },
-          { min: 2, max: 15, message: "长度在 2 到 15 个字符", trigger: "blur" },
+          {
+            min: 2,
+            max: 15,
+            message: "长度在 2 到 15 个字符",
+            trigger: "blur",
+          },
         ],
         userPassword: [
           { required: true, message: "请输入密码", trigger: "change" },
@@ -102,22 +106,28 @@ export default {
     this.canvasFlag = true;
   },
   methods: {
-
     submitForm(formName) {
       const _this = this;
       this.$refs[formName].validate((valid) => {
         if (valid) {
           if (this.code.validate(this.ruleForm.code)) {
             // this.ruleForm.userPassword=this.$md5(this.ruleForm.userPassword)
-            api.login(this.ruleForm).then((res) => {
-              if (res.data.code == 200) {
-                const userInfo = res.data.data;
-                sessionStorage.setItem('userId',userInfo.userId)
-                sessionStorage.setItem('token',res.headers.authorization)
-                sessionStorage.setItem('userName',userInfo.userName)
-                this.$router.push({ path: "illStatistic" });
-              } else _this.$message.error("用户不存在或密码错误！");
-            });
+            api
+              .login(this.ruleForm)
+              .then((res) => {
+                console.log(res);
+                if (res.data.code == 200) {
+                  const userInfo = res.data.data;
+                  sessionStorage.setItem("userId", userInfo.userId);
+                  sessionStorage.setItem("token", res.headers.authorization);
+                  sessionStorage.setItem("userName", userInfo.userName);
+                  this.$router.push({ path: "illStatistic" });
+                } else _this.$message.error("登陆失败！");
+              })
+              .catch((error) => {
+                 _this.$message.error("用户不存在或密码错误！");
+              })
+              .finally(() => {});
           } else {
             const _this = this;
             _this.$message.error("验证码错误");
