@@ -22,7 +22,7 @@
             style="width: 100%; border-radius: 20px"
             v-loading="loading"
           >
-            <el-table-column label="就诊号" prop="visitNumber" align="center">
+            <el-table-column label="患者号" prop="patientId" align="center">
             </el-table-column>
             <el-table-column
               width="100px"
