@@ -12,7 +12,11 @@
       </el-page-header>
       <el-tabs v-model="activeName" @tab-click="handleClick">
         <el-tab-pane label="门诊病历" name="case" style="float: left">
-          <el-empty :image-size="300" description="暂无数据" v-if="noTimelineData"></el-empty>
+          <el-empty
+            :image-size="300"
+            description="暂无数据"
+            v-if="noTimelineData"
+          ></el-empty>
           <el-timeline>
             <el-timeline-item
               placement="top"
@@ -21,14 +25,12 @@
               :key="caseData.patiendId"
               :timestamp="caseData.diagTime"
             >
-              <el-button
-                type="primary"
-                @click="handleCard(caseData.visitNumber)"
+              <el-button type="primary" @click="handleCard(caseData.diagName)"
                 >展开/收起病历</el-button
               >
               <el-card
-                v-show="cardList[caseData.visitNumber]"
-                :id="caseData.visitNumber"
+                v-show="cardList[caseData.diagName]"
+                :id="caseData.diagName"
                 style="margin: 5px 5px 0px 0px; width: 800px"
               >
                 <div slot="header" class="header">
@@ -403,8 +405,8 @@ export default {
   },
   created() {
     this.caseDataList.forEach((item, index) => {
-      if (index == 0) this.$set(this.cardList, item.visitNumber, true);
-      else this.$set(this.cardList, item.visitNumber, false);
+      if (index == 0) this.$set(this.cardList, item.diagName, true);
+      else this.$set(this.cardList, item.diagName, false);
     });
     this.patientId = this.$route.query.id;
     this.patientName = this.$route.query.name;
@@ -473,9 +475,7 @@ export default {
           }
         })
         .catch((error) => {})
-        .finally(() => {
-          
-        });
+        .finally(() => {});
     },
     getPdfs() {
       this.timeRange = this.timeRange ? this.timeRange : ["", ""];
@@ -509,6 +509,11 @@ export default {
     },
     timeChange() {
       this.getPdfs();
+    },
+
+    // 处理控制台handleClick警告
+    handleClick(tab, event) {
+      // console.log(tab, event);
     },
   },
 };
