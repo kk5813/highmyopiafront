@@ -62,6 +62,15 @@
                   </el-descriptions>
                 </div>
                 <el-divider></el-divider>
+                <div class="cardFooter">
+                  <el-button
+                    style="display: flex;"
+                    type="primary"
+                    size="small"
+                    @click="toPatientManagement(item.name)"
+                    >查看档案</el-button
+                  >
+                </div>
               </el-card>
             </el-col>
             <el-col :span="12" style=""
@@ -81,6 +90,7 @@
 <script>
 import Header from "../components/Header";
 import api from "@/api/apiManage";
+import { mapMutations, mapGetters } from "vuex";
 export default {
   name: "illStatistic",
   components: { Header },
@@ -101,10 +111,14 @@ export default {
       detailIllData: [],
     };
   },
+    computed: {
+    ...mapGetters("patientState", ["getFilters"]),
+  },
   created() {
     // this.setCharts();
   },
   methods: {
+    ...mapMutations("patientState", ["SET_FILTERS"]),
     forSum(arr) {
       let sum = 0;
       arr.forEach((item) => (sum += item.value));
@@ -375,6 +389,28 @@ export default {
       });
       myChart.setOption(option);
     },
+
+    toPatientManagement(illness) {
+      const seachForm = {
+        patientId: "",
+        diagName: illness,
+        timeRange: [],
+      }
+
+      // 保存筛选状态到 Vuex
+      this.SET_FILTERS({
+        currentPage: 1,
+        pageSize: 10,
+        currentCommand: "",
+        diaDoctor: "",
+        timeRange: this.timeRange,
+        searchForm: seachForm,
+      });
+
+      this.$router.push({
+        path: "/patientmanagement",
+      });
+    },
   },
   mounted() {
     this.getCountData();
@@ -427,5 +463,11 @@ export default {
   background-color: #fcfcfd;
   display: flex;
   align-items: center;
+}
+
+.cardFooter {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
 }
 </style>

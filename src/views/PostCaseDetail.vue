@@ -391,74 +391,7 @@ export default {
       patientId: "",
       patientName: "",
       dialogCheckReportVisible: false,
-      caseDataList: [
-        // {
-        //   patientId: "1309689045627559938",
-        //   scdOsValue: "0.6",
-        //   scdOdValue: "0.8",
-        //   ccdOsValue: "0.8",
-        //   ccdOdValue: "0.8",
-        //   iopOs: "19",
-        //   iopOd: "19",
-        //   name: "艾弗森",
-        //   mainAppeal: "视力逐渐下降2年，要求检查",
-        //   pastHistory: "高度近视",
-        //   presentIllness:
-        //     "2年前开始出现视力逐渐下降，无眼红、眼痛，于当地眼镜店自行配镜。半年前开始视力下降加重，配镜视力无提高，现来我院就诊",
-        //   allergy: "无特殊",
-        //   specialOs: "双眼外观未见异常，屈光介质透明眼底呈近视改变",
-        //   specialOd: "双眼外观未见异常，屈光介质透明眼底呈近视改变",
-        //   visitNumber: "MZ202402020111",
-        //   physicalExam: "无",
-        //   dispose: "随诊",
-        //   diagName: "高度近视",
-        //   diagTime: "2024-02-02",
-        // },
-        // {
-        //   patientId: "1309689045627559938",
-        //   scdOs: "0.6",
-        //   scdOd: "0.8",
-        //   ccdOs: "0.8",
-        //   ccdOd: "0.8",
-        //   iopOs: "19",
-        //   iopOd: "19",
-        //   name: "艾弗森",
-        //   mainAppeal: "视力逐渐下降2年，要求检查",
-        //   pastHistory: "高度近视",
-        //   presentIllness:
-        //     "2年前开始出现视力逐渐下降，无眼红、眼痛，于当地眼镜店自行配镜。半年前开始视力下降加重，配镜视力无提高，现来我院就诊",
-        //   allergy: "无特殊",
-        //   specialOs: "双眼外观未见异常，屈光介质透明眼底呈近视改变",
-        //   specialOd: "双眼外观未见异常，屈光介质透明眼底呈近视改变",
-        //   visitNumber: "MZ202302020444",
-        //   physicalExam: "无",
-        //   dispose: "随诊",
-        //   diagName: "高度近视",
-        //   diagTime: "2023-02-02",
-        // },
-        // {
-        //   patientId: "1309689045627559938",
-        //   scdOs: "0.6",
-        //   scdOd: "0.8",
-        //   ccdOs: "0.8",
-        //   ccdOd: "0.8",
-        //   iopOs: "19",
-        //   iopOd: "19",
-        //   name: "艾弗森",
-        //   mainAppeal: "视力逐渐下降2年，要求检查",
-        //   pastHistory: "高度近视",
-        //   presentIllness:
-        //     "2年前开始出现视力逐渐下降，无眼红、眼痛，于当地眼镜店自行配镜。半年前开始视力下降加重，配镜视力无提高，现来我院就诊",
-        //   allergy: "无特殊",
-        //   specialOs: "双眼外观未见异常，屈光介质透明眼底呈近视改变",
-        //   specialOd: "双眼外观未见异常，屈光介质透明眼底呈近视改变",
-        //   visitNumber: "MZ202202020047",
-        //   physicalExam: "无",
-        //   dispose: "随诊",
-        //   diagName: "高度近视",
-        //   diagTime: "2022-02-02",
-        // },
-      ],
+      caseDataList: [],
       pdfDataList: [],
       value: "",
       formLabelWidth: "120px",
@@ -509,7 +442,10 @@ export default {
         });
     },
     goBack() {
-      this.$router.go(-1);
+      // this.$router.go(-1);
+      this.$router.push({
+        path: "/patientmanagement",
+      });
     },
     getHistoryCase() {
       let obj = {

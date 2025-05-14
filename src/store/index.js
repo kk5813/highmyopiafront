@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import patientState from './modules/patientState';
 
 Vue.use(Vuex)
 
@@ -48,5 +49,7 @@ export default new Vuex.Store({
   actions: {
   },
   modules: {
+    // 解决在PatientManagement页面点击病人详细病历并返回PatientManagement页面时原筛选条件丢失的问题
+    patientState
   }
 })
