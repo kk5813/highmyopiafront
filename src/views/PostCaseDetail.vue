@@ -25,12 +25,12 @@
               :key="caseData.patiendId"
               :timestamp="caseData.diagTime"
             >
-              <el-button type="primary" @click="handleCard(caseData.diagName)"
+              <el-button type="primary" @click="handleCard(caseData.diagTime + caseData.diagName)"
                 >展开/收起病历</el-button
               >
               <el-card
-                v-show="cardList[caseData.diagName]"
-                :id="caseData.diagName"
+                v-show="cardList[caseData.diagTime + caseData.diagName]"
+                :id="caseData.diagTime + caseData.diagName"
                 style="margin: 5px 5px 0px 0px; width: 800px"
               >
                 <div slot="header" class="header">
@@ -405,8 +405,8 @@ export default {
   },
   created() {
     this.caseDataList.forEach((item, index) => {
-      if (index == 0) this.$set(this.cardList, item.diagName, true);
-      else this.$set(this.cardList, item.diagName, false);
+      if (index == 0) this.$set(this.cardList,item.diagTime + item.diagName, true);
+      else this.$set(this.cardList, item.diagTime + item.diagName, false);
     });
     this.patientId = this.$route.query.id;
     this.patientName = this.$route.query.name;
