@@ -27,7 +27,14 @@ service.interceptors.request.use(
     }
     return config
   },
-  // 智能诊断请求超时重发
+  error => {
+    // do something with request error
+    return Promise.reject(error)
+  }
+)
+
+service.interceptors.response.use(
+  response => response,
   async error => {
     const config = error.config;
     // 仅处理超时错误
@@ -59,8 +66,7 @@ service.interceptors.request.use(
     }
     return Promise.reject(error);
   }
-)
-
+);
 // axios.interceptors.response.use(response => {
 //         if(response.data.code === 200) {
 //             return response
