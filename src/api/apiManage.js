@@ -282,7 +282,9 @@ export default {
     return request({
       url: '/disease/diagnose',
       method: 'post',
-      data
+      data,
+      timeout: 70000, // 初始超时70秒
+    __retryCount: 0 // 初始重试次数
     })
   },
 
