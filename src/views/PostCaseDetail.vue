@@ -25,7 +25,9 @@
               :key="caseData.patiendId"
               :timestamp="caseData.diagTime"
             >
-              <el-button type="primary" @click="handleCard(caseData.diagTime + caseData.diagName)"
+              <el-button
+                type="primary"
+                @click="handleCard(caseData.diagTime + caseData.diagName)"
                 >展开/收起病历</el-button
               >
               <el-card
@@ -405,11 +407,13 @@ export default {
   },
   created() {
     this.caseDataList.forEach((item, index) => {
-      if (index == 0) this.$set(this.cardList,item.diagTime + item.diagName, true);
+      if (index == 0)
+        this.$set(this.cardList, item.diagTime + item.diagName, true);
       else this.$set(this.cardList, item.diagTime + item.diagName, false);
     });
     this.patientId = this.$route.query.id;
     this.patientName = this.$route.query.name;
+    this.timeRange = this.getWeekTimeRange();
     this.getHistoryCase();
     this.getLabData();
     this.getRecipe();
@@ -477,8 +481,27 @@ export default {
         .catch((error) => {})
         .finally(() => {});
     },
+    getWeekTimeRange() {
+      // 获取当前日期和时间
+      let today = new Date();
+      // 设置时间为当天的开始（00:00:00）
+      today.setHours(0, 0, 0, 0);
+
+      // 获取一周前的日期（同样设置为当天的开始）
+      let oneWeekAgo = new Date(today);
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+      // 格式化日期为 YYYY-MM-DD 字符串
+      function formatDate(date) {
+        let year = date.getFullYear().toString();
+        let month = (date.getMonth() + 1).toString().padStart(2, "0");
+        let day = date.getDate().toString().padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      }
+
+      return [formatDate(oneWeekAgo), formatDate(today)];
+    },
     getPdfs() {
-      this.timeRange = this.timeRange ? this.timeRange : ["", ""];
       let obj = {
         startTime: this.timeRange[0],
         endTime: this.timeRange[1],
