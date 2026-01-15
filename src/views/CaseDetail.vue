@@ -129,7 +129,7 @@
                 </el-form-item>
                 <el-button type="primary" icon="el-icon-check" @click="submitCaseData">修改完成</el-button>
             </el-form>
-            <div v-show="activeName=='third'" v-for="item in iolmaster">
+            <div v-show="activeName=='third'" v-for="item in iolmaster" :key="item.id || item.localpath">
                 <pdf
                         class="case-pdf"
                         style="width: 900px; height: 100%; margin-top: -480px; margin-left: 500px;"
@@ -138,7 +138,7 @@
                 </pdf>
             </div>
             <div class="opt-img">
-                <div v-show="activeName=='fourth'" v-for="item in opt">
+                <div v-show="activeName=='fourth'" v-for="item in opt" :key="item.id || item.localpath">
                     <div @click="onPreview(item)" @dblclick="sendToPredict(item)" @v-if="item.type ==='JPG'">
                         <img
                                 class="case-img"
@@ -151,7 +151,7 @@
                     v-if="showViewer"
                     :on-close="closeViewer"
                     :url-list="[optimg]" />
-            <div v-show="activeName=='fifth'" v-for="item in oct">
+            <div v-show="activeName=='fifth'" v-for="item in oct" :key="item.id || item.localpath">
                 <pdf
                         style="width: 900px; height: 120%; margin-top: 0px; margin-left: 500px;"
                         ref="pdf"

@@ -14,6 +14,9 @@ import illStatistic from "../views/illStatistic";
 import {
   getSession
 } from '@/auth'
+import nurseDashboard from "@/views/nurseDashboard.vue";
+import ModelConfig from "@/views/ModelConfig.vue";
+
 
 Vue.use(VueRouter)
 
@@ -72,6 +75,16 @@ const routes = [
     path: '/illStatistic',
     name: 'illStatistic',
     component: illStatistic
+  },
+  {
+    path: '/nurseDashboard',
+    name: 'nurseDashboard',
+    component: nurseDashboard
+  },
+  {
+    path: '/ModelConfig',
+    name: 'ModelConfig',
+    component: ModelConfig
   },
   
 ]

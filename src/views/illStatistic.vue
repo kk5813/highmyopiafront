@@ -2,7 +2,7 @@
   <div>
     <el-container>
       <el-header>
-        <Header active-index="/illStatistic"></Header>
+        <Header active-index="/illStatistic" />
       </el-header>
       <el-main v-loading="loading">
         <el-row>

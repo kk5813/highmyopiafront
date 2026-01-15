@@ -271,13 +271,6 @@ export default {
     })
   },
 
-  getAiDisease() {
-    return request({
-      url: '/disease/get_disease',
-      method: 'get'
-    })
-  },
-
   getAiDiagnose(data) {
     return request({
       url: '/disease/diagnose',
@@ -306,6 +299,90 @@ export default {
       url: '/patients/export',
       method: 'get',
       responseType: 'blob'
+    })
+  },
+  getPatientReport(visitNumber) {
+    return request({
+      url: '/patients/getReport/' + visitNumber,
+      method: 'get'
+    })
+  },
+  getAiDisease() {
+    return request({
+      url: '/config/get_disease',
+      method: 'get'
+    })
+  },
+  getAiNode() {
+    return request({
+      url: '/config/get_node',
+      method: 'get'
+    })
+  },
+  getAiLine() {
+    return request({
+      url: '/config/get_line',
+      method: 'get'
+    })
+  },
+  delAiDisease(diseaseId) {
+    return request({
+      url: '/config/del_disease/' + diseaseId,
+      method: 'delete'
+    })
+  },
+  delAiNode(nodeId) {
+    return request({
+      url: '/config/del_node/' + nodeId,
+      method: 'delete'
+    })
+  },
+  delAiLine(lineId) {
+    return request({
+      url: '/config/del_line/' + lineId,
+      method: 'delete'
+    })
+  },
+  modAiDisease(data) {
+    return request({
+      url: '/config/mod_disease',
+      method: 'post',
+      data
+    })
+  },
+  modAiNode(data) {
+    return request({
+      url: '/config/mod_node',
+      method: 'post',
+      data
+    })
+  },
+  modAiLine(data) {
+    return request({
+      url: '/config/mod_line',
+      method: 'post',
+      data
+    })
+  },
+  addAiDisease(data) {
+    return request({
+      url: '/config/add_disease',
+      method: 'post',
+      data
+    })
+  },
+  addAiNode(data) {
+    return request({
+      url: '/config/add_node',
+      method: 'post',
+      data
+    })
+  },
+  addAiLine(data) {
+    return request({
+      url: '/config/add_line',
+      method: 'post',
+      data
     })
   },
 }

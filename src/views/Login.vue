@@ -115,12 +115,30 @@ export default {
             api
               .login(this.ruleForm)
               .then((res) => {
-                if (res.data.code == 200) {
+                if (res.data.code === 200) {
                   const userInfo = res.data.data;
                   sessionStorage.setItem("userId", userInfo.userId);
                   sessionStorage.setItem("token", res.headers.authorization);
                   sessionStorage.setItem("userName", userInfo.userName);
-                  this.$router.push({ path: "illStatistic" });
+                  sessionStorage.setItem("role", userInfo.role);
+                  /*
+                  * 根据不同角色跳转不同页面
+                  * -1.用户注销
+                  *  1.管理员
+                  *  2.医生
+                  *  3.护士
+                  * */
+                  if (userInfo.role === 3) { // 护士
+                    this.$router.push({ path: "/nurseDashboard" });
+                  } else if (userInfo.role === 2) { // 医生
+                    this.$router.push({ path: "/illStatistic" });
+                  } else if (userInfo.role === 1) { // 管理员
+                    this.$router.push({ path: "/Main" });
+                  } else if (userInfo.role === -1) { // 注销用户
+                    this.$message.error("用户已被注销");
+                  } else {
+                    this.$router.push({ path: "/illStatistic" }); // 默认
+                  }
                 } else _this.$message.error("登陆失败！");
               })
               .catch((error) => {
