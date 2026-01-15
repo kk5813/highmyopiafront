@@ -12,7 +12,11 @@
       </el-page-header>
       <el-tabs v-model="activeName" @tab-click="handleClick">
         <el-tab-pane label="门诊病历" name="case" style="float: left">
-          <el-empty :image-size="300" description="暂无数据" v-if="noTimelineData"></el-empty>
+          <el-empty
+            :image-size="300"
+            description="暂无数据"
+            v-if="noTimelineData"
+          ></el-empty>
           <el-timeline>
             <el-timeline-item
               placement="top"
@@ -23,12 +27,12 @@
             >
               <el-button
                 type="primary"
-                @click="handleCard(caseData.visitNumber)"
+                @click="handleCard(caseData.diagTime + caseData.diagName)"
                 >展开/收起病历</el-button
               >
               <el-card
-                v-show="cardList[caseData.visitNumber]"
-                :id="caseData.visitNumber"
+                v-show="cardList[caseData.diagTime + caseData.diagName]"
+                :id="caseData.diagTime + caseData.diagName"
                 style="margin: 5px 5px 0px 0px; width: 800px"
               >
                 <div slot="header" class="header">
@@ -391,74 +395,7 @@ export default {
       patientId: "",
       patientName: "",
       dialogCheckReportVisible: false,
-      caseDataList: [
-        // {
-        //   patientId: "1309689045627559938",
-        //   scdOsValue: "0.6",
-        //   scdOdValue: "0.8",
-        //   ccdOsValue: "0.8",
-        //   ccdOdValue: "0.8",
-        //   iopOs: "19",
-        //   iopOd: "19",
-        //   name: "艾弗森",
-        //   mainAppeal: "视力逐渐下降2年，要求检查",
-        //   pastHistory: "高度近视",
-        //   presentIllness:
-        //     "2年前开始出现视力逐渐下降，无眼红、眼痛，于当地眼镜店自行配镜。半年前开始视力下降加重，配镜视力无提高，现来我院就诊",
-        //   allergy: "无特殊",
-        //   specialOs: "双眼外观未见异常，屈光介质透明眼底呈近视改变",
-        //   specialOd: "双眼外观未见异常，屈光介质透明眼底呈近视改变",
-        //   visitNumber: "MZ202402020111",
-        //   physicalExam: "无",
-        //   dispose: "随诊",
-        //   diagName: "高度近视",
-        //   diagTime: "2024-02-02",
-        // },
-        // {
-        //   patientId: "1309689045627559938",
-        //   scdOs: "0.6",
-        //   scdOd: "0.8",
-        //   ccdOs: "0.8",
-        //   ccdOd: "0.8",
-        //   iopOs: "19",
-        //   iopOd: "19",
-        //   name: "艾弗森",
-        //   mainAppeal: "视力逐渐下降2年，要求检查",
-        //   pastHistory: "高度近视",
-        //   presentIllness:
-        //     "2年前开始出现视力逐渐下降，无眼红、眼痛，于当地眼镜店自行配镜。半年前开始视力下降加重，配镜视力无提高，现来我院就诊",
-        //   allergy: "无特殊",
-        //   specialOs: "双眼外观未见异常，屈光介质透明眼底呈近视改变",
-        //   specialOd: "双眼外观未见异常，屈光介质透明眼底呈近视改变",
-        //   visitNumber: "MZ202302020444",
-        //   physicalExam: "无",
-        //   dispose: "随诊",
-        //   diagName: "高度近视",
-        //   diagTime: "2023-02-02",
-        // },
-        // {
-        //   patientId: "1309689045627559938",
-        //   scdOs: "0.6",
-        //   scdOd: "0.8",
-        //   ccdOs: "0.8",
-        //   ccdOd: "0.8",
-        //   iopOs: "19",
-        //   iopOd: "19",
-        //   name: "艾弗森",
-        //   mainAppeal: "视力逐渐下降2年，要求检查",
-        //   pastHistory: "高度近视",
-        //   presentIllness:
-        //     "2年前开始出现视力逐渐下降，无眼红、眼痛，于当地眼镜店自行配镜。半年前开始视力下降加重，配镜视力无提高，现来我院就诊",
-        //   allergy: "无特殊",
-        //   specialOs: "双眼外观未见异常，屈光介质透明眼底呈近视改变",
-        //   specialOd: "双眼外观未见异常，屈光介质透明眼底呈近视改变",
-        //   visitNumber: "MZ202202020047",
-        //   physicalExam: "无",
-        //   dispose: "随诊",
-        //   diagName: "高度近视",
-        //   diagTime: "2022-02-02",
-        // },
-      ],
+      caseDataList: [],
       pdfDataList: [],
       value: "",
       formLabelWidth: "120px",
@@ -470,11 +407,13 @@ export default {
   },
   created() {
     this.caseDataList.forEach((item, index) => {
-      if (index == 0) this.$set(this.cardList, item.visitNumber, true);
-      else this.$set(this.cardList, item.visitNumber, false);
+      if (index == 0)
+        this.$set(this.cardList, item.diagTime + item.diagName, true);
+      else this.$set(this.cardList, item.diagTime + item.diagName, false);
     });
     this.patientId = this.$route.query.id;
     this.patientName = this.$route.query.name;
+    this.timeRange = this.getWeekTimeRange();
     this.getHistoryCase();
     this.getLabData();
     this.getRecipe();
@@ -509,7 +448,10 @@ export default {
         });
     },
     goBack() {
-      this.$router.go(-1);
+      // this.$router.go(-1);
+      this.$router.push({
+        path: "/patientmanagement",
+      });
     },
     getHistoryCase() {
       let obj = {
@@ -537,12 +479,29 @@ export default {
           }
         })
         .catch((error) => {})
-        .finally(() => {
-          
-        });
+        .finally(() => {});
+    },
+    getWeekTimeRange() {
+      // 获取当前日期和时间
+      let today = new Date();
+      // 设置时间为当天的开始（00:00:00）
+      today.setHours(0, 0, 0, 0);
+
+      // 获取一周前的日期（同样设置为当天的开始）
+      let oneWeekAgo = new Date(today);
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+      // 格式化日期为 YYYY-MM-DD 字符串
+      function formatDate(date) {
+        let year = date.getFullYear().toString();
+        let month = (date.getMonth() + 1).toString().padStart(2, "0");
+        let day = date.getDate().toString().padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      }
+
+      return [formatDate(oneWeekAgo), formatDate(today)];
     },
     getPdfs() {
-      this.timeRange = this.timeRange ? this.timeRange : ["", ""];
       let obj = {
         startTime: this.timeRange[0],
         endTime: this.timeRange[1],
@@ -573,6 +532,11 @@ export default {
     },
     timeChange() {
       this.getPdfs();
+    },
+
+    // 处理控制台handleClick警告
+    handleClick(tab, event) {
+      // console.log(tab, event);
     },
   },
 };

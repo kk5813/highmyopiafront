@@ -154,7 +154,7 @@ export default {
     return request({
       url: '/dept/page',
       method: 'get',
-      data
+      params: data
     })
   },
 
@@ -275,7 +275,9 @@ export default {
     return request({
       url: '/disease/diagnose',
       method: 'post',
-      data
+      data,
+      timeout: 70000, // 初始超时70秒
+    __retryCount: 0 // 初始重试次数
     })
   },
 
@@ -299,6 +301,61 @@ export default {
       url: '/patients/export',
       method: 'get',
       responseType: 'blob'
+    })
+  },
+
+  seachTemplate(data) {
+    return request({
+      url: '/followupTemplate/search',
+      method: 'get',
+      params: data
+    })
+  },
+
+  setFollowupBatch(data) {
+    return request({
+      url: '/followup/setFollowupBatch',
+      method: 'post',
+      data
+    })
+  },
+
+  editFollowupTemplate(data) {
+    return request({
+      url: '/followupTemplate/editFollowupTemplate',
+      method: 'post',
+      data
+    })
+  },
+
+  deleteTemplate(templateId) {
+    return request({
+      url: '/followupTemplate/invalidFollowupTemplate/' + templateId,
+      method: 'get',
+    })
+  },
+
+  addFollowupTemplate(data) {
+    return request({
+      url: '/followupTemplate/addFollowupTemplate',
+      method: 'post',
+      data
+    })
+  },
+
+  addFollowUpBatchByTemplate(data) {
+    return request({
+      url: '/visits/addFollowUpBatchByTemplate',
+      method: 'post',
+      data
+    })
+  },
+
+  addFollowUpBatchByPatientsInfo(data) {
+    return request({
+      url: '/visits/addFollowUpBatchByPatientsInfo',
+      method: 'post',
+      data
     })
   },
   getPatientReport(visitNumber) {

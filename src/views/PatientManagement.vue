@@ -15,13 +15,44 @@
             box-shadow: 8px 20px 30px 8px rgba(21, 60, 204, 0.09);
           "
         >
+          <div
+            style="
+              padding: 10px;
+              border-radius: 20px;
+              background: white;
+              float: left;
+            "
+          >
+            <div style="display: inline-block">
+              <el-input v-model="diaDoctor">
+                <template slot="prepend">诊断医生</template>
+                <template slot="append">
+                  <el-button type="primary" @click="handleDoctorChange()" circle
+                    >确定</el-button
+                  >
+                </template>
+              </el-input>
+            </div>
+
+            <el-button
+              style="margin-left: 30px"
+              icon="el-icon-top-right"
+              type="primary"
+              :disabled="setFollowupedInfos.length <= 0"
+              @click="dialogAddFormVisible = true"
+              >批量添加随访</el-button
+            >
+          </div>
+
           <!--                            患者档案表格-->
           <el-table
             :data="tableData"
             border
             style="width: 100%; border-radius: 20px"
             v-loading="loading"
+            @selection-change="handleSelectionChange"
           >
+            <el-table-column type="selection" width="55"></el-table-column>
             <el-table-column label="患者号" prop="patientId" align="center">
             </el-table-column>
             <el-table-column
@@ -48,32 +79,6 @@
               </template>
             </el-table-column>
             <el-table-column label="诊断" prop="diagName" align="center">
-              <!-- <template slot="header" slot-scope="scope">
-                <el-dropdown @command="handleCommand">
-                  <span>
-                    诊断({{ currentCommand }})<i
-                      class="el-icon-arrow-down el-icon--right"
-                    ></i>
-                  </span>
-                  <el-dropdown-menu slot="dropdown">
-                    <el-dropdown-item command="">全部</el-dropdown-item>
-                    <el-dropdown-item command="糖尿病">糖网</el-dropdown-item>
-                    <el-dropdown-item command="静脉阻塞"
-                      >视网膜静脉阻塞</el-dropdown-item
-                    >
-                    <el-dropdown-item command="近视">高度近视</el-dropdown-item>
-                    <el-dropdown-item command="青光眼">青光眼</el-dropdown-item>
-                    <el-dropdown-item command="角膜溃疡"
-                      >角膜溃疡</el-dropdown-item
-                    >
-                    <el-dropdown-item command="黄斑变性"
-                      >黄斑变性</el-dropdown-item
-                    >
-                    <el-dropdown-item command="白内障">白内障</el-dropdown-item>
-                    <el-dropdown-item command="干眼">干眼</el-dropdown-item>
-                  </el-dropdown-menu>
-                </el-dropdown>
-              </template> -->
             </el-table-column>
             <el-table-column
               width="100px"
@@ -141,17 +146,6 @@
                   v-if="withPermission"
                   >信息导出</el-button
                 >
-                <!-- <el-input
-                  width="50px"
-                  v-model="search"
-                  @keyup.enter.native="
-                    () => {
-                      (currentPage = 1), (pageSize = 10), searchByInput(1, 10);
-                    }
-                  "
-                  size="medium"
-                  placeholder="请输入患者ID或诊断名称"
-                /> -->
                 <el-button
                   @click="dialogSearchVisible = true"
                   type="primary"
@@ -273,6 +267,70 @@
             >
           </div>
         </el-dialog>
+        <!--                            批量新增随访          -->
+        <el-dialog
+          title="添加随访"
+          :visible.sync="dialogAddFormVisible"
+          width="30%"
+        >
+          <el-form :model="addFollowForm">
+            <el-form-item label="使用模板" :label-width="formLabelWidth">
+              <el-switch
+                @change="useTemplateChange()"
+                v-model="useTemplate"
+                active-color="#13ce66"
+                inactive-color="#ff4949"
+                style="float: left; margin-top: 10px"
+                :disabled="allTemplates.length <= 0"
+              >
+              </el-switch>
+            </el-form-item>
+            <el-form-item label="模板名称" :label-width="formLabelWidth">
+              <el-select
+                v-model="chosenTemplate"
+                placeholder="请选择"
+                style="float: left"
+                :disabled="allTemplates.length <= 0 || !useTemplate"
+                @change="handleTemplateChange"
+              >
+                <el-option
+                  v-for="item in allTemplates"
+                  :key="item.id"
+                  :label="item.templateName"
+                  :value="item.id"
+                >
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="几天后随访" :label-width="formLabelWidth">
+              <el-input-number
+                style="float: left"
+                v-model="addFollowForm.intervalValue"
+                :step="1"
+                :min="1"
+                :max="999"
+                :disabled="useTemplate"
+              ></el-input-number>
+            </el-form-item>
+            <el-form-item label="随访计划" :label-width="formLabelWidth">
+              <el-input
+                :disabled="useTemplate"
+                type="textarea"
+                maxlength="85"
+                show-word-limit
+                :autosize="{ minRows: 4, maxRows: 10 }"
+                v-model="addFollowForm.visitPlan"
+                autocomplete="off"
+              ></el-input>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="addPatientsFollow()"
+              >确 定</el-button
+            >
+            <el-button @click="dialogAddFormVisible = false">取 消</el-button>
+          </div>
+        </el-dialog>
       </el-main>
       <el-footer
         >爱尔眼科慢病管理系统( 推荐使用Edge,Firefox、Chrome 浏览器访问
@@ -286,13 +344,14 @@
 import Header from "../components/Header";
 import api from "@/api/apiManage";
 import request from "@/axios";
+import { mapMutations, mapGetters } from "vuex";
 export default {
   name: "PatientManagement",
   components: { Header },
   inject: ["reload"],
   data() {
     return {
-      currentDiag: '',
+      currentDiag: "",
       currentCommand: "",
       searchForm: {
         patientId: "",
@@ -328,9 +387,44 @@ export default {
       caseData: [{}],
       dialogFormVisible: false,
       currentPatientName: "",
+      diaDoctor: "",
+      dialogAddFormVisible: false,
+      addFollowForm: {
+        id: "",
+        patientId: "",
+        intervalValue: "",
+        visitPlan: "",
+        visitRemark: "",
+        visitResult: "",
+        visitDate: "",
+        visitContent: "",
+        deptId: "",
+        doctorId: "",
+        visitNumber: "",
+      },
+      pickerOptions: {
+        //          日期限制，只能选择今日以后的时间
+        disabledDate(time) {
+          return time.getTime() < Date.now();
+        },
+      },
+      chosenTemplate: -1,
+      allTemplates: [],
+      setFollowupedInfos: [],
+      useTemplate: false,
     };
   },
+  computed: {
+    ...mapGetters("patientState", ["getFilters"]),
+  },
   created() {
+    // 这里设置currentPage是为了解决仅在mounted函数中设置currentPage分页组件仍显示页码为1的bug
+    const savedFilters = this.getFilters;
+    if (savedFilters.currentPage != -1) {
+      this.currentPage = savedFilters.currentPage;
+    }
+
+    this.getAllTemplates();
     this.getDepts();
     api
       .findUserById(sessionStorage.getItem("userId"))
@@ -340,9 +434,12 @@ export default {
       })
       .catch((error) => {})
       .finally(() => {});
-    // this.getPatientData()
   },
   methods: {
+    // 加载vuex相关方法
+    ...mapMutations("patientState", ["SET_FILTERS"]),
+
+    // 处理各类筛选条件变化
     handleDept(command) {
       this.currentClass = command;
       this.currentPage = 1;
@@ -350,11 +447,67 @@ export default {
       this.currentCommand = command ? command : "";
       this.getData();
     },
+    // 处理时间区间变化
     timeChange() {
       this.currentPage = 1;
       this.pageSize = 10;
       this.getData();
     },
+    // 每页条数改变时触发 选择一页显示多少行
+    handleSizeChange(size) {
+      this.pageSize = size;
+      this.getData();
+    },
+    // 当前页改变时触发 跳转其他页
+    handleCurrentChange(page) {
+      this.currentPage = page;
+      this.getData();
+    },
+    // 处理诊断医生变化
+    handleDoctorChange() {
+      this.currentPage = 1;
+      this.pageSize = 10;
+      this.getData();
+    },
+    // 处理模板选择变化
+    handleTemplateChange(selectedId) {
+      const selectedTemplate = this.allTemplates.find(
+        (item) => item.id === selectedId
+      );
+      if (selectedTemplate) {
+        this.addFollowForm = {
+          id: selectedTemplate.id,
+          intervalValue: selectedTemplate.intervalValue,
+          visitPlan: selectedTemplate.visitPlan,
+        };
+      }
+    },
+    // 处理表格勾选项
+    handleSelectionChange(val) {
+      this.setFollowupedInfos = val.map(function (item) {
+        return {
+          deptId: item.deptId,
+          doctorId: item.doctorId,
+          patientId: item.patientId,
+          visitNumber: item.visitNumber,
+        };
+      });
+    },
+
+    useTemplateChange() {
+      const selectedTemplate = this.allTemplates.find(
+        (item) => item.id === this.chosenTemplate
+      );
+      if (selectedTemplate) {
+        this.addFollowForm = {
+          id: selectedTemplate.id,
+          intervalValue: selectedTemplate.intervalValue,
+          visitPlan: selectedTemplate.visitPlan,
+        };
+      }
+    },
+
+    // 下载全部诊断信息
     downInfo() {
       api
         .downloadPatientInfo()
@@ -377,13 +530,68 @@ export default {
         })
         .finally(() => {});
     },
-    // handleCommand(command) {
-    //   this.currentClass = command;
-    //   this.currentPage = 1;
-    //   this.pageSize = 10;
-    //   this.currentCommand = command ? command : "";
-    //   this.getData();
-    // },
+
+    // 根据搜索条件筛选table数据
+    searchByInput() {
+      this.timeRange = this.searchForm.timeRange;
+      this.currentDiag = this.searchForm.diagName;
+      this.currentPage = 1;
+      this.pageSize = 10;
+      this.getData(this.searchForm.patientId);
+      // Object.assign(this.$data.searchForm, this.$options.data().searchForm);
+      this.dialogSearchVisible = false;
+    },
+
+    // 获取全部模板
+    getAllTemplates() {
+      let obj = {
+        templateName: "",
+        visitPlan: "",
+        deptName: "",
+        modifyName: "",
+        intervalValue: "",
+        dateStart: "",
+        dateEnd: "",
+        pageNo: "",
+        pageSize: "",
+      };
+      api
+        .seachTemplate(obj)
+        .then((res) => {
+          if (res.data.code === 200) {
+            this.allTemplates = res.data.data.records;
+            if (this.allTemplates.length > 0) {
+              this.useTemplate = true;
+              this.chosenTemplate = this.allTemplates[0].id;
+              this.handleTemplateChange(this.chosenTemplate);
+            }
+          }
+        })
+        .catch((error) => {})
+        .finally(() => {});
+    },
+
+    // 获取全部科室
+    getDepts() {
+      let obj = {
+        pageNumber: 1,
+        pageSize: 20,
+      };
+      api
+        .getDeptsName(obj)
+        .then((res) => {
+          if (res.data.code == 200) {
+            let items = res.data.data.records;
+            this.depts = items.map(function (item) {
+              return { deptName: item.deptName };
+            });
+          }
+        })
+        .catch((error) => {})
+        .finally(() => {});
+    },
+
+    // 获取table数据
     getData(patientId) {
       // 避免时间选择器清空后为null
       this.timeRange = this.timeRange ? this.timeRange : ["", ""];
@@ -392,6 +600,7 @@ export default {
         pageSize: this.pageSize,
         diagName: this.currentDiag,
         deptName: this.currentClass,
+        doctorName: this.diaDoctor,
         startTime: this.timeRange[0],
         endTime: this.timeRange[1],
         patientID: patientId,
@@ -410,50 +619,8 @@ export default {
           this.loading = false;
         });
     },
-    searchByInput() {
-      this.timeRange = this.searchForm.timeRange;
-      this.currentDiag = this.searchForm.diagName;
-      this.currentPage = 1;
-      this.pageSize = 10;
-      this.getData(this.searchForm.patientId);
-      // Object.assign(this.$data.searchForm, this.$options.data().searchForm);
-      this.dialogSearchVisible = false;
-    },
-    toCaseDetail(row) {
-      this.$router.push({
-        path: "/postcasedetail",
-        query: { id: row.patientId, name: row.patientName },
-      });
-    },
-    //          患者基本信息
-    patientInfo(index, row) {
-      api
-        .getPatientById(row.patientId)
-        .then((res) => {
-          if (res.data.code == 200) {
-            this.infoForm = res.data.data;
-            this.dialogFormVisible = true;
-          }
-        })
-        .catch((error) => {
-          this.$message({
-            message: "该用户基本信息不存在！",
-            type: "warning",
-          });
-        })
-        .finally(() => {});
-    },
-    //每页条数改变时触发 选择一页显示多少行
-    handleSizeChange(size) {
-      this.pageSize = size;
-      this.getData();
-    },
-    //当前页改变时触发 跳转其他页
-    handleCurrentChange(page) {
-      this.currentPage = page;
-      this.getData();
-    },
-    //          页面加载，获取数据
+
+    // 功能上等同getData函数青春版，用于无任何筛选条件下加载全科室诊断数据
     getPatientData() {
       const _this = this;
       let obj = {
@@ -475,25 +642,45 @@ export default {
           this.loading = false;
         });
     },
-    getDepts() {
-      let obj = {
-        pageNumber: 1,
-        pageSize: 20,
-      };
+
+    // 跳转至详细病历
+    toCaseDetail(row) {
+      // 保存当前table的筛选状态到 Vuex
+      this.SET_FILTERS({
+        currentPage: this.currentPage,
+        pageSize: this.pageSize,
+        currentCommand: this.currentCommand,
+        diaDoctor: this.diaDoctor,
+        timeRange: this.timeRange,
+        searchForm: this.searchForm,
+      });
+
+      this.$router.push({
+        path: "/postcasedetail",
+        query: { id: row.patientId, name: row.patientName },
+      });
+    },
+
+    // 加载患者基本信息
+    patientInfo(index, row) {
       api
-        .getDeptsName(obj)
+        .getPatientById(row.patientId)
         .then((res) => {
           if (res.data.code == 200) {
-            let items = res.data.data.records;
-            this.depts = items.map(function (item) {
-              return { deptName: item.deptName };
-            });
+            this.infoForm = res.data.data;
+            this.dialogFormVisible = true;
           }
         })
-        .catch((error) => {})
+        .catch((error) => {
+          this.$message({
+            message: "该用户基本信息不存在！",
+            type: "warning",
+          });
+        })
         .finally(() => {});
     },
-    //          编辑患者基本信息
+
+    // 编辑患者基本信息
     submitEditPatient() {
       this.dialogFormVisible = false;
       const _this = this;
@@ -516,9 +703,130 @@ export default {
           this.getPatientData();
         });
     },
+
+    // 添加勾选患者至随访管理
+    addPatientsFollow() {
+      let templateObj = {
+        infos: this.setFollowupedInfos,
+        templateId: this.chosenTemplate,
+      };
+      let infoObj = [];
+      let currentDate = new Date();
+      let year = currentDate.getFullYear();
+      let month = currentDate.getMonth() + 1; 
+      let day = currentDate.getDate();
+      infoObj = this.setFollowupedInfos.map((item) => {
+        return {
+          deptId: item.deptId,
+          doctorId: item.doctorId,
+          patientId: item.patientId,
+          visitNumber: item.visitNumber,
+          planVisitDate: this.getTargetDate(`${year}-${month}-${day}`, this.addFollowForm.intervalValue),
+          visitPlan: this.addFollowForm.visitPlan,
+        };
+      });
+      if (this.useTemplate) {
+        api
+          .addFollowUpBatchByTemplate(templateObj)
+          .then((res) => {
+            if (res.data.code === 200) {
+              this.$message({
+                message: "批量设置成功",
+                type: "success",
+              });
+            } else {
+              this.$message.error("批量设置失败");
+            }
+          })
+          .catch((error) => {
+            this.$message.error("批量设置失败");
+          })
+          .finally(() => {
+            this.$nextTick(() => {
+              this.dialogAddFormVisible = false; // 保障关闭操作
+            });
+            this.getPatientData();
+          });
+      } else {
+        api
+          .addFollowUpBatchByPatientsInfo(infoObj)
+          .then((res) => {
+            if (res.data.code === 200) {
+              this.$message({
+                message: "批量设置成功",
+                type: "success",
+              });
+            } else {
+              this.$message.error("批量设置失败");
+            }
+          })
+          .catch((error) => {
+            this.$message.error("批量设置失败");
+          })
+          .finally(() => {
+            this.$nextTick(() => {
+              this.dialogAddFormVisible = false; // 保障关闭操作
+            });
+            this.getPatientData();
+          });
+      }
+    },
+
+    // 返回当前时间 + 天数的对应日期
+    getTargetDate(startDate, days) {
+      var startTime = new Date(startDate).getTime();
+      var diff = days * 86400 * 1000;
+      var endTime = startTime + diff;
+      var d = new Date(endTime);
+      var CurrentDate = "";
+      CurrentDate += d.getFullYear();
+      //var year=(d.getFullYear())+"-"+(d.getMonth()+1)+"-"+(d.getDate());
+      if (d.getMonth() + 1 > 9) {
+        CurrentDate += "-" + (d.getMonth() + 1);
+      } else {
+        CurrentDate += "-0" + (d.getMonth() + 1);
+      }
+      if (d.getDate() > 9) {
+        CurrentDate += "-" + d.getDate();
+      } else {
+        CurrentDate += "-0" + d.getDate();
+      }
+      return CurrentDate;
+    },
   },
+
   mounted() {
-    this.getPatientData();
+    const savedFilters = this.getFilters;
+    if (savedFilters.currentPage == -1) {
+      this.getPatientData();
+    } else {
+      // 利用vuex解决在PatientManagement页面点击病人详细病历并返回PatientManagement页面时原筛选条件丢失的问题
+      this.currentPage = savedFilters.currentPage;
+      this.pageSize = savedFilters.pageSize;
+      // 修改科室名称显示
+      this.currentCommand = savedFilters.currentCommand;
+      // 修改实际筛选科室
+      this.currentClass = savedFilters.currentCommand;
+      this.timeRange = savedFilters.timeRange;
+      this.diaDoctor = savedFilters.diaDoctor;
+      this.currentDiag = savedFilters.searchForm.diagName;
+      this.searchForm = savedFilters.searchForm;
+
+      // 强制分页组件更新
+      this.$nextTick(() => {
+        this.getData();
+      });
+
+      // 重置Vuex状态，避免任意条件时都应用该筛选条件
+      this.SET_FILTERS({
+        currentPage: -1,
+        pageSize: 10,
+        currentCommand: "",
+        timeRange: [],
+        diaDoctor: "",
+        searchForm: {},
+      });
+    }
   },
 };
 </script>
