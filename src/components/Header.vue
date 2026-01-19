@@ -33,6 +33,9 @@
         <el-menu-item index="/AIdiagnosis">
           <i class="el-icon-cpu"></i>智能诊断
         </el-menu-item>
+        <el-menu-item index="/NewAIdiagnosis">
+          <i class="el-icon-cpu"></i>新智能诊断
+        </el-menu-item>
         <el-menu-item index="/followupvisit">
           <i class="el-icon-phone-outline"></i>随访管理
         </el-menu-item>
@@ -54,6 +57,9 @@
         </el-menu-item>
         <el-menu-item index="/AIdiagnosis">
           <i class="el-icon-cpu"></i>智能诊断
+        </el-menu-item>
+        <el-menu-item index="/NewAIdiagnosis">
+          <i class="el-icon-cpu"></i>新智能诊断
         </el-menu-item>
         <el-menu-item index="/patientmanagement">
           <i class="el-icon-folder"></i>患者档案

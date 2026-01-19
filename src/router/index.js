@@ -16,6 +16,7 @@ import {
 } from '@/auth'
 import nurseDashboard from "@/views/nurseDashboard.vue";
 import ModelConfig from "@/views/ModelConfig.vue";
+import NewAIdiagnosis from "@/views/NewAIdiagnosis.vue";
 
 
 Vue.use(VueRouter)
@@ -70,6 +71,11 @@ const routes = [
     path: '/AIdiagnosis',
     name: 'AIdiagnosis',
     component: AIdiagnosis
+  },
+  {
+    path: '/NewAIdiagnosis',
+    name: 'NewAIdiagnosis',
+    component: NewAIdiagnosis
   },
   {
     path: '/illStatistic',

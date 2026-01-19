@@ -281,6 +281,16 @@ export default {
     })
   },
 
+  getNewAIDiagnose(data) {
+    return request({
+      url: '/AIDisease/diagnose',
+      method: 'post',
+      data,
+      timeout: 70000, // 初始超时70秒
+      __retryCount: 0 // 初始重试次数
+    })
+  },
+
   getAiDiagnoseByVisitnumber(data) {
     return request({
       url: '/disease/onlySearchByVisitNumber',
