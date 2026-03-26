@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI诊断系统 - 合并版演示</title>
+    <!-- 引入 Element UI 样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+            background: #f0f2f5;
+        }
+        /* 模拟头部样式 */
+        .mock-header {
+            height: 65px;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            color: #1890ff;
+            font-weight: bold;
+            font-size: 18px;
+            border-bottom: 1px solid #e4e7ed;
+        }
+        .mock-header i {
+            margin-right: 8px;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <!-- 模拟 Header 组件 -->
+    <div class="mock-header">
+        <i class="el-icon-monitor"></i> 爱尔眼科·慢病管理系统
+    </div>
+
+    <!-- 主体内容，直接嵌入组件模板 -->
+    <div class="analysis-page-container">
+        <el-container class="full-height-container">
+            <el-main class="main-wrapper">
+                <!-- 步骤条改为两步 -->
+                <el-steps :active="activeStep" align-center class="steps-nav" finish-status="success">
+                    <el-step title="输入信息" description="就诊号与模型选择"></el-step>
+                    <el-step title="诊断结果" description="查看分析报告"></el-step>
+                </el-steps>
+
+                <div class="content-body">
+                    <!-- 步骤0：合并后的输入卡片 -->
+                    <div v-if="activeStep === 0" class="step-card-wrapper">
+                        <el-card shadow="always" class="fancy-card">
+                            <div class="card-inner-content">
+                                <div class="header-section">
+                                    <div class="icon-circle"><i class="el-icon-user"></i></div>
+                                    <h2 class="title">眼底AI诊断系统</h2>
+                                    <p class="subtitle">请输入就诊号并选择疑似疾病</p>
+                                </div>
+                                <div class="interactive-section">
+                                    <div class="input-group-box">
+                                        <!-- 就诊号输入 -->
+                                        <el-input
+                                                v-model="search"
+                                                placeholder="请输入患者门诊号/就诊号"
+                                                class="styled-input"
+                                                clearable
+                                        >
+                                            <i slot="prefix" class="el-input__icon el-icon-search"></i>
+                                        </el-input>
+                                        <!-- 模型选择下拉 -->
+                                        <el-select v-model="selectedModel" placeholder="请选择疑似病症" class="styled-input">
+                                            <el-option v-for="item in modelOptions" :key="item.value" :label="item.label" :value="item.value" />
+                                        </el-select>
+                                        <!-- 按钮组 -->
+                                        <div class="btn-group" style="margin-top: 20px;">
+                                            <el-button type="primary" class="action-btn" @click="handleAiImg" :loading="loadingStep2" style="width: 100%;">开始AI分析</el-button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </el-card>
+                    </div>
+
+                    <!-- 步骤1：诊断结果展示 (与原来基本一致) -->
+                    <div v-if="activeStep === 1" class="result-display-wrapper">
+                        <div class="result-header-bar">
+                            <el-button icon="el-icon-back" size="mini" @click="resetProcess">重新诊断</el-button>
+                            <span class="patient-info">患者：{{ search }} | 诊断时间：{{ diagnosisTime }}</span>
+                        </div>
+
+                        <el-tabs v-model="activeEyeTab" type="border-card" class="eye-tabs">
+                            <el-tab-pane v-for="eye in diagnosisList" :key="eye.site" :name="eye.site">
+                                <span slot="label"><i class="el-icon-view"></i> {{ eye.site }}</span>
+
+                                <el-row :gutter="20" class="diagnosis-top-row">
+                                    <el-col :span="8">
+                                        <el-card class="status-card" shadow="never">
+                                            <div class="label">诊断结论</div>
+                                            <div class="value" :class="{'danger-text': !isHealthy(eye.result)}">{{ eye.result }}</div>
+                                        </el-card>
+                                    </el-col>
+                                    <el-col :span="16">
+                                        <el-card class="status-card" shadow="never">
+                                            <div class="label">分析说明</div>
+                                            <div class="info-text">{{ eye.resultInfo || '无详细分析描述' }}</div>
+                                        </el-card>
+                                    </el-col>
+                                </el-row>
+
+                                <div class="image-section">
+                                    <h4 class="section-title">影像分析结果</h4>
+                                    <el-row :gutter="20">
+                                        <el-col :span="12" v-for="(img, idx) in eye.parsedUrls" :key="idx">
+                                            <el-card shadow="hover" class="img-detail-card">
+                                                <div slot="header">{{ img.name }}</div>
+                                                <el-image
+                                                        :src="img.url"
+                                                        :preview-src-list="eye.parsedUrls.map(i => i.url)"
+                                                        fit="contain"
+                                                        class="fundus-img"
+                                                >
+                                                    <div slot="error" class="image-slot"><i class="el-icon-picture-outline"></i></div>
+                                                </el-image>
+                                            </el-card>
+                                        </el-col>
+                                    </el-row>
+                                </div>
+                            </el-tab-pane>
+                        </el-tabs>
+                    </div>
+                </div>
+            </el-main>
+            <el-footer class="page-footer">爱尔眼科慢病管理系统 - AI诊断终端</el-footer>
+        </el-container>
+    </div>
+</div>
+
+<!-- 引入 Vue 和 Element UI -->
+<script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+<script>
+    // 模拟的模型选项数据
+    const mockModelOptions = [
+        { label: '青光眼', value: 1 },
+        { label: '白内障', value: 2 },
+        { label: '糖尿病视网膜病变', value: 3 },
+        { label: '年龄相关性黄斑变性', value: 4 },
+        { label: '高度近视', value: 5 }
+    ];
+
+    // 模拟的诊断结果数据（左右眼）
+    const mockDiagnosisData = [
+        {
+            site: '左眼',
+            result: '高度近视',
+            resultInfo: '视盘倾斜，颞侧弧形斑，视网膜呈豹纹状改变。建议定期复查眼底，避免剧烈运动。',
+            urls: {
+                '眼底彩照': 'https://picsum.photos/id/1015/600/400',
+                'OCT视盘': 'https://picsum.photos/id/1043/600/400',
+                '视野图': 'https://picsum.photos/id/106/600/400'
+            }
+        },
+        {
+            site: '右眼',
+            result: '正常',
+            resultInfo: '视盘边界清晰，杯盘比正常，视网膜平复，黄斑中心凹反光可见。未见明显异常。',
+            urls: {
+                '眼底彩照': 'https://picsum.photos/id/102/600/400',
+                'OCT视盘': 'https://picsum.photos/id/1040/600/400',
+                '视野图': 'https://picsum.photos/id/106/600/400'
+            }
+        }
+    ];
+
+    // 解析图片路径的模拟函数（直接返回原URL）
+    const resolveImageUrl = (path) => path;
+
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                activeStep: 0,           // 0:输入信息, 1:诊断结果
+                search: 'VISIT20240308',  // 预设就诊号方便演示
+                selectedModel: '',        // 选中的模型ID
+                modelOptions: mockModelOptions,
+                diagnosisList: [],
+                activeEyeTab: '',
+                diagnosisTime: '',
+                loadingStep2: false
+            };
+        },
+        methods: {
+            // 模拟诊断请求
+            handleAiImg() {
+                if (!this.search) {
+                    this.$message.warning('请输入就诊号');
+                    return;
+                }
+                if (!this.selectedModel) {
+                    this.$message.warning('请选择疑似病症');
+                    return;
+                }
+                this.loadingStep2 = true;
+
+                // 模拟异步请求
+                setTimeout(() => {
+                    const rawData = mockDiagnosisData;
+                    this.diagnosisTime = new Date().toLocaleString('zh-CN');
+
+                    if (Array.isArray(rawData) && rawData.length > 0) {
+                        // 转换数据格式
+                        this.diagnosisList = rawData.map(item => {
+                            const parsedUrls = [];
+                            if (item.urls && typeof item.urls === 'object') {
+                                for (const [key, value] of Object.entries(item.urls)) {
+                                    parsedUrls.push({
+                                        name: key,
+                                        url: resolveImageUrl(value)
+                                    });
+                                }
+                            }
+                            return {
+                                site: item.site,
+                                result: item.result,
+                                resultInfo: item.resultInfo,
+                                parsedUrls: parsedUrls
+                            };
+                        });
+
+                        this.activeEyeTab = this.diagnosisList[0].site;
+                        this.activeStep = 1;   // 切换到结果步骤
+                        this.$message.success('AI诊断分析完成（模拟数据）');
+                    } else {
+                        this.$message.warning('未找到匹配的眼底影像数据');
+                    }
+                    this.loadingStep2 = false;
+                }, 1500);
+            },
+
+            isHealthy(result) {
+                return result && (result.includes('正常') || result.includes('健康'));
+            },
+
+            resetProcess() {
+                this.activeStep = 0;
+                this.selectedModel = '';
+                this.diagnosisList = [];
+            }
+        }
+    });
+</script>
+
+<!-- 样式部分，复制并调整自原组件 -->
+<style>
+    .main-wrapper {
+        background-color: #f0f2f5;
+        padding: 24px;
+        min-height: calc(100vh - 125px); /* 减去头部和底部 */
+    }
+
+    .steps-nav {
+        max-width: 800px;
+        margin: 0 auto 40px;
+    }
+
+    .step-card-wrapper {
+        display: flex;
+        justify-content: center;
+        margin-top: 40px;
+    }
+
+    .fancy-card {
+        width: 100%;
+        max-width: 600px;
+        border-radius: 12px;
+    }
+
+    .card-inner-content {
+        padding: 30px;
+        text-align: center;
+    }
+
+    .icon-circle {
+        width: 64px;
+        height: 64px;
+        background: #e6f7ff;
+        color: #1890ff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 30px;
+        margin: 0 auto 20px;
+    }
+
+    .input-group-box {
+        margin-top: 30px;
+    }
+
+    .styled-input {
+        margin-bottom: 20px;
+    }
+    .styled-input .el-input__inner {
+        height: 45px;
+        border-radius: 8px;
+    }
+
+    .result-display-wrapper {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    .result-header-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        background: #fff;
+        padding: 10px 20px;
+        border-radius: 8px;
+    }
+    .patient-info {
+        font-weight: bold;
+        color: #606266;
+    }
+
+    .diagnosis-top-row {
+        margin-bottom: 20px;
+    }
+    .status-card {
+        height: 100px;
+        background: #fafafa;
+        border: 1px solid #ebeef5;
+    }
+    .status-card .label {
+        font-size: 13px;
+        color: #909399;
+        margin-bottom: 8px;
+    }
+    .status-card .value {
+        font-size: 20px;
+        font-weight: bold;
+        color: #67C23A;
+    }
+    .status-card .danger-text {
+        color: #F56C6C;
+    }
+    .status-card .info-text {
+        font-size: 14px;
+        color: #606266;
+        line-height: 1.5;
+    }
+
+    .section-title {
+        border-left: 4px solid #1890ff;
+        padding-left: 12px;
+        margin: 20px 0;
+    }
+
+    .img-detail-card {
+        margin-bottom: 20px;
+    }
+    .img-detail-card .el-card__header {
+        padding: 10px 15px;
+        font-size: 14px;
+        font-weight: bold;
+    }
+    .fundus-img {
+        width: 100%;
+        height: 300px;
+        background: #000;
+        border-radius: 4px;
+    }
+
+    .page-footer {
+        text-align: center;
+        color: #909399;
+        font-size: 12px;
+        border-top: 1px solid #dcdfe6;
+        line-height: 60px;
+        background: #fff;
+    }
+</style>
+</body>
+</html>

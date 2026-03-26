@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>眼底AI诊断分析系统 - 模拟演示</title>
+    <!-- 引入 Element UI 样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+            background: #f0f2f5;
+        }
+        /* 简单模拟 Header 组件 */
+        .mock-header {
+            height: 60px;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            color: #1890ff;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .mock-header i {
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- 由于原组件依赖 Header，这里用一个模拟的头部替代 -->
+        <div class="mock-header">
+            <i class="el-icon-s-home"></i> 眼底AI诊断系统 (演示版)
+        </div>
+        <!-- 使用我们的诊断组件 -->
+        <optic-disc-analysis-page></optic-disc-analysis-page>
+    </div>
+
+    <!-- 引入 Vue 和 Element UI -->
+    <script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+    <script>
+        // 模拟的假数据，对应后端返回格式
+        const mockDiagnosisData = [
+            {
+                site: '左眼',
+                result: '高度近视',
+                resultInfo: '视盘倾斜，颞侧弧形斑，视网膜呈豹纹状改变。建议定期复查眼底，避免剧烈运动。',
+                urls: {
+                    '视杯视盘分割图': 'https://picsum.photos/id/1015/600/400',  // 山水风景作为占位
+                    '病灶检测结果图': 'https://picsum.photos/id/1043/600/400'
+                }
+            },
+            {
+                site: '右眼',
+                result: '正常',
+                resultInfo: '视盘边界清晰，杯盘比正常，视网膜平复，黄斑中心凹反光可见。未见明显异常。',
+                urls: {
+                    '视杯视盘分割图': 'https://picsum.photos/id/102/600/400',
+                    '病灶检测结果图': 'https://picsum.photos/id/1040/600/400'
+                }
+            }
+        ];
+
+        // 解析图片路径的方法（直接返回原 URL，因为已经用了网络图片）
+        const resolveImageUrl = (path) => path;
+
+        // 定义组件（从用户提供的代码精简而来，移除了 Header 依赖和 api 调用）
+        Vue.component('optic-disc-analysis-page', {
+            template: `
+                <div class="optic-disc-analysis-page">
+                    <!-- 顶部搜索区域 (保持原样，但为了演示自动填充并触发诊断) -->
+                    <div class="top-section">
+                        <div class="search-container">
+                            <div class="compact-search-box">
+                                <div class="compact-search-header">
+                                    <i class="el-icon-search compact-search-icon"></i>
+                                    <span class="compact-search-title">就诊号查询</span>
+                                </div>
+                                <div class="compact-search-body">
+                                    <div class="compact-input-group">
+                                        <div class="input-with-label">
+                                            <span class="input-label">就诊号：</span>
+                                            <el-input
+                                                v-model="inputPatientId"
+                                                placeholder="请输入患者就诊号"
+                                                class="compact-patient-input"
+                                                clearable
+                                                size="medium"
+                                            >
+                                                <i slot="prefix" class="el-input__icon el-icon-user"></i>
+                                            </el-input>
+                                        </div>
+                                        <el-button
+                                            type="primary"
+                                            icon="el-icon-cpu"
+                                            :loading="isDiagnosing"
+                                            @click="handleDiagnose"
+                                            class="compact-diagnose-btn"
+                                        >
+                                            {{ isDiagnosing ? '诊断中...' : '开始AI诊断' }}
+                                        </el-button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="compact-status-box" v-if="hasSearched">
+                                <div class="compact-status-header">
+                                    <i class="el-icon-s-order status-icon"></i>
+                                    <span class="status-title">诊断状态</span>
+                                </div>
+                                <div class="compact-status-content">
+                                    <div class="status-row">
+                                        <span class="status-label">就诊号：</span>
+                                        <el-tag type="info" size="small">{{ inputPatientId }}</el-tag>
+                                    </div>
+                                    <div class="status-row" v-if="diagnosisTime">
+                                        <span class="status-label">时间：</span>
+                                        <span class="status-value">{{ diagnosisTime }}</span>
+                                    </div>
+                                    <div class="status-row">
+                                        <span class="status-label">眼别：</span>
+                                        <div v-if="diagnosisList.length > 0" style="display:inline-block">
+                                            <el-tag
+                                                v-for="item in diagnosisList"
+                                                :key="item.site"
+                                                type="primary"
+                                                size="mini"
+                                                style="margin-right: 4px;"
+                                            >
+                                                {{ item.site }}
+                                            </el-tag>
+                                        </div>
+                                        <el-tag v-else-if="!isDiagnosing" type="warning" size="small">无结果</el-tag>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 未搜索时的欢迎卡片 (预诊断状态) -->
+                    <div class="pre-diagnosis-content" v-if="!hasSearched">
+                        <el-row :gutter="24">
+                            <el-col :span="16" :offset="4">
+                                <el-card shadow="always" class="welcome-card">
+                                    <div class="welcome-content">
+                                        <div class="welcome-icon">
+                                            <i class="el-icon-s-promotion"></i>
+                                        </div>
+                                        <h2 class="welcome-title">眼底AI诊断分析系统</h2>
+                                        <p class="welcome-description">
+                                            请输入患者就诊号，系统将自动进行眼底图像分析，包括视盘分割、病灶检测和疾病诊断。
+                                        </p>
+                                        <div class="diagnosis-steps">
+                                            <div class="step-item">
+                                                <div class="step-number">1</div>
+                                                <div class="step-content">
+                                                    <h4>输入就诊号</h4>
+                                                    <p>在上方输入框输入患者的就诊号码</p>
+                                                </div>
+                                            </div>
+                                            <div class="step-item">
+                                                <div class="step-number">2</div>
+                                                <div class="step-content">
+                                                    <h4>开始AI诊断</h4>
+                                                    <p>点击"开始AI诊断"按钮启动分析</p>
+                                                </div>
+                                            </div>
+                                            <div class="step-item">
+                                                <div class="step-number">3</div>
+                                                <div class="step-content">
+                                                    <h4>查看结果</h4>
+                                                    <p>获取完整的诊断报告和分析结果</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </el-card>
+                            </el-col>
+                        </el-row>
+                    </div>
+
+                    <!-- 诊断结果显示区域 -->
+                    <div class="post-diagnosis-content" v-else-if="diagnosisList.length > 0">
+                        <div class="eye-tabs-wrapper">
+                            <el-tabs v-model="activeSite" type="border-card" class="eye-tabs">
+                                <el-tab-pane
+                                    v-for="item in diagnosisList"
+                                    :key="item.site"
+                                    :name="item.site"
+                                >
+                                    <span slot="label">
+                                        <i class="el-icon-view"></i> {{ item.site }}
+                                    </span>
+                                </el-tab-pane>
+                            </el-tabs>
+                        </div>
+
+                        <transition name="el-fade-in-linear" mode="out-in">
+                            <div class="eye-detail-container" v-if="currentEyeData" :key="activeSite">
+                                <el-row :gutter="24" class="main-content">
+                                    <el-col :span="10" class="left-column">
+                                        <el-card shadow="always" class="diagnosis-card">
+                                            <div class="diagnosis-header">
+                                                <i class="el-icon-document-checked result-icon"></i>
+                                                <span class="diagnosis-title">诊断结论 ({{ currentEyeData.site }})</span>
+                                                <div class="diagnosis-badge">
+                                                    <el-tag :type="getResultTagType(currentEyeData.result)" effect="dark">
+                                                        {{ currentEyeData.result }}
+                                                    </el-tag>
+                                                </div>
+                                            </div>
+                                            <div class="diagnosis-content">
+                                                <h2 class="final-diagnosis" :class="{'text-danger': !isHealthy(currentEyeData.result)}">
+                                                    {{ currentEyeData.result }}
+                                                </h2>
+                                                <div class="diagnosis-time">
+                                                    <i class="el-icon-time"></i> {{ diagnosisTime }}
+                                                </div>
+                                            </div>
+                                        </el-card>
+                                    </el-col>
+                                    <el-col :span="14" class="right-column">
+                                        <el-card shadow="always" class="analysis-card">
+                                            <div class="card-header">
+                                                <i class="el-icon-chat-line-round"></i>
+                                                <span>详细分析说明</span>
+                                            </div>
+                                            <div class="analysis-content">
+                                                <div class="info-text-box">
+                                                    {{ currentEyeData.resultInfo || '暂无详细说明' }}
+                                                </div>
+                                            </div>
+                                        </el-card>
+                                    </el-col>
+                                </el-row>
+
+                                <div class="section-divider">
+                                    <span class="divider-title"><i class="el-icon-picture"></i> 影像分析结果</span>
+                                </div>
+
+                                <el-row :gutter="20" class="image-content">
+                                    <el-col
+                                        v-for="(img, idx) in currentEyeData.parsedUrls"
+                                        :key="idx"
+                                        :span="12"
+                                        class="image-col"
+                                    >
+                                        <el-card shadow="hover" class="image-card">
+                                            <div slot="header" class="card-header">
+                                                <span>{{ img.name }}</span>
+                                            </div>
+                                            <div class="image-container">
+                                                <el-image
+                                                    :src="img.url"
+                                                    :preview-src-list="allCurrentImages"
+                                                    fit="contain"
+                                                    class="fundus-image"
+                                                >
+                                                    <div slot="error" class="image-slot">
+                                                        <i class="el-icon-picture-outline"></i>
+                                                        <div class="error-msg">加载失败</div>
+                                                    </div>
+                                                    <div slot="placeholder" class="image-slot">
+                                                        <i class="el-icon-loading"></i>
+                                                        <div>加载中...</div>
+                                                    </div>
+                                                </el-image>
+                                            </div>
+                                        </el-card>
+                                    </el-col>
+                                </el-row>
+                            </div>
+                        </transition>
+                    </div>
+
+                    <div v-else-if="hasSearched && !isDiagnosing" class="no-data-container">
+                        <el-alert title="未查询到诊断数据" type="warning" show-icon :closable="false" center></el-alert>
+                    </div>
+                </div>
+            `,
+            data() {
+                return {
+                    inputPatientId: '20240308',
+                    isDiagnosing: false,
+                    hasSearched: false,
+                    diagnosisTime: '',
+                    diagnosisList: [],
+                    activeSite: ''
+                };
+            },
+            computed: {
+                currentEyeData() {
+                    if (!this.activeSite || this.diagnosisList.length === 0) return null;
+                    return this.diagnosisList.find(item => item.site === this.activeSite);
+                },
+                allCurrentImages() {
+                    if (!this.currentEyeData || !this.currentEyeData.parsedUrls) return [];
+                    return this.currentEyeData.parsedUrls.map(img => img.url);
+                }
+            },
+            methods: {
+                isHealthy(result) {
+                    return result && (result.includes('正常') || result.includes('健康'));
+                },
+                getResultTagType(result) {
+                    if (!result) return 'info';
+                    if (this.isHealthy(result)) return 'success';
+                    return 'danger';
+                },
+                // 直接使用传入的 URL
+                resolveImageUrl(path) {
+                    return path;
+                },
+                handleDiagnose() {
+                    if (!this.inputPatientId) {
+                        this.$message.warning("请输入就诊号");
+                        return;
+                    }
+
+                    this.isDiagnosing = true;
+                    this.hasSearched = true;
+                    this.diagnosisList = [];
+                    this.activeSite = '';
+
+                    // 模拟异步请求
+                    setTimeout(() => {
+                        // 转换 mock 数据为前端格式
+                        const rawData = mockDiagnosisData;
+                        this.diagnosisTime = new Date().toLocaleString('zh-CN');
+
+                        if (Array.isArray(rawData) && rawData.length > 0) {
+                            this.diagnosisList = rawData.map(item => {
+                                const parsedUrls = [];
+                                if (item.urls && typeof item.urls === 'object') {
+                                    for (const [key, value] of Object.entries(item.urls)) {
+                                        parsedUrls.push({
+                                            name: key,
+                                            url: this.resolveImageUrl(value)
+                                        });
+                                    }
+                                }
+                                return {
+                                    site: item.site,
+                                    result: item.result,
+                                    resultInfo: item.resultInfo,
+                                    parsedUrls: parsedUrls
+                                };
+                            });
+
+                            if (this.diagnosisList.length > 0) {
+                                this.activeSite = this.diagnosisList[0].site;
+                            }
+                            this.$message.success("诊断分析完成 (模拟数据)");
+                        } else {
+                            this.$message.warning("未查询到相关眼底数据");
+                        }
+                        this.isDiagnosing = false;
+                    }, 1500);
+                }
+            },
+            mounted() {
+                // 自动触发一次诊断，方便直接看到结果
+                this.handleDiagnose();
+            }
+        });
+
+        // 启动 Vue 实例
+        new Vue({
+            el: '#app'
+        });
+    </script>
+
+    <!-- 复制原组件的样式 (已做简化) -->
+    <style lang="css">
+        .optic-disc-analysis-page {
+            padding: 16px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #f0f2f5 100%);
+            min-height: calc(100vh - 60px);
+        }
+
+        /* 顶部搜索区域 */
+        .top-section {
+            margin-bottom: 20px;
+        }
+        .search-container {
+            display: flex;
+            gap: 16px;
+            align-items: stretch;
+        }
+        .compact-search-box {
+            flex: 3;
+            background: white;
+            border-radius: 8px;
+            padding: 10px 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e4e7ed;
+            display: flex;
+            flex-direction: column;
+            min-height: 80px;
+        }
+        .compact-search-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+        .compact-search-icon {
+            font-size: 16px;
+            color: #1890ff;
+            margin-right: 6px;
+        }
+        .compact-search-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #303133;
+        }
+        .compact-search-body {
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+        .compact-input-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+        .input-with-label {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .input-label {
+            font-size: 14px;
+            color: #606266;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        .compact-patient-input {
+            flex: 1;
+        }
+        .compact-diagnose-btn {
+            height: 34px;
+            min-width: 100px;
+            background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+            border: none;
+        }
+        .compact-status-box {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            padding: 10px 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e4e7ed;
+            min-height: 80px;
+        }
+        .compact-status-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #f0f2f5;
+        }
+        .status-icon {
+            color: #67C23A;
+            margin-right: 6px;
+        }
+        .status-title {
+            font-weight: 600;
+        }
+        .compact-status-content .status-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+            font-size: 12px;
+        }
+        .status-label {
+            color: #606266;
+            width: 45px;
+        }
+        .status-value {
+            color: #303133;
+        }
+
+        /* 欢迎区域 */
+        .pre-diagnosis-content {
+            margin-top: 16px;
+        }
+        .welcome-card {
+            border: none;
+            background: linear-gradient(135deg, #f6faff 0%, #e6f7ff 100%);
+        }
+        .welcome-content {
+            text-align: center;
+            padding: 32px 16px;
+        }
+        .welcome-icon {
+            font-size: 50px;
+            color: #1890ff;
+            margin-bottom: 16px;
+        }
+        .welcome-title {
+            color: #303133;
+            margin-bottom: 12px;
+            font-size: 24px;
+        }
+        .welcome-description {
+            color: #606266;
+            font-size: 14px;
+            line-height: 1.6;
+            max-width: 550px;
+            margin: 0 auto 32px;
+        }
+        .diagnosis-steps {
+            display: flex;
+            justify-content: space-around;
+            max-width: 750px;
+            margin: 0 auto;
+        }
+        .step-item {
+            text-align: center;
+            padding: 0 16px;
+        }
+        .step-number {
+            width: 45px;
+            height: 45px;
+            line-height: 45px;
+            background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+            color: white;
+            border-radius: 50%;
+            font-size: 20px;
+            font-weight: bold;
+            margin: 0 auto 12px;
+        }
+        .step-content h4 {
+            color: #303133;
+            margin-bottom: 6px;
+            font-size: 16px;
+        }
+        .step-content p {
+            color: #909399;
+            font-size: 13px;
+        }
+
+        /* 诊断结果区域 */
+        .eye-tabs-wrapper {
+            background: white;
+            border-radius: 8px 8px 0 0;
+        }
+        .eye-tabs-wrapper .el-tabs--border-card {
+            border: none;
+            box-shadow: none;
+        }
+        .eye-tabs-wrapper .el-tabs__header {
+            background-color: #f5f7fa;
+            border-bottom: 1px solid #e4e7ed;
+            margin-bottom: 0;
+        }
+        .eye-tabs-wrapper .el-tabs__item {
+            font-size: 15px;
+            font-weight: 500;
+            height: 48px;
+            line-height: 48px;
+        }
+        .eye-tabs-wrapper .el-tabs__item.is-active {
+            color: #1890ff;
+            font-weight: bold;
+        }
+        .eye-detail-container {
+            background: #fff;
+            padding: 24px;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+            min-height: 500px;
+        }
+        .main-content {
+            margin-bottom: 24px;
+        }
+        .diagnosis-card {
+            height: 100%;
+            border-radius: 8px;
+            border: 1px solid #ebeef5;
+        }
+        .diagnosis-header {
+            display: flex;
+            align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0f2f5;
+            margin-bottom: 12px;
+        }
+        .result-icon {
+            font-size: 20px;
+            color: #1890ff;
+            margin-right: 8px;
+        }
+        .diagnosis-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #303133;
+        }
+        .diagnosis-badge {
+            margin-left: auto;
+        }
+        .diagnosis-content .final-diagnosis {
+            font-size: 24px;
+            color: #67C23A;
+            margin: 10px 0;
+            font-weight: 600;
+        }
+        .final-diagnosis.text-danger {
+            color: #F56C6C;
+        }
+        .diagnosis-time {
+            font-size: 13px;
+            color: #909399;
+        }
+        .analysis-card {
+            height: 100%;
+            border-radius: 8px;
+            border: 1px solid #ebeef5;
+        }
+        .analysis-card .card-header {
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+        .analysis-card .card-header i {
+            color: #1890ff;
+            margin-right: 6px;
+        }
+        .info-text-box {
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            color: #606266;
+            line-height: 1.6;
+            font-size: 14px;
+            border: 1px solid #f0f0f0;
+        }
+        .section-divider {
+            margin: 20px 0 16px;
+            border-bottom: 1px solid #ebeef5;
+            padding-bottom: 10px;
+        }
+        .divider-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #303133;
+            border-left: 4px solid #1890ff;
+            padding-left: 10px;
+        }
+        .image-col {
+            margin-bottom: 20px;
+        }
+        .image-card {
+            border-radius: 8px;
+        }
+        .image-card .card-header span {
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .image-container {
+            height: 350px;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .fundus-image {
+            width: 100%;
+            height: 100%;
+        }
+        .image-slot {
+            color: #909399;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .image-slot i {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        .error-msg {
+            font-size: 12px;
+        }
+        .no-data-container {
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .search-container {
+                flex-direction: column;
+            }
+            .compact-input-group {
+                flex-direction: column;
+            }
+            .main-content {
+                flex-direction: column;
+            }
+            .left-column, .right-column {
+                width: 100%;
+                margin-bottom: 16px;
+            }
+            .image-col {
+                width: 100%;
+            }
+            .image-container {
+                height: 220px;
+            }
+        }
+    </style>
+</body>
+</html>

@@ -24,9 +24,9 @@
 
       <!-- 管理员菜单 (role = 1) -->
       <template v-if="userRole === 1">
-        <el-menu-item index="/nurseDashboard">
-          <i class="el-icon-search"></i>疾病初筛
-        </el-menu-item>
+<!--        <el-menu-item index="/nurseDashboard">-->
+<!--          <i class="el-icon-search"></i>疾病初筛-->
+<!--        </el-menu-item>-->
         <el-menu-item index="/illStatistic">
           <i class="el-icon-data-line"></i>病种统计
         </el-menu-item>
@@ -64,12 +64,21 @@
         <el-menu-item index="/patientmanagement">
           <i class="el-icon-folder"></i>患者档案
         </el-menu-item>
+        <el-menu-item index="/followupvisit">
+          <i class="el-icon-phone-outline"></i>随访管理
+        </el-menu-item>
       </template>
 
       <!-- 护士菜单 (role = 3) -->
       <template v-else-if="userRole === 3">
-        <el-menu-item index="/nurseDashboard">
+        <el-menu-item index="/illStatistic">
+          <i class="el-icon-data-line"></i>病种统计
+        </el-menu-item>
+<!--        <el-menu-item index="/nurseDashboard">
           <i class="el-icon-search"></i>疾病初筛
+        </el-menu-item>-->
+        <el-menu-item index="/followupvisit">
+          <i class="el-icon-phone-outline"></i>随访管理
         </el-menu-item>
       </template>
 
